@@ -23,7 +23,11 @@ test_requirements = [
 
 setup(
     description="Multimodal Classification with Variational Autoencoder",
-    version="1.0",
+    version="0.1",
+    url = 'https://github.com/pioui/multimodal_classification_vae',
+    author='Pigi Lozou',
+    author_email='piyilozou@gmail.com',
+    license='MIT',
     install_requires=requirements,
     include_package_data=True,
     keywords="mcvae",

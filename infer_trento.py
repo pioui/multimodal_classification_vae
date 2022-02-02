@@ -1,6 +1,6 @@
 from email.policy import default
-from dmvaes.models.regular_modules import ClassifierA, EncoderB
-from dmvaes.models.semi_supervised_vae_relaxed import RelaxedSVAE
+from mcvae.models.regular_modules import ClassifierA, EncoderB
+from mcvae.models.semi_supervised_vae_relaxed import RelaxedSVAE
 import tifffile
 
 import torch

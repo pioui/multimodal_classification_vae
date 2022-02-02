@@ -10,7 +10,7 @@ import torch.distributions as db
 from torch.nn.functional import dropout
 from torch.utils.data import sampler
 
-from dmvaes.models.distributions import EllipticalStudent
+from mcvae.models.distributions import EllipticalStudent
 
 logger = logging.getLogger(__name__)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

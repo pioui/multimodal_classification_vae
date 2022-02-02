@@ -11,7 +11,7 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
-from dmvaes.dataset import TrentoDataset
+from mcvae.dataset import TrentoDataset
 
 logger = logging.getLogger(__name__)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

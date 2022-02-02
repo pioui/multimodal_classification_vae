@@ -7,7 +7,7 @@ from arviz.stats import psislw
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from tqdm.auto import tqdm
 
-from dmvaes.dataset import TrentoDataset
+from mcvae.dataset import TrentoDataset
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

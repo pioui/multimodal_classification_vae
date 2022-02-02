@@ -17,9 +17,9 @@ from arviz.stats import psislw
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from tqdm.auto import tqdm
 
-from dmvaes.inference import TrentoRTrainer
-from dmvaes.models import RelaxedSVAE
-from dmvaes.models.regular_modules import (
+from mcvae.inference import TrentoRTrainer
+from mcvae.models import RelaxedSVAE
+from mcvae.models.regular_modules import (
     EncoderA,
     EncoderB,
     ClassifierA,

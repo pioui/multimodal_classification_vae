@@ -1,8 +1,6 @@
-from ctypes import sizeof
 from torch.utils.data import Dataset
 from torch.utils.data import TensorDataset
 import torch
-import random
 
 import tifffile
 from scipy import io
@@ -27,11 +25,6 @@ class TrentoDataset(Dataset):
     def __init__(
         self,
         labelled_fraction = 0.9,
-        labelled_proportions = 0.2,
-        test_size=0.7,
-        do_1d=True,
-        do_preprocess=True,
-    
     ) -> None:
         """
             Definition of trento Dataset loader
@@ -72,10 +65,6 @@ class TrentoDataset(Dataset):
         x_train_labelled, x_train_unlabelled, y_train_labelled, y_train_unlabelled = train_test_split(
             x_train[labelled_indeces], y_train[labelled_indeces], train_size = labelled_fraction, stratify = y_train[labelled_indeces]) 
 
-        # print(torch.unique(y_train)-1, y_train.size())
-        # print(torch.unique(y_train_labelled)-1, y_train_labelled.size())
-        # print(torch.unique(y_test)-1, y_test.size())
-
         # NOTE: 1 is substracted from the labels so the smaller label is 0, makes things simpler later but will be good to reverse it in the end.
 
         rdm_inx = torch.randint(0, 29395, (3000,))
@@ -84,21 +73,3 @@ class TrentoDataset(Dataset):
         self.train_dataset_labelled = TensorDataset(x_train_labelled, y_train_labelled-1)  #34
         self.test_dataset = TensorDataset(x_test[rdm_inx], y_test[rdm_inx]-1) #29395
 
-        # self.train_dataset = TensorDataset(x_train[:200,:], y_train[:200]-1)  #819
-        # self.train_dataset_labelled = TensorDataset(x_train_labelled[:20,:], y_train_labelled[:20]-1)  #34
-        # self.test_dataset = TensorDataset(x_test[:300,:], y_test[:300]-1) #29395
-
-
-# LABELLED_PROPORTIONS = np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.0])
-# LABELLED_PROPORTIONS = LABELLED_PROPORTIONS / LABELLED_PROPORTIONS.sum()
-# LABELLED_FRACTION = 0.05
-
-# DATASET = TrentoDataset(
-#     labelled_fraction=LABELLED_FRACTION,
-#     labelled_proportions=LABELLED_PROPORTIONS,
-#     do_1d=True,
-#     test_size=0.5,
-# )
-
-# X_TRAIN, Y_TRAIN = DATASET.train_dataset.tensors #No
-# print(torch.unique(Y_TRAIN))

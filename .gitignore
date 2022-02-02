@@ -97,3 +97,6 @@ ENV/
 models/
 *.pkl
 *.pt
+
+#logs
+logs/

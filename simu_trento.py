@@ -4,7 +4,6 @@
 
 import os
 import logging
-from math import ceil, fmod
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
@@ -13,9 +12,6 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from arviz.stats import psislw
-from sklearn.metrics import accuracy_score, precision_score, recall_score
-from tqdm.auto import tqdm
 
 from mcvae.inference import TrentoRTrainer
 from mcvae.models import RelaxedSVAE
@@ -27,21 +23,12 @@ from mcvae.models.regular_modules import (
     EncoderBStudent,
 )
 from trento_utils import (
-    NUM,
-    LABELLED_PROPORTIONS,
-    LABELLED_FRACTION,
     N_INPUT,
     N_LABELS,
     CLASSIFICATION_RATIO,
     N_EVAL_SAMPLES,
     BATCH_SIZE,
     DATASET,
-    X_TRAIN,
-    Y_TRAIN,
-    RDM_INDICES,
-    X_SAMPLE,
-    Y_SAMPLE,
-    DO_OVERALL,
     res_eval_loop,
 )
 
@@ -85,30 +72,9 @@ logging.info("test examples {}".format(len(DATASET.test_dataset.tensors[0])))
 EVAL_ENCODERS = [
     dict(encoder_type="train", eval_encoder_name="train"),  # MUST BE ON TOP!!!
     dict(encoder_type="ELBO", reparam=True, eval_encoder_name="VAE"),
-    # dict(encoder_type="IWELBO", reparam=True, eval_encoder_name="IWAE"),
-    # dict(encoder_type="REVKL", reparam=False, eval_encoder_name="WW"),
-    # dict(
-    #     encoder_type="CUBO",
-    #     reparam=True,
-    #     eval_encoder_name="$\\chi$",
-    #     vdist_map=dict(default="student"),
-    # ),
-    # dict(
-    #     encoder_type=["IWELBO", "CUBO", "REVKL"],
-    #     reparam=None,
-    #     eval_encoder_name="M-sbVAE",
-    #     counts_eval=pd.Series(
-    #         dict(
-    #             REVKL=ceil(N_PARTICULES / 4),
-    #             CUBO=ceil(N_PARTICULES / 4),
-    #             IWELBO=ceil(N_PARTICULES / 4),
-    #             prior=ceil(N_PARTICULES / 4),
-    #         )
-    #     ),
-    # ),
 ]
 
-SCENARIOS = [  # WAKE updates
+SCENARIOS = [ 
     dict(
         loss_gen="ELBO",
         loss_wvar="ELBO",
@@ -116,28 +82,6 @@ SCENARIOS = [  # WAKE updates
         counts=None,
         model_name="VAE",
     ),
-    # dict(
-    #     loss_gen="IWELBO",
-    #     loss_wvar="IWELBO",
-    #     reparam_latent=True,
-    #     counts=None,
-    #     model_name="IWAE",
-    # ),
-    # dict(
-    #     loss_gen="IWELBO",
-    #     loss_wvar="REVKL",
-    #     reparam_latent=False,
-    #     counts=None,
-    #     model_name="WW",
-    # ),
-    # dict(
-    #     loss_gen="IWELBO",
-    #     loss_wvar="CUBO",
-    #     reparam_latent=True,
-    #     counts=None,
-    #     model_name="$\\chi$",
-    #     vdist_map=dict(default="student"),
-    # ),
 ]
 
 DF_LI = []

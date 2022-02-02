@@ -1,0 +1,49 @@
+INFO:root:Device in use: cpu
+INFO:root:train all examples 819
+INFO:root:train labelled examples 34
+INFO:root:test examples 3000
+INFO:root:Number of scenarios : 1
+INFO:root:Number of experiments : 1
+INFO:root:##############################################
+INFO:root:################ Scenario 0 ##################
+INFO:root:##############################################
+INFO:root:## Experiment 0 ##
+INFO:root:########## TRAIN ##########
+INFO:root:### Try 0 ###
+INFO:dmvaes.models.regular_modules:No batch normalization
+INFO:root:Using MF encoder with convolutions
+INFO:root:Using MF encoder
+INFO:dmvaes.models.regular_modules:No batch normalization
+INFO:dmvaes.models.regular_modules:No batch normalization
+INFO:dmvaes.models.regular_modules:No batch normalization
+INFO:dmvaes.inference.trento_trainer:Using 30 and 30 samples for theta wake / phi wake
+INFO:dmvaes.inference.trento_trainer:Multiobjective training using ELBO / ELBO
+INFO:root:Model saved as: models/trento-relaxed_nparticules_30/10_0_ELBO_ELBO_None_30_30_True_10_128_vanilla_100_None_None_0.001_False_False_VAE_.pt
+INFO:root:########## EVALUATION ##########
+INFO:root: ### Evalulation encoder 0 ###
+INFO:root:ENCODER TYPE : train
+INFO:root:Using train variational distribution for evaluation ...
+INFO:root:Predictions computation ...
+INFO:root:Precision, recall, auc ...
+INFO:root:Heldout CUBO/IWELBO computation ...
+INFO:root:Evaluation resuts IWELBO: 117372.4140625, CUBO: 234747.984375, M_ACCURACY: 0.3945885005636979, MEAN_RECALL: [0.         0.         0.         0.         0.         0.
+ 0.         0.         0.         0.02359882 0.05899705 0.09734513
+ 0.13569322 0.16224189 0.20648968 0.2359882  0.28908555 0.39823009
+ 0.60471976 1.        ]
+INFO:root: ### Evalulation encoder 1 ###
+INFO:root:ENCODER TYPE : ELBO
+INFO:root:Training eval variational distribution for evaluation with ELBO ...
+INFO:root: #### Try 0 ####
+INFO:root:Using map {'REVKL': 'gaussian', 'CUBO': 'student', 'ELBO': 'gaussian', 'IWELBO': 'gaussian', 'IWELBOC': 'gaussian', 'default': 'gaussian'} ...
+INFO:dmvaes.models.regular_modules:No batch normalization
+INFO:root:Using MF encoder with convolutions
+INFO:root:Using MF encoder
+INFO:dmvaes.models.regular_modules:No batch normalization
+INFO:root:training ELBO
+INFO:dmvaes.inference.trento_trainer:Using 30 samples for eval encoder training
+INFO:root:UPDATING ENCODERS ... ONLY MAKES SENSE WHEN USING EVAL ENCODER!
+INFO:dmvaes.inference.trento_trainer:Training using ELBO
+INFO:root:Predictions computation ...
+INFO:root:Precision, recall, auc ...
+INFO:root:Heldout CUBO/IWELBO computation ...
+INFO:root:Evaluation resuts IWELBO: 47937.6015625, CUBO: 95877.8515625, M_ACCURACY: 0.3900789177001127, MEAN_RECALL: [0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]

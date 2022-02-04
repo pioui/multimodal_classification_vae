@@ -1,8 +1,6 @@
-from ctypes import sizeof
 from torch.utils.data import Dataset
 from torch.utils.data import TensorDataset
 import torch
-import random
 
 import tifffile
 from scipy import io
@@ -28,7 +26,7 @@ class TrentoDataset(Dataset):
         self,
         labelled_fraction = 0.9,
         validation_fraction =0.01,
-    
+
     ) -> None:
         """
             Definition of trento Dataset loader
@@ -75,7 +73,6 @@ class TrentoDataset(Dataset):
         x_val, x_test, y_val, y_test = train_test_split(
             x_test_val, y_test_val, train_size = validation_fraction, stratify = y_test_val
         )
-
         # NOTE: 1 is substracted from the labels so the smaller label is 0, makes things simpler later but will be good to reverse it in the end.
 
         rdm_inx = torch.randint(0, 29395, (3000,))

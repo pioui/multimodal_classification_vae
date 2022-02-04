@@ -1,7 +1,6 @@
 import os
 import logging
 import torch
-from torch.distributions import Categorical
 import numpy as np
 from arviz.stats import psislw
 from sklearn.metrics import accuracy_score, precision_score, recall_score
@@ -21,15 +20,13 @@ CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 N_EPOCHS = 2
 LR = 3e-4
+
 BATCH_SIZE = 10
+LABELLED_FRACTION = 0.05
+
 DATASET = TrentoDataset(
     labelled_fraction=LABELLED_FRACTION,
 )
-X_TRAIN, Y_TRAIN = DATASET.train_dataset.tensors #No
-RDM_INDICES = np.random.choice(len(X_TRAIN), 200) #No
-X_SAMPLE = X_TRAIN[RDM_INDICES].to(device) #No
-Y_SAMPLE = Y_TRAIN[RDM_INDICES].to(device) #No
-DO_OVERALL = True
 
 
 N_INPUT = X_SAMPLE.shape[-1]
@@ -49,6 +46,7 @@ def compute_reject_score(y_true: np.ndarray, y_pred: np.ndarray, num=20):
     _, n_pos_classes = y_pred.shape
 
     assert np.unique(y_true).max() == n_pos_classes
+    
     thetas = np.linspace(0.1, 1.0, num=num)
     properties = dict(
         precision_discovery=np.zeros(num),

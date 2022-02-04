@@ -13,25 +13,17 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # !! NOT ALL OF THE ARE ACTUALLY USED: #No!! 
-NUM = 300 #No
-N_EXPERIMENTS = 5 #No
-LABELLED_PROPORTIONS = np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.0])
-LABELLED_PROPORTIONS = LABELLED_PROPORTIONS / LABELLED_PROPORTIONS.sum()
-LABELLED_FRACTION = 0.05
-np.random.seed(42) #???
+LABELLED_FRACTION = 0.6
 N_INPUT = 65
 N_LABELS = 5 #one label is excluded
 
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
-N_EPOCHS = 100
+N_EPOCHS = 2
 LR = 3e-4
 BATCH_SIZE = 10
 DATASET = TrentoDataset(
     labelled_fraction=LABELLED_FRACTION,
-    labelled_proportions=LABELLED_PROPORTIONS,
-    do_1d=True,
-    test_size=0.5,
 )
 X_TRAIN, Y_TRAIN = DATASET.train_dataset.tensors #No
 RDM_INDICES = np.random.choice(len(X_TRAIN), 200) #No
@@ -39,7 +31,11 @@ X_SAMPLE = X_TRAIN[RDM_INDICES].to(device) #No
 Y_SAMPLE = Y_TRAIN[RDM_INDICES].to(device) #No
 DO_OVERALL = True
 
-EXCLUDED_LABEL = 5
+
+N_INPUT = X_SAMPLE.shape[-1]
+N_LABELS = len(torch.unique(Y_TRAIN))-1
+
+EXCLUDED_LABEL = N_LABELS
 
 
 # Utils functions

@@ -25,6 +25,8 @@ class TrentoDataset(Dataset):
     def __init__(
         self,
         labelled_fraction = 0.9,
+        validation_fraction =0.01,
+
     ) -> None:
         """
             Definition of trento Dataset loader
@@ -33,6 +35,9 @@ class TrentoDataset(Dataset):
             the lidar and hyperspectral data are concatenated 
             so for each pixel we have a feature array with 65 elements, 
             the 2 first are lidar and therest hypersoectral
+
+            label_fraction: the precentage of the training data to use labelled
+            validation_fraction: the precentage of the test set that is gonna be used as validation
 
             we keep 90% of the train set labelled and the rest 10% as unlabelled
         """
@@ -50,13 +55,13 @@ class TrentoDataset(Dataset):
         gt_test = pixelwise_reshape(torch.tensor(gt_test, dtype = torch.int64)) # 99600
 
         train_indeces = (gt_train!=0).nonzero()[:,0] # 819
-        test_indeces = (gt_test!=0).nonzero()[:,0] # 29395
-
+        test_val_indeces = (gt_test!=0).nonzero()[:,0] # 29395
+        
         x_train = x[train_indeces] # 819,65
         y_train = torch.tensor(gt_train[train_indeces]) # 819
 
-        x_test = x[test_indeces] # 29395,65
-        y_test = torch.tensor(gt_test[test_indeces]) # 29395
+        x_test_val = x[test_val_indeces] # 29395,65
+        y_test_val = torch.tensor(gt_test[test_val_indeces]) # 29395
 
 
         excluded_label = torch.max(torch.unique(y_train))
@@ -65,11 +70,41 @@ class TrentoDataset(Dataset):
         x_train_labelled, x_train_unlabelled, y_train_labelled, y_train_unlabelled = train_test_split(
             x_train[labelled_indeces], y_train[labelled_indeces], train_size = labelled_fraction, stratify = y_train[labelled_indeces]) 
 
+        x_val, x_test, y_val, y_test = train_test_split(
+            x_test_val, y_test_val, train_size = validation_fraction, stratify = y_test_val
+        )
         # NOTE: 1 is substracted from the labels so the smaller label is 0, makes things simpler later but will be good to reverse it in the end.
 
         rdm_inx = torch.randint(0, 29395, (3000,))
 
         self.train_dataset = TensorDataset(x_train, y_train-1)  #819
-        self.train_dataset_labelled = TensorDataset(x_train_labelled, y_train_labelled-1)  #34
-        self.test_dataset = TensorDataset(x_test[rdm_inx], y_test[rdm_inx]-1) #29395
+        self.train_dataset_labelled = TensorDataset(x_train_labelled, y_train_labelled-1) 
+        self.validation_dataset = TensorDataset(x_val, y_val-1)
+        self.test_dataset = TensorDataset(x_test, y_test-1) #29395
 
+        # self.train_dataset = TensorDataset(x_train[:200,:], y_train[:200]-1)  #819
+        # self.train_dataset_labelled = TensorDataset(x_train_labelled[:20,:], y_train_labelled[:20]-1)  #34
+        # self.test_dataset = TensorDataset(x_test[:300,:], y_test[:300]-1) #29395
+
+
+# LABELLED_FRACTION = 0.6
+
+# DATASET = TrentoDataset(
+#     labelled_fraction=LABELLED_FRACTION,
+# )
+
+# x,y = DATASET.train_dataset.tensors # 819
+# print(x.shape, y.shape, torch.unique(y)) 
+# print(torch.mean(x, dim = 0), torch.std(x, dim =0))
+
+# x,y = DATASET.train_dataset_labelled.tensors # 418
+# print(x.shape, y.shape, torch.unique(y))
+# print(torch.mean(x, dim = 0), torch.std(x, dim =0))
+
+# x,y = DATASET.test_dataset.tensors # 29102
+# print(x.shape, y.shape, torch.unique(y))
+# print(torch.mean(x, dim = 0), torch.std(x, dim =0))
+
+# x,y = DATASET.validation_dataset.tensors # 293
+# print(x.shape, y.shape, torch.unique(y))
+# print(torch.mean(x, dim = 0), torch.std(x, dim =0))

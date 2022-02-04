@@ -29,6 +29,7 @@ from trento_utils import (
     N_EVAL_SAMPLES,
     BATCH_SIZE,
     DATASET,
+
     res_eval_loop,
 )
 
@@ -39,9 +40,9 @@ logging.info("Device in use: {}".format(str(device)))
 
 N_PARTICULES = 30
 N_LATENT = 10
-N_EPOCHS = 100
+N_EPOCHS = 2
 N_HIDDEN = 128
-LR = 1e-5
+LR = 1e-3
 N_EXPERIMENTS = 1
 
 DEFAULT_MAP = dict(
@@ -354,6 +355,7 @@ for scenario in SCENARIOS:
                             for key in mdl_names:
                                 torch.save(encoders[key].state_dict(), mdl_names[key])
 
+
                     except ValueError as e:
                         print(e)
                         count_tries = count_tries+1
@@ -371,7 +373,8 @@ for scenario in SCENARIOS:
             print(loop_results_dict)
 
             res = {**loop_setup_dict, **loop_results_dict, **eval_encoder_loop}
-            logging.info("Evaluation resuts IWELBO: {}, CUBO: {}, M_ACCURACY: {}, MEAN_RECALL: {}".format(res['IWELBO'],res['CUBO'],res['M_ACCURACY'],res['MEAN_RECALL']))
+            logging.info("Evaluation resuts: {}".format(loop_results_dict))            
+            
             DF_LI.append(res)
             DF = pd.DataFrame(DF_LI)
             DF.to_pickle(FILENAME)

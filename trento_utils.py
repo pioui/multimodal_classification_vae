@@ -11,10 +11,16 @@ from mcvae.dataset import TrentoDataset
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
+# !! NOT ALL OF THE ARE ACTUALLY USED: #No!! 
+LABELLED_FRACTION = 0.6
+N_INPUT = 65
+N_LABELS = 5 #one label is excluded
+
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
-N_EPOCHS = 100
-LR = 1e-2
+N_EPOCHS = 2
+LR = 3e-4
+
 BATCH_SIZE = 10
 LABELLED_FRACTION = 0.05
 
@@ -22,17 +28,11 @@ DATASET = TrentoDataset(
     labelled_fraction=LABELLED_FRACTION,
 )
 
-#Used for evaluation
-X_TRAIN, Y_TRAIN = DATASET.train_dataset.tensors 
-RDM_INDICES = np.random.choice(len(X_TRAIN), 200) 
-X_SAMPLE = X_TRAIN[RDM_INDICES].to(device) 
-Y_SAMPLE = Y_TRAIN[RDM_INDICES].to(device) 
 
-N_INPUT = X_TRAIN.shape[-1]
-N_LABELS = torch.unique(Y_TRAIN).shape[0] - 1 #one label is excluded
+N_INPUT = X_SAMPLE.shape[-1]
+N_LABELS = len(torch.unique(Y_TRAIN))-1
 
-DO_OVERALL = True
-EXCLUDED_LABEL = N_LABELS #the last label
+EXCLUDED_LABEL = N_LABELS
 
 
 # Utils functions

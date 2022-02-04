@@ -22,17 +22,23 @@ N_EPOCHS = 2
 LR = 3e-4
 
 BATCH_SIZE = 10
-LABELLED_FRACTION = 0.05
+LABELLED_FRACTION = 0.6
 
 DATASET = TrentoDataset(
     labelled_fraction=LABELLED_FRACTION,
 )
 
+#Used for evaluation
+X_TRAIN, Y_TRAIN = DATASET.train_dataset.tensors 
+RDM_INDICES = np.random.choice(len(X_TRAIN), 200) 
+X_SAMPLE = X_TRAIN[RDM_INDICES].to(device) 
+Y_SAMPLE = Y_TRAIN[RDM_INDICES].to(device) 
 
-N_INPUT = X_SAMPLE.shape[-1]
-N_LABELS = len(torch.unique(Y_TRAIN))-1
+N_INPUT = X_TRAIN.shape[-1]
+N_LABELS = torch.unique(Y_TRAIN).shape[0] - 1 #one label is excluded
 
-EXCLUDED_LABEL = N_LABELS
+DO_OVERALL = True
+EXCLUDED_LABEL = N_LABELS #the last label
 
 
 # Utils functions

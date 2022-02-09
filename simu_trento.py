@@ -40,7 +40,7 @@ logging.info("Device in use: {}".format(str(device)))
 
 N_PARTICULES = 30
 N_LATENT = 10
-N_EPOCHS = 2
+N_EPOCHS = 1000
 N_HIDDEN = 128
 LR = 1e-3
 N_EXPERIMENTS = 1

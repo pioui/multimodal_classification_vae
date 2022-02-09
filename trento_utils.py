@@ -18,21 +18,27 @@ N_LABELS = 5 #one label is excluded
 
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
-N_EPOCHS = 2
+N_EPOCHS = 1000
 LR = 3e-4
 
 BATCH_SIZE = 10
-LABELLED_FRACTION = 0.05
+LABELLED_FRACTION = 0.6
 
 DATASET = TrentoDataset(
     labelled_fraction=LABELLED_FRACTION,
 )
 
+#Used for evaluation
+X_TRAIN, Y_TRAIN = DATASET.train_dataset.tensors 
+RDM_INDICES = np.random.choice(len(X_TRAIN), 200) 
+X_SAMPLE = X_TRAIN[RDM_INDICES].to(device) 
+Y_SAMPLE = Y_TRAIN[RDM_INDICES].to(device) 
 
-N_INPUT = X_SAMPLE.shape[-1]
-N_LABELS = len(torch.unique(Y_TRAIN))-1
+N_INPUT = X_TRAIN.shape[-1]
+N_LABELS = torch.unique(Y_TRAIN).shape[0] - 1 #one label is excluded
 
-EXCLUDED_LABEL = N_LABELS
+DO_OVERALL = True
+EXCLUDED_LABEL = N_LABELS #the last label
 
 
 # Utils functions
@@ -40,36 +46,41 @@ def compute_reject_score(y_true: np.ndarray, y_pred: np.ndarray, num=20):
     """
         Computes precision recall properties for the discovery label using
         Bayesian decision theory
+
+        y_true: true labels (1,2,3,...,N)
+        y_preds: prediction probabilities for N-1 classes
+        num: number of probabilities between(0.1,1) that are used as thresholds 
+             for rejecting a prediction and assigned it to the Nth label.
+        
     """
+    with torch.no_grad():
+        _, n_pos_classes = y_pred.shape
 
-
-    _, n_pos_classes = y_pred.shape
-
-    assert np.unique(y_true).max() == n_pos_classes
-    
-    thetas = np.linspace(0.1, 1.0, num=num)
-    properties = dict(
-        precision_discovery=np.zeros(num),
-        recall_discovery=np.zeros(num),
-        accuracy=np.zeros(num),
-        thresholds=thetas,
-    )
-
-    for idx, theta in enumerate(thetas):
-        y_pred_theta = y_pred.argmax(1)
-        reject = y_pred.max(1) <= theta
-        y_pred_theta[reject] = n_pos_classes
-
-        properties["accuracy"][idx] = accuracy_score(y_true, y_pred_theta)
-
-        y_true_discovery = y_true == n_pos_classes
-        y_pred_discovery = y_pred_theta == n_pos_classes
-        properties["precision_discovery"][idx] = precision_score(
-            y_true_discovery, y_pred_discovery, zero_division=0
+        assert np.unique(y_true).max() == n_pos_classes
+        
+        thetas = np.linspace(0.1, 1.0, num=num)
+        properties = dict(
+            precision_discovery=np.zeros(num),
+            recall_discovery=np.zeros(num),
+            accuracy=np.zeros(num),
+            thresholds=thetas,
         )
-        properties["recall_discovery"][idx] = recall_score(
-            y_true_discovery, y_pred_discovery, zero_division=0
-        )
+
+        for idx, theta in enumerate(thetas):
+            y_pred_theta = y_pred.argmax(1)
+            reject = y_pred.max(1) <= theta
+            y_pred_theta[reject] = n_pos_classes
+
+            properties["accuracy"][idx] = accuracy_score(y_true, y_pred_theta)
+
+            y_true_discovery = y_true == n_pos_classes
+            y_pred_discovery = y_pred_theta == n_pos_classes
+            properties["precision_discovery"][idx] = precision_score(
+                y_true_discovery, y_pred_discovery, zero_division=0
+            )
+            properties["recall_discovery"][idx] = recall_score(
+                y_true_discovery, y_pred_discovery, zero_division=0
+            )
     return properties
 
 

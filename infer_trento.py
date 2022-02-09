@@ -8,6 +8,9 @@ import os
 from torch import nn
 from scipy import io
 
+from sklearn.metrics import classification_report, confusion_matrix
+from trento_utils import compute_reject_score
+from mcvae.dataset import TrentoDataset
 
 
 def pixelwise_reshape(input):
@@ -19,9 +22,9 @@ def pixelwise_reshape(input):
     if len(input.shape)==2:
         return input.reshape(-1)
 
-PATH_C =  "/home/pigi/repos/multimodal-decision-making-vaes/models/trento-relaxed_nparticules_30/classifier_7448361527406774815.pt"
-PATH_E =  "/home/pigi/repos/multimodal-decision-making-vaes/models/trento-relaxed_nparticules_30/encoder_z1_7448361527406774815.pt"
-PATH_M = "/home/pigi/repos/multimodal-decision-making-vaes/models/trento-relaxed_nparticules_30/10_0_ELBO_ELBO_None_30_30_True_10_128_vanilla_100_None_None_0.001_False_False_VAE_.pt"
+PATH_C =  "/home/pigi/repos/multimodal_classification_vae/models/trento-relaxed_nparticules_30/classifier_-3118629562734959505_epoch_850.pt"
+PATH_E =  "/home/pigi/repos/multimodal_classification_vae/models/trento-relaxed_nparticules_30/encoder_z1_-3118629562734959505_epoch_850.pt"
+PATH_M = "/home/pigi/repos/multimodal_classification_vae/models/trento-relaxed_nparticules_30/10_0_ELBO_ELBO_None_30_30_True_10_128_vanilla_1000_None_None_0.001_False_False_VAE_epoch_850.pt"
 
 N_INPUT = 65
 N_LABELS = 5 #one label is excluded
@@ -82,37 +85,44 @@ if os.path.exists(PATH_M):
     mdl.load_state_dict(torch.load(PATH_M))
 mdl.eval()
 
-x = torch.rand(1, 65)
-
-z1= encoder['default'](x, N_SAMPLES)
-print(x.shape,z1['latent'].shape)
-
-y_pred= classifier['default'](z1['latent'])
-print(y_pred.shape)
-
-y_pred = mdl.classify(x, N_SAMPLES)
-print(y_pred.shape)
-
-data_dir = "/home/pigi/Documents/UiT_Internship/Trento/Trento/"
-
-image_hyper = pixelwise_reshape(torch.tensor(tifffile.imread(data_dir+"hyper_Italy.tif"))) # 99600,63
-image_lidar = pixelwise_reshape(torch.tensor(tifffile.imread(data_dir+"LiDAR_Italy.tif"))) # 99600,2
-x = torch.cat((image_hyper,image_lidar), dim = 1) # 99600,65
-
-y = io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"]
-y = pixelwise_reshape(torch.tensor(y, dtype = torch.int64)) # 99600
+DATASET = TrentoDataset()
+x,y = DATASET.test_dataset.tensors # 29102
+print(x.shape, y.shape, torch.unique(y))
+print(torch.mean(x, dim = 0), torch.std(x, dim =0))
 
 
-rdm_idx = torch.randint(0,99600, (50000,))
-y_pred_prob = mdl.classify(x[rdm_idx], N_SAMPLES)
-y_pred = torch.argmax(y_pred_prob, dim = 1)
-print(y_pred.shape, y[rdm_idx].shape)
-print(sum(y_pred == y[rdm_idx]))
+print(" ")
+for i in range(1):
+    y_pred_prob1 = mdl.classify(x[:10000], N_SAMPLES)
+    y_pred1 = torch.argmax(y_pred_prob1, dim = 1)+1
 
-z1= encoder['default'](x[rdm_idx], 1)
-y_pred_prob= classifier['default'](z1['latent'])
-y_pred = torch.argmax(y_pred_prob, dim = 1)
-print(y_pred.shape, y[rdm_idx].shape)
-print(sum(y_pred == y[rdm_idx]))
+    y_pred_prob2 = mdl.classify(x[10000:], N_SAMPLES)
+    y_pred2 = torch.argmax(y_pred_prob2, dim = 1)+1
+
+    print((sum(y_pred1 == y[:10000])+sum(y_pred2 == y[10000:]))/ N)
+    # print(confusion_matrix(y_true = y, y_pred=y_pred))
+print(torch.unique(y_pred1))
+print(torch.unique(y_pred2))
+
+compute_reject_score(y[:10000]-1, y_pred_prob1)
+compute_reject_score(y[10000:]-1, y_pred_prob2)
 
 
+
+
+
+# print(" ")
+# for i in range(1):
+
+#     z1= encoder['default'](x[:10000], 1)
+#     y_pred_prob1= classifier['default'](z1['latent'])
+#     y_pred1 = torch.argmax(y_pred_prob1, dim = 1)+1
+
+#     z1= encoder['default'](x[10000:], 1)
+#     y_pred_prob2= classifier['default'](z1['latent'])
+#     y_pred2 = torch.argmax(y_pred_prob2, dim = 1)+1
+
+#     print((sum(y_pred1 == y[:10000])+sum(y_pred2 == y[10000:]))/ N)
+#     print(confusion_matrix(y_true = y[:10000], y_pred=y_pred1))
+# print(torch.unique(y_pred1))
+# print(torch.unique(y_pred2))

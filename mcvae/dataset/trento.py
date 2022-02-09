@@ -49,10 +49,18 @@ class TrentoDataset(Dataset):
         image_lidar = pixelwise_reshape(torch.tensor(tifffile.imread(data_dir+"LiDAR_Italy.tif"))) # 99600,2
         x = torch.cat((image_hyper,image_lidar), dim = 1) # 99600,65
 
+
+        # Normalization 
+        #TODO: this can be written (more tidy) as a transform with other preprocessin' when making the dataset 
+        mean = torch.mean(x, dim = 0)
+        std= torch.std(x, dim = 0)
+        x = (x - mean)/std
+
         gt_train= io.loadmat(data_dir+"TNsecSUBS_Train.mat")["TNsecSUBS_Train"] 
         gt_test = io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"] - gt_train
         gt_train = pixelwise_reshape(torch.tensor(gt_train, dtype = torch.int64)) # 99600
         gt_test = pixelwise_reshape(torch.tensor(gt_test, dtype = torch.int64)) # 99600
+
 
         train_indeces = (gt_train!=0).nonzero()[:,0] # 819
         test_val_indeces = (gt_test!=0).nonzero()[:,0] # 29395

@@ -12,7 +12,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # !! NOT ALL OF THE ARE ACTUALLY USED: #No!! 
-LABELLED_FRACTION = 0.6
 N_INPUT = 65
 N_LABELS = 5 #one label is excluded
 
@@ -22,12 +21,8 @@ N_EPOCHS = 1000
 LR = 3e-4
 
 BATCH_SIZE = 10
-LABELLED_FRACTION = 0.6
 
-DATASET = TrentoDataset(
-    labelled_fraction=LABELLED_FRACTION,
-)
-
+DATASET = TrentoDataset()
 #Used for evaluation
 X_TRAIN, Y_TRAIN = DATASET.train_dataset.tensors 
 RDM_INDICES = np.random.choice(len(X_TRAIN), 200) 

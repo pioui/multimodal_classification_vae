@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-
+import random
 from mcvae.inference import TrentoRTrainer
 from mcvae.models import RelaxedSVAE
 from mcvae.models.regular_modules import (
@@ -33,6 +33,8 @@ from trento_utils import (
     res_eval_loop,
 )
 
+random.seed(10)
+
 logging.basicConfig(filename='logs/simu_trento.log', encoding='utf-8', level=logging.DEBUG)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -40,9 +42,9 @@ logging.info("Device in use: {}".format(str(device)))
 
 N_PARTICULES = 30
 N_LATENT = 10
-N_EPOCHS = 1000
+N_EPOCHS = 10
 N_HIDDEN = 128
-LR = 1e-3
+LR = 1e-2
 N_EXPERIMENTS = 1
 
 DEFAULT_MAP = dict(
@@ -214,9 +216,8 @@ for scenario in SCENARIOS:
                 print(e)
                 count_tries=count_tries+1
                 continue
-                
             break
-    
+
         torch.save(mdl.state_dict(), mdl_name)
         logging.info("Model saved as: {}".format(mdl_name))
         

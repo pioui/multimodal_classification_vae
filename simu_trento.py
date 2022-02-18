@@ -38,7 +38,6 @@ random.seed(10)
 logging.basicConfig(filename='logs/simu_trento.log', encoding='utf-8', level=logging.DEBUG)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-logging.info("Device in use: {}".format(str(device)))
 
 N_PARTICULES = 30
 N_LATENT = 6
@@ -66,10 +65,12 @@ DEBUG = False
 if not os.path.exists(MDL_DIR):
     os.makedirs(MDL_DIR)
 
-
-logging.info("train all examples {}".format(len(DATASET.train_dataset.tensors[0])))
-logging.info("train labelled examples {}".format(len(DATASET.train_dataset_labelled.tensors[0])))
-logging.info("test examples {}".format(len(DATASET.test_dataset.tensors[0])))
+logging.basicConfig(filename='logs/simu_trento_{}.log'.format(LR), encoding='utf-8', level=logging.DEBUG)
+logging.info("Device in use: {}".format(str(device)))
+logging.info("Train all examples {}".format(len(DATASET.train_dataset.tensors[0])))
+logging.info("Train labelled examples {}".format(len(DATASET.train_dataset_labelled.tensors[0])))
+logging.info("Test examples {}".format(len(DATASET.test_dataset.tensors[0])))
+logging.info("Learning Rate {}".format(LR))
 
 
 EVAL_ENCODERS = [
@@ -89,15 +90,10 @@ SCENARIOS = [
 
 DF_LI = []
 
-logging.info("Number of scenarios : {}".format(len(SCENARIOS)))
-logging.info("Number of experiments : {}".format(N_EXPERIMENTS))
 
 # Main script
 scenario_number = 0
 for scenario in SCENARIOS:
-    logging.info("##############################################")
-    logging.info("################ Scenario {} ##################".format(scenario_number))
-    logging.info("##############################################")
 
     scenario_number = scenario_number+1
 

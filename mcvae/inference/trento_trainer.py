@@ -28,6 +28,7 @@ class TrentoRTrainer:
         use_cuda=True,
         save_metrics=False,
         debug_gradients=False,
+        PROJECT_NAME=None
     ):
         self.classify_mode = classify_mode
         self.r = r
@@ -72,7 +73,7 @@ class TrentoRTrainer:
             train_cubo=[],
             classification_gradients=[],
         )
-
+        self.project_name = PROJECT_NAME
     @property
     def temperature(self):
         t_ref = self.it - (self.it % 500)
@@ -324,9 +325,9 @@ class TrentoRTrainer:
 
             pbar.set_description("{0:.2f}".format(theta_loss.item()))
             if model_name is not None:
-                torch.save(self.model.state_dict(), model_name[:-3]+"epoch_"+str(epoch)+".pt")
+                torch.save(self.model.state_dict(), model_name[:-3]+"_epoch_"+str(epoch)+".pt")
         
-        write_csv(loss_dict, 'logs/output.csv')
+        write_csv(loss_dict, 'logs/output_{}.csv'.format(self.project_name))
 
 
 
@@ -424,7 +425,7 @@ class TrentoRTrainer:
                     optim_vars[key].step()
                     # torch.cuda.synchronize()
                     self.iterate += 1
-            if model_names is not None:
+            if model_names is not None and epoch % 20 == 0:
                 for key in model_names:
                     torch.save(encoders[key].state_dict(), model_names[key][:-3]+"_epoch_"+str(epoch)+".pt")
 

@@ -65,6 +65,8 @@ class FCLayersA(nn.Module):
         return res
 
 
+
+
 class EncoderA(nn.Module):
     r"""
     Linear Variational Encoder Module 
@@ -128,132 +130,53 @@ class EncoderA(nn.Module):
         )
 
 
-class CVLayersB(nn.Module):
-    r"""
-    Three 2D Convolutional layers Module - fixed for input that is (28,28)
-
-    out_channels: (int) number of output channels of the convolution
-
-    (N,784--> (N,1,28,28) --3x2DCovolutions--> (N, out_channels, 1, 1) --> (N, out_channels)
-    """
-    def __init__(
-        self, out_channels, kernel_size=3, dropout_rate=0.1, 
-    ):
-        super().__init__()
-        self.encoder_cv = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=32, kernel_size=kernel_size), 
-            nn.SELU(),
-            nn.MaxPool2d(2), 
-            nn.Dropout(p=dropout_rate),
-            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=kernel_size), 
-            nn.SELU(),
-            nn.MaxPool2d(2),
-            nn.Dropout(p=dropout_rate),
-            nn.Conv2d(in_channels=64, out_channels=out_channels, kernel_size=kernel_size),
-            nn.SELU(),
-            nn.MaxPool2d(2),
-            nn.Dropout(p=dropout_rate),
-        )
-
-    def forward(self, x):
-        n_batch = x.shape[0]
-        in_channels=1
-        x_reshape = x.view(n_batch, in_channels, 28, 28) #that's why it's fixed to (28,28)
-        res = self.encoder_cv(x_reshape)
-        res = res.view(n_batch, -1)
-        return res
-
-
-class CV1DLayersB(nn.Module):
-    r"""
-    Three 1D Convolutional layers Module 
-
-    input: tensor (N,L), L>63
-
-    out_channels: (int) number of output channels of the convolution
-
-    TODO: fix chanels size,kernels size or maxpooling so for the given L we have L'=1, currently fixed for L=65
-
-    (N,L) --> (N,1,L) --3x1DCovolutions--> (N, out_channels, L') --> (N, out_channels)
-    """
-    def __init__(
-        self, out_channels, kernel_size=9, dropout_rate=0.1, 
-    ):
-        super().__init__()
-        self.encoder_cv = nn.Sequential(
-            nn.Conv1d(in_channels=1, out_channels=32, kernel_size=kernel_size), 
-            nn.SELU(),
-            nn.MaxPool1d(2), 
-            nn.Dropout(p=dropout_rate),
-            nn.Conv1d(in_channels=32, out_channels=64, kernel_size=kernel_size), 
-            nn.SELU(),
-            nn.MaxPool1d(2), 
-            nn.Dropout(p=dropout_rate),
-            nn.Conv1d(in_channels=64, out_channels=out_channels, kernel_size=kernel_size), 
-            nn.SELU(),
-            nn.MaxPool1d(2),
-            nn.Dropout(p=dropout_rate),
-            
-        )
-
-    def forward(self, x):
-        x = x.view(x.shape[0],1,-1)
-        res = self.encoder_cv(x)
-        res = res.view(res.shape[0],-1)
-        return res
-
-
 class EncoderB(nn.Module):
-    """
-    Convolutional Variational Encoder Module 
-
-    n_input : (tuple) input shape (28,28) or (...,784)
-    n_output: (int) output size
-    h_hidden: (int) means and variances input size
-    n_samples: (int) number of samples to create the latent variables
-
-                                            -Linear--> qm (N,n_output) 
-                                          /               \
-    (N,784) --CVLayersB--> (N,n_hidden)                   -sample N(qm,qv)--> latent (n_samples, N, n_output)
-                                          \               /
-                                            -Linear --> qv (N,n_output)
-                        
-    """
     def __init__(
-        self, n_input, n_output, n_hidden, dropout_rate=0.1, do_batch_norm=True, n_middle=None
+        self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
-        #  TODO: describe architecture and choice for people
+        # TODO: describe architecture and choice for people 
         super().__init__()
         logging.info("Using MF encoder with convolutions")
-
-        # self.encoder_cv = CVLayersB(out_channels=n_hidden, dropout_rate=dropout_rate)
-        self.encoder_cv = CV1DLayersB(out_channels=n_hidden, dropout_rate=dropout_rate)
+        self.encoder_cv = nn.Sequential(
+            nn.Conv1d(in_channels=1, out_channels=32, kernel_size=9),
+            nn.SELU(),
+            nn.MaxPool1d(2),
+            nn.Dropout(p=0.1),
+            nn.Conv1d(in_channels=32, out_channels=64, kernel_size=9),
+            nn.SELU(),
+            nn.MaxPool1d(2),
+            nn.Dropout(p=0.1),
+            nn.Conv1d(in_channels=64, out_channels=n_hidden, kernel_size=9),
+            nn.SELU(),
+            nn.MaxPool1d(2),
+            nn.Dropout(p=0.1),
+        )
 
         self.mean_encoder = nn.Linear(n_hidden, n_output)
         self.var_encoder = nn.Linear(n_hidden, n_output)
         self.tanh = nn.Tanh()
-        self.n_input = n_input
 
     def forward(self, x, n_samples, squeeze=True, reparam=True):
-        q = self.encoder_cv(x)
+        n_batch = len(x)
+        x_reshape = x.view(n_batch, 1, -1)
+
+        q = self.encoder_cv(x_reshape)
+        q = q.view(n_batch, -1)
 
         q_m = self.mean_encoder(q)
-
         q_v = self.var_encoder(q)
         q_v = torch.clamp(q_v, min=-17.0, max=10.0)
         q_v = q_v.exp()
-
         variational_dist = db.Normal(loc=q_m, scale=q_v.sqrt())
+
         if n_samples == 1 and squeeze:
             sample_shape = []
         else:
             sample_shape = (n_samples,)
-
         if reparam:
             latent = variational_dist.rsample(sample_shape=sample_shape)
         else:
             latent = variational_dist.sample(sample_shape=sample_shape)
-
         return dict(
             q_m=q_m, q_v=q_v, latent=latent, dist=variational_dist, sum_last=True
         )

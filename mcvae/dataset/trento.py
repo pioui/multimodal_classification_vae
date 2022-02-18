@@ -60,6 +60,11 @@ class TrentoDataset(Dataset):
         X = x[valid_indeces] # [30214, 65]
         Y = y[valid_indeces] # [30214] 1 to 6
 
+        # sample if needed
+        RDM_INDICES = np.random.choice(len(X), 5000) 
+        X = X[RDM_INDICES]
+        Y = Y[RDM_INDICES]
+
         # 50-50 train and test
         x_train_val, x_test, y_train_val, y_test = train_test_split(
             X, Y, train_size = 0.5, stratify = Y

@@ -41,10 +41,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 logging.info("Device in use: {}".format(str(device)))
 
 N_PARTICULES = 30
-N_LATENT = 10
+N_LATENT = 6
 N_EPOCHS = 10
 N_HIDDEN = 128
-LR = 1e-2
+LR = 1e-4
 N_EXPERIMENTS = 1
 
 DEFAULT_MAP = dict(

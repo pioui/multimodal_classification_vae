@@ -94,8 +94,8 @@ def res_eval_loop(
         # Below function integrates both inference methods for
         # mixture and simple statistics
         train_res = trainer.inference(
-            # trainer.test_loader,
-            trainer.train_loader,
+            trainer.test_loader,
+            # trainer.train_loader,
             keys=[
                 "qc_z1_all_probas",
                 "y",

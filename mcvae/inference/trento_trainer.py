@@ -269,21 +269,14 @@ class TrentoRTrainer:
             epoch_dict["train_acc"]=m_accuracy
 
             logger.info(
-                "Epoch {} Training: accuracy - {}".format(epoch, m_accuracy)
+                "Epoch {} Training: accuracy = {}".format(epoch, m_accuracy)
             )
-
-
-
-
-
 
             # Validation
             overall_val_loss_list = []
             theta_val_loss_list = []
             psi_val_loss_list = []
             with torch.no_grad():
-
-
 
                 for (tensor_val) in self.validation_loader:
 
@@ -393,7 +386,7 @@ class TrentoRTrainer:
             epoch_dict["train_acc"]=m_accuracy
 
             logger.info(
-                "Epoch {} Validation: accuracy - {}".format(epoch, m_accuracy)
+                "Epoch {} Validation: accuracy = {}".format(epoch, m_accuracy)
             )
 
             loss_dict.append(epoch_dict)

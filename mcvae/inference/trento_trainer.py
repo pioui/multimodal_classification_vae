@@ -12,6 +12,8 @@ from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 import csv
 from mcvae.dataset import TrentoDataset
+from trento_utils import res_eval_loop 
+from sklearn.metrics import accuracy_score
 
 logger = logging.getLogger(__name__)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -237,6 +239,39 @@ class TrentoRTrainer:
                     )
                     )
             
+            train_res = self.inference(
+                self.train_loader,
+                keys = [
+                    "qc_z1_all_probas",
+                    "y",
+                    "log_ratios",
+                    "qc_z1",
+                    "preds_is",
+                    "preds_plugin",
+                ],
+                n_samples=1000,
+                encoder_key="default",
+                counts=None
+            )
+
+            y_pred = train_res["preds_plugin"].numpy()
+            y_pred = y_pred / y_pred.sum(1, keepdims=True)
+
+            y_pred_is = train_res["preds_is"].numpy()
+            # y_pred_is = y_pred_is / y_pred_is.sum(1, keepdims=True)
+            assert y_pred.shape == y_pred_is.shape, (y_pred.shape, y_pred_is.sh)
+
+            where_non9 = train_res["y"] != 5
+            y_non9 = train_res["y"][where_non9]
+            y_pred_non9 = y_pred[where_non9].argmax(1)
+            m_accuracy = accuracy_score(y_non9, y_pred_non9)
+
+            epoch_dict["train_acc"]=m_accuracy
+
+            logger.info(
+                "Epoch {} Training: accuracy = {}".format(epoch, m_accuracy)
+            )
+
             # Validation
             overall_val_loss_list = []
             theta_val_loss_list = []
@@ -320,12 +355,58 @@ class TrentoRTrainer:
                     epoch_dict["φ_val_loss"], 
                     )
                     )
+
+            train_res = self.inference(
+                self.validation_loader,
+                keys = [
+                    "qc_z1_all_probas",
+                    "y",
+                    "log_ratios",
+                    "qc_z1",
+                    "preds_is",
+                    "preds_plugin",
+                ],
+                n_samples=1000,
+                encoder_key="default",
+                counts=None
+            )
+
+            y_pred = train_res["preds_plugin"].numpy()
+            y_pred = y_pred / y_pred.sum(1, keepdims=True)
+
+            y_pred_is = train_res["preds_is"].numpy()
+            # y_pred_is = y_pred_is / y_pred_is.sum(1, keepdims=True)
+            assert y_pred.shape == y_pred_is.shape, (y_pred.shape, y_pred_is.sh)
+
+            where_non9 = train_res["y"] != 5
+            y_non9 = train_res["y"][where_non9]
+            y_pred_non9 = y_pred[where_non9].argmax(1)
+            m_accuracy = accuracy_score(y_non9, y_pred_non9)
+
+            epoch_dict["train_acc"]=m_accuracy
+
+            logger.info(
+                "Epoch {} Validation: accuracy = {}".format(epoch, m_accuracy)
+            )
+
             loss_dict.append(epoch_dict)
 
 
             pbar.set_description("{0:.2f}".format(theta_loss.item()))
             if model_name is not None:
                 torch.save(self.model.state_dict(), model_name[:-3]+"_epoch_"+str(epoch)+".pt")
+
+            loop_results_dict = res_eval_loop(
+                trainer=self,
+                eval_encoder=None,
+                counts_eval=None,
+                encoder_eval_name="default",
+                do_defensive=False,
+                debug=False,
+            )
+            print(loop_results_dict)
+
+            logging.info("Evaluation resuts: {}".format(loop_results_dict))    
         
         write_csv(loss_dict, 'logs/output_{}.csv'.format(self.project_name))
 

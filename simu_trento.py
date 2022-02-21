@@ -119,6 +119,7 @@ for scenario in SCENARIOS:
 
     do_defensive = type(loss_wvar) == list
     multi_encoder_keys = loss_wvar if do_defensive else ["default"]
+
     
     for t in range(N_EXPERIMENTS):
         logging.info("## Experiment {} ##".format(t))
@@ -358,6 +359,9 @@ for scenario in SCENARIOS:
                         count_tries = count_tries+1
                         continue
                     break
+
+            print("$$$$$$$$$$$$$$$$$$$$$$$$$$")
+            print(multi_counts_eval, do_defensive_eval, DEBUG)
            
             loop_results_dict = res_eval_loop(
                 trainer=trainer,

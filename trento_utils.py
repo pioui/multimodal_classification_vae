@@ -16,7 +16,7 @@ N_INPUT = 65
 N_LABELS = 5 #one label is excluded
 
 CLASSIFICATION_RATIO = 50.0
-N_EVAL_SAMPLES = 25
+N_EVAL_SAMPLES = 500
 N_EPOCHS = 1000
 LR = 3e-4
 
@@ -94,8 +94,8 @@ def res_eval_loop(
         # Below function integrates both inference methods for
         # mixture and simple statistics
         train_res = trainer.inference(
-            trainer.test_loader,
-            # trainer.train_loader,
+            # trainer.test_loader,
+            trainer.train_loader,
             keys=[
                 "qc_z1_all_probas",
                 "y",
@@ -115,119 +115,92 @@ def res_eval_loop(
     # y_pred_is = y_pred_is / y_pred_is.sum(1, keepdims=True)
     assert y_pred.shape == y_pred_is.shape, (y_pred.shape, y_pred_is.shape)
 
-    y_true = train_res["y"].numpy()
+    # y_true = train_res["y"].numpy()
 
     # Precision / Recall for discovery class
     # And accuracy
-    logging.info("Precision, recall, auc ...")
-    res_baseline = compute_reject_score(y_true=y_true, y_pred=y_pred)
-    m_ap = res_baseline["precision_discovery"]
-    m_recall = res_baseline["recall_discovery"]
-    auc_pr = np.trapz(
-        x=res_baseline["recall_discovery"], y=res_baseline["precision_discovery"],
-    )
+    # logging.info("Precision, recall, auc ...")
+    # res_baseline = compute_reject_score(y_true=y_true, y_pred=y_pred)
+    # m_ap = res_baseline["precision_discovery"]
+    # m_recall = res_baseline["recall_discovery"]
+    # auc_pr = np.trapz(
+    #     x=res_baseline["recall_discovery"], y=res_baseline["precision_discovery"],
+    # )
 
-    res_baseline_is = compute_reject_score(y_true=y_true, y_pred=y_pred_is)
-    m_ap_is = res_baseline_is["precision_discovery"]
-    m_recall_is = res_baseline_is["recall_discovery"]
-    auc_pr_is = np.trapz(
-        x=res_baseline_is["recall_discovery"], y=res_baseline_is["precision_discovery"],
-    )
+    # res_baseline_is = compute_reject_score(y_true=y_true, y_pred=y_pred_is)
+    # m_ap_is = res_baseline_is["precision_discovery"]
+    # m_recall_is = res_baseline_is["recall_discovery"]
+    # auc_pr_is = np.trapz(
+    #     x=res_baseline_is["recall_discovery"], y=res_baseline_is["precision_discovery"],
+    # )
 
-    # Cubo / Iwelbo with n_samples_total samples
-    logging.info("Heldout CUBO/IWELBO computation ...")
+    # # Cubo / Iwelbo with n_samples_total samples
+    # logging.info("Heldout CUBO/IWELBO computation ...")
 
-    n_samples_total = 500 # Samples used 
-    if debug:
-        n_samples_total = 200
-    n_samples_per_pass = 25 if not do_defensive else counts_eval.sum()
-    n_iter = int(n_samples_total / n_samples_per_pass)
+    # n_samples_total = 500 # Samples used 
+    # if debug:
+    #     n_samples_total = 200
+    # n_samples_per_pass = 25 if not do_defensive else counts_eval.sum()
+    # n_iter = int(n_samples_total / n_samples_per_pass)
 
-    cubo_vals = []
-    iwelbo_vals = []
-    iwelbo_c_vals = []
+    # cubo_vals = []
+    # iwelbo_vals = []
+    # iwelbo_c_vals = []
 
-    with torch.no_grad():
-        i = 0
-        for tensors in tqdm(trainer.test_loader):
-            x, _ = tensors
-            x = x.to(device)
-            log_ratios_batch = []
-            log_qc_batch = []
-            for _ in tqdm(range(n_iter)):
-                out = model.inference(
-                    x,
-                    temperature=0.5,
-                    n_samples=n_samples_per_pass,
-                    encoder_key=encoder_eval_name,
-                    counts=counts_eval,
-                )
-                if do_defensive:
-                    log_ratio = out["log_ratio"].cpu()
-                else:
-                    log_ratio = (
-                        out["log_px_z"]
-                        + out["log_pz2"]
-                        + out["log_pc"]
-                        + out["log_pz1_z2"]
-                        - out["log_qz1_x"]
-                        - out["log_qc_z1"]
-                        - out["log_qz2_z1"]
-                    ).cpu()
-                log_ratios_batch.append(log_ratio)
-                log_qc_batch.append(out["log_qc_z1"].cpu())
+    # with torch.no_grad():
+    #     i = 0
+    #     for tensors in tqdm(trainer.test_loader):
+    #         x, _ = tensors
+    #         x = x.to(device)
+    #         log_ratios_batch = []
+    #         log_qc_batch = []
+    #         for _ in tqdm(range(n_iter)):
+    #             out = model.inference(
+    #                 x,
+    #                 temperature=0.5,
+    #                 n_samples=n_samples_per_pass,
+    #                 encoder_key=encoder_eval_name,
+    #                 counts=counts_eval,
+    #             )
+    #             if do_defensive:
+    #                 log_ratio = out["log_ratio"].cpu()
+    #             else:
+    #                 log_ratio = (
+    #                     out["log_px_z"]
+    #                     + out["log_pz2"]
+    #                     + out["log_pc"]
+    #                     + out["log_pz1_z2"]
+    #                     - out["log_qz1_x"]
+    #                     - out["log_qc_z1"]
+    #                     - out["log_qz2_z1"]
+    #                 ).cpu()
+    #             log_ratios_batch.append(log_ratio)
+    #             log_qc_batch.append(out["log_qc_z1"].cpu())
 
-            i += 1
-            if i == 20:
-                break
-            # Concatenation
-            log_ratios_batch = torch.cat(log_ratios_batch, dim=1)
-            log_qc_batch = torch.cat(log_qc_batch, dim=1)
+    #         i += 1
+    #         if i == 20:
+    #             break
+    #         # Concatenation
+    #         log_ratios_batch = torch.cat(log_ratios_batch, dim=1)
+    #         log_qc_batch = torch.cat(log_qc_batch, dim=1)
 
-            # Lower bounds
-            # 1. Cubo
-            # n_cat, n_samples, n_batch = log_ratios_batch.shape
-            # cubo_val = torch.logsumexp(
-            #     (2 * log_ratios_batch + log_qc_batch).view(n_cat * n_samples, n_batch),
-            #     dim=0,
-            #     keepdim=False,
-            # ) - np.log(n_samples)
+        
 
-            # iwelbo_val = torch.logsumexp(
-            #     (log_ratios_batch + log_qc_batch).view(n_cat * n_samples, n_batch),
-            #     dim=0,
-            #     keepdim=False,
-            # ) - np.log(n_samples)
-            # IWELBO C
-            # # n_cat, n_samples, n_batch
-            # qc_probs = log_qc_batch.permute([1, 2, 0]).exp()
-            # qc_dist = Categorical(probs=qc_probs)
-            # c_sampled = qc_dist.sample().unsqueeze(0)
-            # # log_qc_samp = torch.gather(log_qc_batch, dim=0, index=c_sampled)
-            # log_ratios_samp = torch.gather(log_ratios_batch, dim=0, index=c_sampled)
-            # # Shape 1, n_samples, n_batch
-            # iwelboc_val = torch.logsumexp(log_ratios_samp, dim=1) - np.log(n_samples)
-            # iwelboc_val = iwelboc_val.squeeze()
+    #         # RELAXED CASE
+    #         n_samples, n_batch = log_ratios_batch.shape
+    #         cubo_val = torch.logsumexp(
+    #             2 * log_ratios_batch, dim=0, keepdim=False,
+    #         ) - np.log(n_samples)
 
-            # cubo_vals.append(cubo_val.cpu())
-            # iwelbo_vals.append(iwelbo_val.cpu())
-            # iwelbo_c_vals.append(iwelboc_val.cpu())
+    #         iwelbo_val = torch.logsumexp(
+    #             log_ratios_batch, dim=0, keepdim=False,
+    #         ) - np.log(n_samples)
 
-            # RELAXED CASE
-            n_samples, n_batch = log_ratios_batch.shape
-            cubo_val = torch.logsumexp(
-                2 * log_ratios_batch, dim=0, keepdim=False,
-            ) - np.log(n_samples)
-
-            iwelbo_val = torch.logsumexp(
-                log_ratios_batch, dim=0, keepdim=False,
-            ) - np.log(n_samples)
-
-            cubo_vals.append(cubo_val.cpu())
-            iwelbo_vals.append(iwelbo_val.cpu())
-        cubo_vals = torch.cat(cubo_vals)
-        iwelbo_vals = torch.cat(iwelbo_vals)
-        # iwelbo_c_vals = torch.cat(iwelbo_c_vals)
+    #         cubo_vals.append(cubo_val.cpu())
+    #         iwelbo_vals.append(iwelbo_val.cpu())
+    #     cubo_vals = torch.cat(cubo_vals)
+    #     iwelbo_vals = torch.cat(iwelbo_vals)
+    #     # iwelbo_c_vals = torch.cat(iwelbo_c_vals)
 
     # Entropy
     where9 = train_res["y"] == EXCLUDED_LABEL
@@ -242,17 +215,8 @@ def res_eval_loop(
     y_pred_non9_is = y_pred_is[where_non9].argmax(1)
     m_accuracy_is = accuracy_score(y_non9, y_pred_non9_is)
 
-    # k_hat
 
-    # n_samples_total = 1000
-    # if debug:
-    #     n_samples_total = 200
-    # n_samples_per_pass = 100 if not do_defensive else counts_eval.sum()
-    # n_iter = int(n_samples_total / n_samples_per_pass)
-
-    # a. Unsupervised case
     # log_ratios = []
-    # qc_z = []
     # for _ in tqdm(range(n_iter)):
     #     with torch.no_grad():
     #         out = model.inference(
@@ -274,90 +238,58 @@ def res_eval_loop(
     #             - out["log_qc_z1"]
     #             - out["log_qz2_z1"]
     #         ).cpu()
-    #     qc_z_here = out["log_qc_z1"].cpu().exp()
-    #     qc_z.append(qc_z_here)
     #     log_ratios.append(log_ratio)
     # # Concatenation over samples
-    # log_ratios = torch.cat(log_ratios, 1)
-    # qc_z = torch.cat(qc_z, 1)
-    # log_ratios_sum = (log_ratios * qc_z).sum(0)  # Sum over labels
-    # wi = torch.softmax(log_ratios_sum, 0)
-    # _, khats = psislw(log_ratios_sum.T.clone())
+    # log_ratios = torch.cat(log_ratios, 0)
+    # _, khats = psislw(log_ratios.T.clone())
 
-    log_ratios = []
-    for _ in tqdm(range(n_iter)):
-        with torch.no_grad():
-            out = model.inference(
-                X_SAMPLE,
-                temperature=0.5,
-                n_samples=n_samples_per_pass,
-                encoder_key=encoder_eval_name,
-                counts=counts_eval,
-            )
-        if do_defensive:
-            log_ratio = out["log_ratio"].cpu()
-        else:
-            log_ratio = (
-                out["log_px_z"]
-                + out["log_pz2"]
-                + out["log_pc"]
-                + out["log_pz1_z2"]
-                - out["log_qz1_x"]
-                - out["log_qc_z1"]
-                - out["log_qz2_z1"]
-            ).cpu()
-        log_ratios.append(log_ratio)
-    # Concatenation over samples
-    log_ratios = torch.cat(log_ratios, 0)
-    _, khats = psislw(log_ratios.T.clone())
-
-    x_samp, y_samp = DATASET.train_dataset[:128]
-    where_ = y_samp != EXCLUDED_LABEL
-    x_samp = x_samp[where_].to(device)
-    y_samp = y_samp[where_].to(device)
-    log_ratios = []
-    for _ in tqdm(range(n_iter)):
-        with torch.no_grad():
-            out = model.inference(
-                x_samp,
-                y_samp,
-                temperature=0.5,
-                n_samples=n_samples_per_pass,
-                encoder_key=encoder_eval_name,
-                counts=counts_eval,
-            )
-        if do_defensive:
-            log_ratio = out["log_ratio"].cpu()
-        else:
-            log_ratio = (
-                out["log_px_z"]
-                + out["log_pz2"]
-                + out["log_pc"]
-                + out["log_pz1_z2"]
-                - out["log_qz1_x"]
-                # - out["log_qc_z1"]
-                - out["log_qz2_z1"]
-            ).cpu()
-        log_ratios.append(log_ratio)
-    # Concatenation over samples
-    log_ratios = torch.cat(log_ratios, 0)
-    _, khats_c_obs = psislw(log_ratios.T.clone())
+    # x_samp, y_samp = DATASET.train_dataset[:128]
+    # where_ = y_samp != EXCLUDED_LABEL
+    # x_samp = x_samp[where_].to(device)
+    # y_samp = y_samp[where_].to(device)
+    # log_ratios = []
+    # for _ in tqdm(range(n_iter)):
+    #     with torch.no_grad():
+    #         out = model.inference(
+    #             x_samp,
+    #             y_samp,
+    #             temperature=0.5,
+    #             n_samples=n_samples_per_pass,
+    #             encoder_key=encoder_eval_name,
+    #             counts=counts_eval,
+    #         )
+    #     if do_defensive:
+    #         log_ratio = out["log_ratio"].cpu()
+    #     else:
+    #         log_ratio = (
+    #             out["log_px_z"]
+    #             + out["log_pz2"]
+    #             + out["log_pc"]
+    #             + out["log_pz1_z2"]
+    #             - out["log_qz1_x"]
+    #             # - out["log_qc_z1"]
+    #             - out["log_qz2_z1"]
+    #         ).cpu()
+    #     log_ratios.append(log_ratio)
+    # # Concatenation over samples
+    # log_ratios = torch.cat(log_ratios, 0)
+    # _, khats_c_obs = psislw(log_ratios.T.clone())
 
     res = {
-        "IWELBO": iwelbo_vals.mean().item(),
+        # "IWELBO": iwelbo_vals.mean().item(),
         # "IWELBOC": iwelbo_c_vals.mean().item(),
-        "CUBO": cubo_vals.mean().item(),
-        "KHAT": np.array(khats),
+        # "CUBO": cubo_vals.mean().item(),
+        # "KHAT": np.array(khats),
         "M_ACCURACY": m_accuracy,
-        "MEAN_AP": m_ap,
-        "MEAN_RECALL": m_recall,
-        "KHATS_C_OBS": khats_c_obs,
+        # "MEAN_AP": m_ap,
+        # "MEAN_RECALL": m_recall,
+        # "AUC": auc_pr,
+        # "KHATS_C_OBS": khats_c_obs,
         "M_ACCURACY_IS": m_accuracy_is,
-        "MEAN_AP_IS": m_ap_is,
-        "MEAN_RECALL_IS": m_recall_is,
-        "AUC_IS": auc_pr_is,
-        "AUC": auc_pr,
-        "ENTROPY": entropy,
+        # "MEAN_AP_IS": m_ap_is,
+        # "MEAN_RECALL_IS": m_recall_is,
+        # "AUC_IS": auc_pr_is,
+        # "ENTROPY": entropy,
     }
     return res
 

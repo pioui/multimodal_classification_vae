@@ -27,7 +27,7 @@ N_LABELS = 5
 
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
-N_EPOCHS = 100
+N_EPOCHS = 2
 LR = 3e-4
 BATCH_SIZE = 512
 DATASET = TrentoDataset(
@@ -230,6 +230,6 @@ def res_eval_loop(
         "train_AUC_IS": train_auc_pr_is,
         "train_AUC": train_auc_pr,
         "train_ENTROPY": train_entropy,
-
+        "train_LOSS": trainer.train_loss,
     }
     return res

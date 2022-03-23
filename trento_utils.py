@@ -6,8 +6,12 @@ import numpy as np
 from arviz.stats import psislw
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from tqdm.auto import tqdm
-
+import random
+random.seed(42)
 from mcvae.dataset import TrentoDataset
+
+logging.basicConfig(filename = 'trento_logs.log',level=logging.DEBUG)
+
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 

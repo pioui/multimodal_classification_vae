@@ -1,6 +1,7 @@
 import logging
 from itertools import cycle
-
+import random
+random.seed(42)
 import pandas as pd
 import numpy as np
 import torch
@@ -128,6 +129,7 @@ class TrentoRTrainer:
 
         pbar = tqdm(range(n_epochs))
         for epoch in pbar:
+            
             for (tensor_all, tensor_superv) in zip(
                 self.train_loader, cycle(self.train_annotated_loader)
             ):

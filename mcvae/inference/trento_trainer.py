@@ -129,6 +129,7 @@ class TrentoRTrainer:
 
         pbar = tqdm(range(n_epochs))
         for epoch in pbar:
+            
             for (tensor_all, tensor_superv) in zip(
                 self.train_loader, cycle(self.train_annotated_loader)
             ):

@@ -61,9 +61,9 @@ from mcvae.inference import TrentoRTrainer
 device = "cuda" if torch.cuda.is_available() else "cpu"
 N_PARTICULES = 30
 N_LATENT = 10
-N_EPOCHS = 5
+N_EPOCHS = 100
 N_HIDDEN = 128
-LR = 1e-3
+LR = 3e-3
 N_EXPERIMENTS = 1
 DEFAULT_MAP = dict(
     REVKL="gaussian",

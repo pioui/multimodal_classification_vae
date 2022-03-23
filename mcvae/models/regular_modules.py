@@ -1,31 +1,18 @@
 import logging
 
 import numpy as np
-from numpy.core.fromnumeric import shape
 import torch
 import torch.nn as nn
 
 # from torch.distributions import MultivariateNormal, Normal
 import torch.distributions as db
-from torch.nn.functional import dropout
-from torch.utils.data import sampler
 
 from mcvae.models.distributions import EllipticalStudent
 
 logger = logging.getLogger(__name__)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class FCLayersA(nn.Module):
-    r"""
-    Two Linear layers Module.
-
-    n_input : (int) input size 
-    n_output: (int) output size
-    n_middle: (int) middle layer size
-
-    (N,..., n_input) --Linear--> (N,..., n_middle) --Linear--> (N,..., n_output)
-    """
     def __init__(
         self, n_input, n_output, n_middle=None, dropout_rate=0.1, do_batch_norm=False
     ):
@@ -65,24 +52,7 @@ class FCLayersA(nn.Module):
         return res
 
 
-
-
 class EncoderA(nn.Module):
-    r"""
-    Linear Variational Encoder Module 
-
-    n_input : (int) input shape 
-    n_output: (int) output size
-    n_hidden: (int) means and variances input size
-    n_samples: (int) number of samples to create the latent variables
-
-                                    -Linear--> qm (N,...,n_output)
-                                  /                             \
-    (N,..., n_input) --FCLayersA--> q (N,n_hidden)                   -sample N(qm,qv)--> latent (n_samples, N,..., n_output)
-                                  \                             /
-                                    -Linear--> qv (N,..., n_output)
-    """
-
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
@@ -99,7 +69,7 @@ class EncoderA(nn.Module):
         self.var_encoder = nn.Linear(n_hidden, n_output)
         self.tanh = nn.Tanh()
 
-    def forward(self, x, n_samples, squeeze=True, reparam=True):
+    def forward(self, x, n_samples=1, squeeze=True, reparam=True):
         q = self.encoder(x)
         q_m = self.mean_encoder(q)
         q_v = self.var_encoder(q)
@@ -111,7 +81,7 @@ class EncoderA(nn.Module):
         # q_m = torch.clamp(q_m, min=-1000, max=1000)
 
         # q_v = torch.clamp(q_v, min=-17.0, max=8.0)
-        q_v = torch.clamp(q_v, min=-17.0, max=10.0) #WHY?
+        q_v = torch.clamp(q_v, min=-17.0, max=10.0)
         q_v = q_v.exp()
         # q_v = 1e-16 + q_v.exp()
 
@@ -134,21 +104,29 @@ class EncoderB(nn.Module):
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
-        # TODO: describe architecture and choice for people 
+        # TODO: describe architecture and choice for people 
         super().__init__()
         logging.info("Using MF encoder with convolutions")
         self.encoder_cv = nn.Sequential(
-            nn.Conv1d(in_channels=1, out_channels=32, kernel_size=9),
+            nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3),
             nn.SELU(),
-            nn.MaxPool1d(2),
+            nn.MaxPool2d(2),
             nn.Dropout(p=0.1),
-            nn.Conv1d(in_channels=32, out_channels=64, kernel_size=9),
+            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3),
             nn.SELU(),
-            nn.MaxPool1d(2),
+            nn.MaxPool2d(2),
             nn.Dropout(p=0.1),
-            nn.Conv1d(in_channels=64, out_channels=n_hidden, kernel_size=9),
+            nn.Conv2d(in_channels=64, out_channels=n_hidden, kernel_size=3),
             nn.SELU(),
-            nn.MaxPool1d(2),
+            nn.MaxPool2d(2),
+            nn.Dropout(p=0.1),
+        )
+        self.encoder_fc = nn.Sequential(
+            nn.Linear(n_hidden, n_hidden),
+            nn.SELU(),
+            nn.Dropout(p=0.1),
+            nn.Linear(n_hidden, n_hidden),
+            nn.SELU(),
             nn.Dropout(p=0.1),
         )
 
@@ -156,9 +134,9 @@ class EncoderB(nn.Module):
         self.var_encoder = nn.Linear(n_hidden, n_output)
         self.tanh = nn.Tanh()
 
-    def forward(self, x, n_samples, squeeze=True, reparam=True):
+    def forward(self, x, n_samples=1, squeeze=True, reparam=True):
         n_batch = len(x)
-        x_reshape = x.view(n_batch, 1, -1)
+        x_reshape = x.view(n_batch, 1, 28, 28)
 
         q = self.encoder_cv(x_reshape)
         q = q.view(n_batch, -1)
@@ -183,22 +161,6 @@ class EncoderB(nn.Module):
 
 
 class EncoderBStudent(EncoderB):
-    r""""
-    Basicaly same with EncoderB but sampling from student dristribution.
-    Student distribution reqquires mean, variance and df so the architecture is changes accordingly.
-    n_input : (tuple) input shape (28,28)
-    n_output: (int) output size
-    h_hidden: (int) means and variances input size
-    n_samples: (int) number of samples to create the latent variables
-
-                                           -Linear--> qm (N,n_output) 
-                                          /                            \
-    (N,28,28) --CVLayersB--> (N,n_hidden) -- Linear--> df (N,1)        --sample ST(qm,qv,df)--> latent (n_samples, N, n_output)
-                                          \                            /
-                                           -Linear --> qv (N,n_output)
-
-
-    """
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
@@ -207,11 +169,17 @@ class EncoderBStudent(EncoderB):
             n_output=n_output,
             n_hidden=n_hidden,
             dropout_rate=dropout_rate,
+            do_batch_norm=do_batch_norm,
+            n_middle=n_middle,
         )
         self.df_fn = nn.Linear(n_hidden, 1)
 
-    def forward(self, x, n_samples, squeeze=True, reparam=True):
-        q = self.encoder_cv(x)
+    def forward(self, x, n_samples=1, squeeze=True, reparam=True):
+        n_batch = len(x)
+        x_reshape = x.view(n_batch, 1, 28, 28)
+
+        q = self.encoder_cv(x_reshape)
+        q = q.view(n_batch, -1)
 
         q_m = self.mean_encoder(q)
         q_v = self.var_encoder(q)
@@ -222,8 +190,21 @@ class EncoderBStudent(EncoderB):
         df = 1.0 + self.df_fn(q).exp()
         df = torch.clamp(df, max=1e5)
 
-        st_dist = EllipticalStudent(df=df, loc=q_m, scale=torch.sqrt(q_v))
+        # print("df : ", df.shape)
+        # print("q_m : ", q_m.shape)
+        # print("q_v : ", q_v.shape)
 
+        st_dist = EllipticalStudent(df=df, loc=q_m, scale=torch.sqrt(q_v))
+        # if n_samples == 1 and squeeze:
+        #     sample_shape = []
+        # else:
+        #     sample_shape = (n_samples,)
+        # latent = self.reparameterize(
+        #     st_dist, sample_shape=sample_shape, reparam=reparam
+        # )
+        # return dict(
+        #     q_m=q_m, q_v=q_v, df=df, dist=st_dist, latent=latent, sum_last=False
+        # )
         if n_samples == 1 and squeeze:
             sample_shape = []
         else:
@@ -238,23 +219,6 @@ class EncoderBStudent(EncoderB):
 
 
 class EncoderAStudent(nn.Module):
-    r""""
-    Basicaly same with EncoderA but sampling from student dristribution.
-    Student distribution reqquires mean, variance and df so the architecture is changes accordingly.
-    n_input : (tuple) input shape (28,28)
-    n_output: (int) output size
-    h_hidden: (int) means and variances input size
-    n_samples: (int) number of samples to create the latent variables
-    df: "learn" can be learned or fixed to an given values with shape (N,1)
-
-
-                                               -Linear--> qm (N, n_output)
-                                              /                             \
-    (N, n_input) --FCLayersA--> q (N,n_hidden) -Linear--> df (N, 1)OR fixed  -sample N(qm,qv)--> latent (n_samples, N, n_output)
-                                              \                             /
-                                               -Linear--> qv (N, n_output)
-    """
-
     def __init__(
         self,
         n_input,
@@ -286,6 +250,7 @@ class EncoderAStudent(nn.Module):
         self.var_encoder = nn.Linear(n_hidden, n_output)
         self.tanh = nn.Tanh()
 
+    # @property
     def df(self, q: torch.Tensor):
         if self.learn_df:
             df_use = 1.0 + self.df_val(q).exp()
@@ -301,36 +266,29 @@ class EncoderAStudent(nn.Module):
             latent = dist.sample(sample_shape=sample_shape)
         return latent
 
-    def forward(self, x, n_samples, squeeze=True, reparam=True):
+    def forward(self, x, n_samples=1, squeeze=True, reparam=True):
         q = self.encoder(x)
-
         q_m = self.mean_encoder(q)
-
         q_v = self.var_encoder(q)
         q_v = torch.clamp(q_v, min=-17.0, max=10.0)
         q_v = q_v.exp()
 
         df_to_use = self.df(q)
         st_dist = EllipticalStudent(df=df_to_use, loc=q_m, scale=torch.sqrt(q_v))
-
         if n_samples == 1 and squeeze:
             sample_shape = []
         else:
             sample_shape = (n_samples,)
-
         latent = self.reparameterize(
             st_dist, sample_shape=sample_shape, reparam=reparam
         )
-
         return dict(
             q_m=q_m, q_v=q_v, df=df_to_use, dist=st_dist, latent=latent, sum_last=False
         )
+        # return dict(q_m=q_m, q_v=q_v, latent=latent)
 
 
 class LinearEncoder(nn.Module):
-    r"""
-    it's not used anywhere, so skip documentation for now.
-    """
     def __init__(self, n_input, n_output):
         super().__init__()
         self.mean_encoder = nn.Linear(n_input, n_output)
@@ -352,7 +310,7 @@ class LinearEncoder(nn.Module):
         l_mat = self.l_mat_encoder
         return l_mat.matmul(l_mat.T)
 
-    def forward(self, x, n_samples=23, reparam=True, squeeze=True):
+    def forward(self, x, n_samples=1, reparam=True, squeeze=True):
         q_m = self.mean_encoder(x)
         l_mat = self.var_encoder
         q_v = l_mat.matmul(l_mat.T)
@@ -369,10 +327,86 @@ class LinearEncoder(nn.Module):
             latent = variational_dist.sample(sample_shape=sample_shape)
         return dict(q_m=q_m, q_v=q_v, latent=latent)
 
+
+# Decoder
+class DecoderA(nn.Module):
+    def __init__(self, n_input: int, n_output: int, n_hidden: int):
+        super().__init__()
+        self.decoder = FCLayersA(n_input=n_input, n_output=n_hidden, dropout_rate=0.0)
+
+        self.mean_decoder = nn.Linear(n_hidden, n_output)
+        self.var_decoder = nn.Linear(n_hidden, n_output)
+
+        self.tanh = nn.Tanh()
+
+    def forward(self, x: torch.Tensor, *cat_list: int):
+        r"""The forward computation for a single sample.
+
+         #. Decodes the data from the latent space using the decoder network
+         #. Returns tensors for the mean and variance of a multivariate distribution
+
+        :param x: tensor with shape ``(n_input,)``
+        :param cat_list: list of category membership(s) for this sample
+        :return: Mean and variance tensors of shape ``(n_output,)``
+        :rtype: 2-tuple of :py:class:`torch.Tensor`
+        """
+
+        # Parameters for latent distribution
+        p = self.decoder(x, *cat_list)
+        p_m = self.mean_decoder(p)
+        p_v = self.var_decoder(p)
+
+        # PREVIOUS TO KEEP
+        # p_m = torch.clamp(p_m, min=-1000, max=1000)
+
+        # p_v = torch.clamp(p_v, min=-17.0, max=10)
+        p_v = torch.clamp(p_v, min=-17.0, max=8)
+
+        # p_v = torch.clamp(p_v, min=-17.0, max=14.0)
+        # p_v = 16. * self.tanh(p_v)
+        return p_m, p_v.exp()
+
+
+class ClassifierA(nn.Module):
+    def __init__(self, n_input, n_output, dropout_rate=0.0, do_batch_norm=False):
+        super().__init__()
+        self.classifier = nn.Sequential(
+            FCLayersA(
+                n_input,
+                n_output,
+                dropout_rate=dropout_rate,
+                do_batch_norm=do_batch_norm,
+            ),
+            nn.Softmax(dim=-1),
+        )
+
+    def forward(self, x):
+        probas = self.classifier(x)
+        probas = probas + 1e-16
+        probas = probas / probas.sum(-1, keepdim=True)
+        return probas    
+
+
+class BernoulliDecoderA(nn.Module):
+    def __init__(
+        self,
+        n_input: int,
+        n_output: int,
+        dropout_rate: float = 0.0,
+        do_batch_norm: bool = True,
+    ):
+        super().__init__()
+        self.loc = FCLayersA(
+            n_input, n_output, dropout_rate=dropout_rate, do_batch_norm=do_batch_norm
+        )
+
+    def forward(self, x):
+        means = self.loc(x)
+        means = nn.Sigmoid()(means)
+        return means
+
+
 class EncoderH(nn.Module):
-    r"""
-    it's not used anywhere, so skip documentation for now.
-    """
     def __init__(
         self,
         n_in,
@@ -443,6 +477,7 @@ class EncoderH(nn.Module):
     def init_weights(m, bias_val=1.5):
         torch.nn.init.normal_(m.weight, mean=0.0, std=1e-8)
         torch.nn.init.constant_(m.bias, val=bias_val)
+
 
 class EncoderIAF(nn.Module):
     def __init__(
@@ -553,122 +588,29 @@ class EncoderIAF(nn.Module):
             qz_x -= new_term.sum(dim=-1)
 
         if torch.isnan(qz_x).any() or torch.isinf(qz_x).any():
-            print("ouille!")
+            print("ouille")
         return dict(latent=z, posterior_density=qz_x, last_inp=inp)
-
-# Decoder
-class DecoderA(nn.Module):
-    r"""The forward computation for a single sample.
-
-         #. Decodes the data from the latent space using the decoder network
-         #. Returns tensors for the mean and variance of a multivariate distribution
-
-        :param x: tensor with shape ``(n_input,)``
-        :param cat_list: list of category membership(s) for this sample
-        :return: Mean and variance tensors of shape ``(n_output,)``
-        :rtype: 2-tuple of :py:class:`torch.Tensor`
-
-                                   -Linear--> pm (N, n_output)
-                                  /                             
-    (N, n_input) --FCLayersA--> p (N,n_hidden)                   
-                                  \                             
-                                    -Linear--> pv (N, n_output)
-    """
-    
-
-    def __init__(self, n_input: int, n_output: int, n_hidden: int):
-        super().__init__()
-        self.decoder = FCLayersA(n_input=n_input, n_output=n_hidden, dropout_rate=0.0)
-
-        self.mean_decoder = nn.Linear(n_hidden, n_output)
-        self.var_decoder = nn.Linear(n_hidden, n_output)
-
-        self.tanh = nn.Tanh()
-
-    def forward(self, x: torch.Tensor, 
-    # *cat_list: int
-    ):
-        # Parameters for latent distribution
-        p = self.decoder(x, 
-        # *cat_list
-        )
-        p_m = self.mean_decoder(p)
-        p_v = self.var_decoder(p)
-
-        # PREVIOUS TO KEEP
-        # p_m = torch.clamp(p_m, min=-1000, max=1000)
-        # p_v = torch.clamp(p_v, min=-17.0, max=10)
-        p_v = torch.clamp(p_v, min=-17.0, max=8)
-
-        # p_v = torch.clamp(p_v, min=-17.0, max=14.0)
-        # p_v = 16. * self.tanh(p_v)
-        return p_m, p_v.exp()
-
-class ClassifierA(nn.Module):
-    r"""
-    Classifier with fully conected linear layers
-    n_input: (int) input size
-    n_output: (int) output size    
-    
-    (N,..., n_input)-- FCLayersA + Softmax --> (N,..., n_ouput)
-    """
-    def __init__(self, n_input, n_output, dropout_rate=0.0, do_batch_norm=False):
-        super().__init__()
-        self.classifier = nn.Sequential(
-            FCLayersA(
-                n_input,
-                n_output,
-                dropout_rate=dropout_rate,
-                do_batch_norm=do_batch_norm,
-            ),
-            nn.Softmax(dim=-1),
-        )
-
-    def forward(self, x):
-        probas = self.classifier(x)
-        probas = probas + 1e-16
-        probas = probas / probas.sum(-1, keepdim=True)
-        return probas
-
-class BernoulliDecoderA(nn.Module):
-    r"""
-    Decoder with fully connected linear layers
-    n_input: (int) input size
-    n_output: (int) output size  
-
-    (N,..., n_input)-- FCLayersA + Sigmnoid --> means (N,..., n_ouput)
-
-    """
-    def __init__(
-        self,
-        n_input: int,
-        n_output: int,
-        dropout_rate: float = 0.0,
-        do_batch_norm: bool = True,
-    ):
-        super().__init__()
-        self.loc = FCLayersA(
-            n_input, n_output, dropout_rate=dropout_rate, do_batch_norm=do_batch_norm
-        )
-
-    def forward(self, x):
-        means = self.loc(x)
-        means = nn.Sigmoid()(means)
-        return means
 
 
 if __name__ == "__main__":
     from torchsummary import summary
 
-    n_input = 65
-    n_output = 10
-    n_hidden = 16
-    n_samples = 25
+    print('ClassifierA')
+    layer = ClassifierA(n_input=10, n_output=5, dropout_rate=0.1, do_batch_norm=False)
+    summary(layer, (1,10))
 
-    layer = EncoderB(n_input, n_output, n_hidden)
+    print('EncoderB')
+    layer = EncoderB(n_input=784, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    summary(layer, (1,784))
 
-    x = torch.rand(1, 65)
-    x_out= layer(x, n_samples)
-    print(x.shape,x_out['latent'].shape)
+    print('EncoderA')
+    layer = EncoderA(n_input=15, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    summary(layer, (1,15))
 
-    
+    print('DecoderA')
+    layer = DecoderA(n_input=15, n_output=10, n_hidden=128)
+    summary(layer, (1,15))
+
+    print('BernoulliDecoderA')
+    layer = BernoulliDecoderA(n_input=10, n_output=784, dropout_rate=0.1, do_batch_norm=False)
+    summary(layer, (1,10))

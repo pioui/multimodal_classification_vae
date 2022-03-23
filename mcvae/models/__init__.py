@@ -1,5 +1,5 @@
-from .semi_supervised_vae_relaxed import RelaxedSVAE
+from .trento_vae import TrentoVAE
 
 __all__ = [
-    "RelaxedSVAE",
+    "TrentoVAE",
 ]

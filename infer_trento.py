@@ -1,8 +1,7 @@
-from email.policy import default
 from mcvae.models.regular_modules import ClassifierA, EncoderB
 from mcvae.models.semi_supervised_vae_relaxed import RelaxedSVAE
 import tifffile
-
+import numpy as np
 import torch
 import os
 from torch import nn
@@ -12,6 +11,13 @@ from sklearn.metrics import classification_report, confusion_matrix
 from trento_utils import compute_reject_score
 from mcvae.dataset import TrentoDataset
 
+from mcvae.models.trento_encoders import (
+    EncoderB3,
+)
+from sklearn.metrics import balanced_accuracy_score, accuracy_score
+from torch.distributions import (
+    RelaxedOneHotCategorical,
+)
 
 def pixelwise_reshape(input):
     """
@@ -22,9 +28,8 @@ def pixelwise_reshape(input):
     if len(input.shape)==2:
         return input.reshape(-1)
 
-PATH_C =  "/home/pigi/repos/multimodal_classification_vae/models/trento-relaxed_nparticules_30/classifier_-3118629562734959505_epoch_850.pt"
-PATH_E =  "/home/pigi/repos/multimodal_classification_vae/models/trento-relaxed_nparticules_30/encoder_z1_-3118629562734959505_epoch_850.pt"
-PATH_M = "/home/pigi/repos/multimodal_classification_vae/models/trento-relaxed_nparticules_30/10_0_ELBO_ELBO_None_30_30_True_10_128_vanilla_1000_None_None_0.001_False_False_VAE_epoch_850.pt"
+PATH_C =  "/Users/plo026/repos/decision-making-vaes/models/trento-relaxed_nparticules_30/classifier_-8050918908592526525.pt"
+PATH_E =  "/Users/plo026/repos/decision-making-vaes/models/trento-relaxed_nparticules_30/encoder_z1_-8050918908592526525.pt"
 
 N_INPUT = 65
 N_LABELS = 5 #one label is excluded
@@ -34,20 +39,15 @@ N_SAMPLES = 20
 
 multi_encoder_keys: list = ["default"]
 
-
-encoder =  nn.ModuleDict(
-                {
-
-                    key: EncoderB(
-                        n_input=N_INPUT,
-                        n_output=N_LATENT,
-                        n_hidden=N_HIDDEN,
-                        dropout_rate=0.1,
-                        do_batch_norm=False,
-                    )
-                    for key in multi_encoder_keys
-                }
-            )
+encoder =nn.ModuleDict(
+            {"default": EncoderB3( 
+                n_input=N_INPUT,
+                n_output=N_LATENT,
+                n_hidden=128,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        )
 if os.path.exists(PATH_E):
     print("model exists; loadizng from .pt")
     encoder.load_state_dict(torch.load(PATH_E))
@@ -55,13 +55,12 @@ encoder.eval()
 
 classifier = nn.ModuleDict(
             {
-                key: ClassifierA(
+                "default": ClassifierA(
                     n_input= N_LATENT,
                     n_output=N_LABELS,
                     do_batch_norm=False,
                     dropout_rate=0.1,
                 )
-                for key in multi_encoder_keys
             }
         )
 
@@ -70,59 +69,35 @@ if os.path.exists(PATH_C):
     classifier.load_state_dict(torch.load(PATH_C))
 classifier.eval()
 
-mdl = RelaxedSVAE(
-    n_input=N_INPUT,
-    n_labels=N_LABELS,
-    n_latent=N_LATENT,
-    n_hidden=N_HIDDEN,
-    n_layers=1,
-    # do_batch_norm=batch_norm,
-    # multi_encoder_keys=multi_encoder_keys,
-    # vdist_map=vdist_map_train,
-)
-if os.path.exists(PATH_M):
-    print("model exists; loadizng from .pt")
-    mdl.load_state_dict(torch.load(PATH_M))
-mdl.eval()
 
-DATASET = TrentoDataset()
+
+LABELLED_PROPORTIONS = np.array([1/6, 1/6, 1/6, 1/6, 1/6, 0.0])
+LABELLED_PROPORTIONS = LABELLED_PROPORTIONS / LABELLED_PROPORTIONS.sum()
+
+LABELLED_FRACTION = 0.5
+
+DATASET = TrentoDataset(
+    labelled_proportions=LABELLED_PROPORTIONS,
+    labelled_fraction=LABELLED_FRACTION
+)
 x,y = DATASET.test_dataset.tensors # 29102
 print(x.shape, y.shape, torch.unique(y))
 print(torch.mean(x, dim = 0), torch.std(x, dim =0))
 
+z1 = encoder["default"](x, n_samples= 1)["latent"]
+qc_z1 = classifier["default"](z1)
 
-print(" ")
-for i in range(1):
-    y_pred_prob1 = mdl.classify(x[:10000], N_SAMPLES)
-    y_pred1 = torch.argmax(y_pred_prob1, dim = 1)+1
+cat_dist = RelaxedOneHotCategorical(
+    temperature=0.5, probs=qc_z1
+    )
+ys_probs = cat_dist.rsample()
+ys = (ys_probs == ys_probs.max(-1, keepdim=True).values).float()
+y_int = ys.argmax(-1)
 
-    y_pred_prob2 = mdl.classify(x[10000:], N_SAMPLES)
-    y_pred2 = torch.argmax(y_pred_prob2, dim = 1)+1
+print(y_int.shape)
 
-    print((sum(y_pred1 == y[:10000])+sum(y_pred2 == y[10000:]))/ N)
-    # print(confusion_matrix(y_true = y, y_pred=y_pred))
-print(torch.unique(y_pred1))
-print(torch.unique(y_pred2))
+score = balanced_accuracy_score(y, y_int)
+print(score)
 
-compute_reject_score(y[:10000]-1, y_pred_prob1)
-compute_reject_score(y[10000:]-1, y_pred_prob2)
-
-
-
-
-
-# print(" ")
-# for i in range(1):
-
-#     z1= encoder['default'](x[:10000], 1)
-#     y_pred_prob1= classifier['default'](z1['latent'])
-#     y_pred1 = torch.argmax(y_pred_prob1, dim = 1)+1
-
-#     z1= encoder['default'](x[10000:], 1)
-#     y_pred_prob2= classifier['default'](z1['latent'])
-#     y_pred2 = torch.argmax(y_pred_prob2, dim = 1)+1
-
-#     print((sum(y_pred1 == y[:10000])+sum(y_pred2 == y[10000:]))/ N)
-#     print(confusion_matrix(y_true = y[:10000], y_pred=y_pred1))
-# print(torch.unique(y_pred1))
-# print(torch.unique(y_pred2))
+score = accuracy_score(y, y_int)
+print(score)

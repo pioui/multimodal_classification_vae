@@ -4,6 +4,9 @@
 
 import os
 import logging
+from math import ceil
+
+from mcvae.models.trento_encoders import EncoderB0, EncoderB2, EncoderB3
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
@@ -12,9 +15,13 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-import random
+from arviz.stats import psislw
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+from tqdm.auto import tqdm
+
+from mcvae.dataset import TrentoDataset
+from mcvae.models import TrentoVAE
 from mcvae.inference import TrentoRTrainer
-from mcvae.models import RelaxedSVAE
 from mcvae.models.regular_modules import (
     EncoderA,
     EncoderB,
@@ -22,30 +29,43 @@ from mcvae.models.regular_modules import (
     EncoderAStudent,
     EncoderBStudent,
 )
+from mcvae.models.trento_encoders import (
+    EncoderB0,
+    EncoderB1,
+    EncoderB2,
+    EncoderB3,
+    EncoderB4,
+    EncoderB5,
+    EncoderB6,
+    EncoderB7,
+
+)
+
 from trento_utils import (
+    NUM,
+    LABELLED_PROPORTIONS,
+    LABELLED_FRACTION,
     N_INPUT,
     N_LABELS,
     CLASSIFICATION_RATIO,
     N_EVAL_SAMPLES,
     BATCH_SIZE,
     DATASET,
-
+    X_TRAIN,
+    Y_TRAIN,
+    RDM_INDICES,
+    X_SAMPLE,
+    Y_SAMPLE,
+    DO_OVERALL,
     res_eval_loop,
 )
-
-random.seed(10)
-
-logging.basicConfig(filename='logs/simu_trento.log', encoding='utf-8', level=logging.DEBUG)
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+device = "cuda" if torch.cuda.is_available() else "cpu"
 N_PARTICULES = 30
-N_LATENT = 6
-N_EPOCHS = 10
+N_LATENT = 10
+N_EPOCHS = 100
 N_HIDDEN = 128
-LR = 1e-4
+LR = 1e-3
 N_EXPERIMENTS = 1
-
 DEFAULT_MAP = dict(
     REVKL="gaussian",
     CUBO="student",
@@ -65,38 +85,180 @@ DEBUG = False
 if not os.path.exists(MDL_DIR):
     os.makedirs(MDL_DIR)
 
-logging.basicConfig(filename='logs/simu_trento_{}.log'.format(LR), encoding='utf-8', level=logging.DEBUG)
-logging.info("Device in use: {}".format(str(device)))
-logging.info("Train all examples {}".format(len(DATASET.train_dataset.tensors[0])))
-logging.info("Train labelled examples {}".format(len(DATASET.train_dataset_labelled.tensors[0])))
-logging.info("Test examples {}".format(len(DATASET.test_dataset.tensors[0])))
-logging.info("Learning Rate {}".format(LR))
+logging.basicConfig(filename = '/Users/plo026/repos/decision-making-vaes/logs/{}.log'.format(PROJECT_NAME),level=logging.DEBUG)
 
+
+print("train all examples {}".format(len(DATASET.train_dataset.tensors[0])))
+print("train labelled examples {}".format(len(DATASET.train_dataset_labelled.tensors[0])))
+print("test labelled examples {}".format(len(DATASET.test_dataset.tensors[0])))
 
 EVAL_ENCODERS = [
     dict(encoder_type="train", eval_encoder_name="train"),  # MUST BE ON TOP!!!
     dict(encoder_type="ELBO", reparam=True, eval_encoder_name="VAE"),
 ]
 
-SCENARIOS = [ 
+SCENARIOS = [  # WAKE updates
     dict(
         loss_gen="ELBO",
         loss_wvar="ELBO",
         reparam_latent=True,
         counts=None,
-        model_name="VAE",
+        model_name="EncoderB0_VAE",
+        encoder_z1=nn.ModuleDict(
+            {"default": EncoderB0( 
+                n_input=N_INPUT,
+                n_output=N_LATENT,
+                n_hidden=128,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+    ),
+
+    dict(
+        loss_gen="ELBO",
+        loss_wvar="ELBO",
+        reparam_latent=True,
+        counts=None,
+        model_name="EncoderB1_VAE",
+        encoder_z1=nn.ModuleDict(
+            {"default": EncoderB1( 
+                n_input=N_INPUT,
+                n_output=N_LATENT,
+                n_hidden=512,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+    ),
+
+    dict(
+        loss_gen="ELBO",
+        loss_wvar="ELBO",
+        reparam_latent=True,
+        counts=None,
+        model_name="EncoderB2_VAE",
+        encoder_z1=nn.ModuleDict(
+            {"default": EncoderB2( 
+                n_input=N_INPUT,
+                n_output=N_LATENT,
+                n_hidden=512,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+        batch_size=128,
+    ),
+
+    dict(
+        loss_gen="ELBO",
+        loss_wvar="ELBO",
+        reparam_latent=True,
+        counts=None,
+        model_name="EncoderB21_VAE",
+        n_latent=20,
+        encoder_z1=nn.ModuleDict(
+            {"default": EncoderB2( 
+                n_input=N_INPUT,
+                n_output=20,
+                n_hidden=512,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+        batch_size=128,
+    ),
+
+
+    dict(
+        loss_gen="ELBO",
+        loss_wvar="ELBO",
+        reparam_latent=True,
+        counts=None,
+        model_name="EncoderB7_VAE",
+        n_latent=20,
+        encoder_z1=nn.ModuleDict(
+            {"default": EncoderB7( 
+                n_input=N_INPUT,
+                n_output=20,
+                n_hidden=512,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+        batch_size=32,
+    ),
+
+        dict(
+        loss_gen="ELBO",
+        loss_wvar="ELBO",
+        reparam_latent=True,
+        counts=None,
+        model_name="EncoderB3_VAE",
+        encoder_z1=nn.ModuleDict(
+            {"default": EncoderB3( 
+                n_input=N_INPUT,
+                n_output=N_LATENT,
+                n_hidden=128,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+    ),
+        dict(
+        loss_gen="ELBO",
+        loss_wvar="ELBO",
+        reparam_latent=True,
+        counts=None,
+        model_name="EncoderB4_VAE",
+        encoder_z1=nn.ModuleDict(
+            {"default": EncoderB4( 
+                n_input=N_INPUT,
+                n_output=N_LATENT,
+                n_hidden=128,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+    ),
+        dict(
+        loss_gen="ELBO",
+        loss_wvar="ELBO",
+        reparam_latent=True,
+        counts=None,
+        model_name="EncoderB5_VAE",
+        encoder_z1=nn.ModuleDict(
+            {"default": EncoderB5( 
+                n_input=N_INPUT,
+                n_output=N_LATENT,
+                n_hidden=128,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+    ),
+        dict(
+        loss_gen="ELBO",
+        loss_wvar="ELBO",
+        reparam_latent=True,
+        counts=None,
+        model_name="EncoderB6_VAE",
+        encoder_z1=nn.ModuleDict(
+            {"default": EncoderB6( 
+                n_input=N_INPUT,
+                n_output=N_LATENT,
+                n_hidden=512,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
     ),
 ]
 
 DF_LI = []
-
-
+logging.info("Number of experiments : {}".format(N_EXPERIMENTS))
 # Main script
-scenario_number = 0
 for scenario in SCENARIOS:
-
-    scenario_number = scenario_number+1
-
     loss_gen = scenario.get("loss_gen", None)
     loss_wvar = scenario.get("loss_wvar", None)
     n_samples_train = scenario.get("n_samples_train", None)
@@ -117,12 +279,12 @@ for scenario in SCENARIOS:
     cubo_z2_with_elbo = scenario.get("cubo_z2_with_elbo", False)
     batch_size = scenario.get("batch_size", BATCH_SIZE)
 
+    encoder_z1=scenario.get("encoder_z1", None)
+
     do_defensive = type(loss_wvar) == list
     multi_encoder_keys = loss_wvar if do_defensive else ["default"]
-
-    
     for t in range(N_EXPERIMENTS):
-        logging.info("## Experiment {} ##".format(t))
+        # t = t + 4
         loop_setup_dict = {
             "BATCH_SIZE": BATCH_SIZE,
             "ITER": t,
@@ -150,13 +312,10 @@ for scenario in SCENARIOS:
             mdl_name = mdl_name + str(st) + "_"
         mdl_name = str(mdl_name)
         mdl_name = os.path.join(MDL_DIR, "{}.pt".format(mdl_name))
-
-        logging.info("########## TRAIN ##########")
-        count_tries=0
+        print(mdl_name)
         while True:
             try:
-                logging.info("### Try {} ###".format(count_tries))
-                mdl = RelaxedSVAE(
+                mdl = TrentoVAE(
                     n_input=N_INPUT,
                     n_labels=N_LABELS,
                     n_latent=n_latent,
@@ -165,12 +324,12 @@ for scenario in SCENARIOS:
                     do_batch_norm=batch_norm,
                     multi_encoder_keys=multi_encoder_keys,
                     vdist_map=vdist_map_train,
+                    encoder_z1=encoder_z1
                 )
                 if os.path.exists(mdl_name):
-                    logging.info("model exists; loadizng from .pt")
+                    print("model exists; loading from .pt")
                     mdl.load_state_dict(torch.load(mdl_name))
                 mdl.to(device)
-
                 trainer = TrentoRTrainer(
                     dataset=DATASET,
                     model=mdl,
@@ -179,7 +338,6 @@ for scenario in SCENARIOS:
                     classify_mode=classify_mode,
                 )
                 overall_loss = None
-                
                 if not os.path.exists(mdl_name):
                     if do_defensive:
                         trainer.train_defensive(
@@ -191,7 +349,6 @@ for scenario in SCENARIOS:
                             classification_ratio=CLASSIFICATION_RATIO,
                             update_mode="all",
                             counts=counts,
-                            model_name=mdl_name
                         )
                     else:
                         trainer.train(
@@ -207,35 +364,23 @@ for scenario in SCENARIOS:
                             classification_ratio=CLASSIFICATION_RATIO,
                             z2_with_elbo=z2_with_elbo,
                             update_mode="all",
-                            model_name=mdl_name
                         )
             except ValueError as e:
                 print(e)
-                count_tries=count_tries+1
                 continue
             break
-
         torch.save(mdl.state_dict(), mdl_name)
-        logging.info("Model saved as: {}".format(mdl_name))
-        
 
-        mdl.eval()  # evaluation mode
-
-        logging.info("########## EVALUATION ##########")
-
-        # TODO: find something cleaner - agree
+        mdl.eval()
+        # TODO: find something cleaner
         if do_defensive:
             factor = N_EVAL_SAMPLES / counts.sum()
             multi_counts = factor * counts
             multi_counts = multi_counts.astype(int)
         else:
             multi_counts = None
-        
-        encoder_num = 0
-        for eval_dic in EVAL_ENCODERS:
-            logging.info(" ### Evalulation encoder {} ###".format(encoder_num))
-            encoder_num = encoder_num+1
 
+        for eval_dic in EVAL_ENCODERS:
             encoder_type = eval_dic.get("encoder_type", None)
             eval_encoder_name = eval_dic.get("eval_encoder_name", None)
             reparam = eval_dic.get("reparam", None)
@@ -248,7 +393,7 @@ for scenario in SCENARIOS:
                 "counts_eval": counts_eval,
                 "vdist_map_eval": vdist_map_eval,
             }
-            logging.info("ENCODER TYPE : {}".format(encoder_type))
+            print("ENCODER TYPE : ", encoder_type)
             if encoder_type == "train":
                 logging.info("Using train variational distribution for evaluation ...")
                 eval_encoder = None
@@ -270,9 +415,7 @@ for scenario in SCENARIOS:
                 else:
                     multi_counts_eval = None
 
-                count_tries=0
                 while True:
-                    logging.info(" #### Try {} ####".format(count_tries))
                     try:
                         logging.info("Using map {} ...".format(vdist_map_eval))
                         new_classifier = nn.ModuleDict(
@@ -286,19 +429,8 @@ for scenario in SCENARIOS:
                                 for key in multi_encoder_keys_eval
                             }
                         ).to(device)
-                        new_encoder_z1 = nn.ModuleDict(
-                            {
-                                # key: EncoderB(
-                                key: Z1_MAP[vdist_map_eval[key]](
-                                    n_input=N_INPUT,
-                                    n_output=n_latent,
-                                    n_hidden=n_hidden,
-                                    dropout_rate=0.1,
-                                    do_batch_norm=False,
-                                )
-                                for key in multi_encoder_keys_eval
-                            }
-                        ).to(device)
+                        new_encoder_z1 = encoder_z1.to(device)
+
                         new_encoder_z2_z1 = nn.ModuleDict(
                             {
                                 # key: EncoderA(
@@ -348,21 +480,15 @@ for scenario in SCENARIOS:
                                 n_samples_phi=30,
                                 classification_ratio=CLASSIFICATION_RATIO,
                                 reparam_wphi=reparam,
-                                model_names=mdl_names
-                                )
+                            )
                             for key in mdl_names:
                                 torch.save(encoders[key].state_dict(), mdl_names[key])
 
-
                     except ValueError as e:
                         print(e)
-                        count_tries = count_tries+1
                         continue
                     break
-
-            print("$$$$$$$$$$$$$$$$$$$$$$$$$$")
-            print(multi_counts_eval, do_defensive_eval, DEBUG)
-           
+            print(trainer.model.encoder_z2_z1.keys())
             loop_results_dict = res_eval_loop(
                 trainer=trainer,
                 eval_encoder=None,
@@ -374,14 +500,10 @@ for scenario in SCENARIOS:
             print(loop_results_dict)
 
             res = {**loop_setup_dict, **loop_results_dict, **eval_encoder_loop}
-            logging.info("Evaluation resuts: {}".format(loop_results_dict))            
-            
+            print(res)
             DF_LI.append(res)
             DF = pd.DataFrame(DF_LI)
             DF.to_pickle(FILENAME)
 
 DF = pd.DataFrame(DF_LI)
 DF.to_pickle(FILENAME)
-
-
-

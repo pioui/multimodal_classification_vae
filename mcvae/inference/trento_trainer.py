@@ -1,4 +1,3 @@
-# semi_supervised_trainer_relaxed.py
 import logging
 from itertools import cycle
 
@@ -10,14 +9,11 @@ from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
-import csv
+
 from mcvae.dataset import TrentoDataset
-from trento_utils import res_eval_loop 
-from sklearn.metrics import accuracy_score
 
 logger = logging.getLogger(__name__)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class TrentoRTrainer:
     def __init__(
@@ -30,7 +26,6 @@ class TrentoRTrainer:
         use_cuda=True,
         save_metrics=False,
         debug_gradients=False,
-        PROJECT_NAME=None
     ):
         self.classify_mode = classify_mode
         self.r = r
@@ -45,12 +40,6 @@ class TrentoRTrainer:
         )
         self.train_annotated_loader = DataLoader(
             self.dataset.train_dataset_labelled,
-            batch_size=batch_size,
-            shuffle=True,
-            pin_memory=use_cuda,
-        )
-        self.validation_loader = DataLoader(
-            self.dataset.validation_dataset,
             batch_size=batch_size,
             shuffle=True,
             pin_memory=use_cuda,
@@ -75,7 +64,7 @@ class TrentoRTrainer:
             train_cubo=[],
             classification_gradients=[],
         )
-        self.project_name = PROJECT_NAME
+
     @property
     def temperature(self):
         t_ref = self.it - (self.it % 500)
@@ -97,7 +86,6 @@ class TrentoRTrainer:
         update_mode: str = "all",
         reparam_wphi: bool = True,
         z2_with_elbo: bool = False,
-        model_name = None
     ):
         assert update_mode in ["all", "alternate"]
         assert (n_samples_phi is None) == (n_samples_theta is None)
@@ -137,15 +125,9 @@ class TrentoRTrainer:
             logger.info(
                 "Multiobjective training using {} / {}".format(wake_theta, wake_psi)
             )
-        
-        loss_dict = []
 
         pbar = tqdm(range(n_epochs))
         for epoch in pbar:
-            epoch_dict = {"Epoch":epoch}
-            overall_loss_list = []
-            theta_loss_list = []
-            psi_loss_list = []
             for (tensor_all, tensor_superv) in zip(
                 self.train_loader, cycle(self.train_annotated_loader)
             ):
@@ -172,7 +154,7 @@ class TrentoRTrainer:
                     optim.zero_grad()
                     loss.backward()
                     optim.step()
-                    overall_loss_list.append(loss)
+                    # torch.cuda.synchronize()
 
                     if self.iterate % 100 == 0:
                         self.metrics["train_loss"].append(loss.item())
@@ -191,7 +173,7 @@ class TrentoRTrainer:
                     optim_gen.zero_grad()
                     theta_loss.backward()
                     optim_gen.step()
-                    theta_loss_list.append(theta_loss)
+                    # torch.cuda.synchronize()
 
                     if self.iterate % 100 == 0:
                         self.metrics["train_theta_wake"].append(theta_loss.item())
@@ -199,7 +181,6 @@ class TrentoRTrainer:
                     reparam_epoch = reparam_wphi
                     wake_psi_epoch = wake_psi
 
-                    # Wake phi
                     psi_loss = self.loss(
                         x_u=x_u,
                         x_s=x_s,
@@ -213,8 +194,7 @@ class TrentoRTrainer:
                     optim_var_wake.zero_grad()
                     psi_loss.backward()
                     optim_var_wake.step()
-                    psi_loss_list.append(psi_loss)
-
+                    # torch.cuda.synchronize()
                     if self.iterate % 100 == 0:
                         self.metrics["train_phi_wake"].append(psi_loss.item())
                         if self.debug_gradients:
@@ -223,194 +203,9 @@ class TrentoRTrainer:
                                 .classifier[0]
                                 .to_hidden.weight.grad.cpu()
                             )
-        
+
                 self.iterate += 1
-            
-            epoch_dict["overall_train_loss"]=torch.mean(torch.tensor(overall_loss_list)).item()
-            epoch_dict["θ_train_loss"]=torch.mean(torch.tensor(theta_loss_list)).item()
-            epoch_dict["φ_train_loss"]=torch.mean(torch.tensor(psi_loss_list)).item()
-
-            logger.info(
-                "Epoch {} Training: loss = {}, θ_loss = {}, φ_loss {}".format(
-                    epoch,
-                    epoch_dict["overall_train_loss"], 
-                    epoch_dict["θ_train_loss"], 
-                    epoch_dict["φ_train_loss"], 
-                    )
-                    )
-            
-            train_res = self.inference(
-                self.train_loader,
-                keys = [
-                    "qc_z1_all_probas",
-                    "y",
-                    "log_ratios",
-                    "qc_z1",
-                    "preds_is",
-                    "preds_plugin",
-                ],
-                n_samples=1000,
-                encoder_key="default",
-                counts=None
-            )
-
-            y_pred = train_res["preds_plugin"].numpy()
-            y_pred = y_pred / y_pred.sum(1, keepdims=True)
-
-            y_pred_is = train_res["preds_is"].numpy()
-            # y_pred_is = y_pred_is / y_pred_is.sum(1, keepdims=True)
-            assert y_pred.shape == y_pred_is.shape, (y_pred.shape, y_pred_is.sh)
-
-            where_non9 = train_res["y"] != 5
-            y_non9 = train_res["y"][where_non9]
-            y_pred_non9 = y_pred[where_non9].argmax(1)
-            m_accuracy = accuracy_score(y_non9, y_pred_non9)
-
-            epoch_dict["train_acc"]=m_accuracy
-
-            logger.info(
-                "Epoch {} Training: accuracy = {}".format(epoch, m_accuracy)
-            )
-
-            # Validation
-            overall_val_loss_list = []
-            theta_val_loss_list = []
-            psi_val_loss_list = []
-            with torch.no_grad():
-
-                for (tensor_val) in self.validation_loader:
-
-                    x_val, y_val = tensor_val
-
-                    x_val = x_val.to(device)
-                    y_val = y_val.to(device)
-
-                    if overall_loss is not None:
-                        loss = self.loss(
-                            x_u=None,
-                            x_s=x_s,
-                            y_s=y_s,
-                            loss_type=overall_loss,
-                            n_samples=n_samples,
-                            reparam=True,
-                            classification_ratio=classification_ratio,
-                            mode=update_mode,
-                        )
-                        overall_val_loss_list.append(loss)
-
-                        if self.iterate % 100 == 0:
-                            self.metrics["train_loss"].append(loss.item())
-                    else:
-                        # Wake theta
-                        theta_loss = self.loss(
-                            x_u=None,
-                            x_s=x_s,
-                            y_s=y_s,
-                            loss_type=wake_theta,
-                            n_samples=n_samples_theta,
-                            reparam=True,
-                            classification_ratio=classification_ratio,
-                            mode=update_mode,
-                        )
-                        theta_val_loss_list.append(theta_loss)
-
-                        if self.iterate % 100 == 0:
-                            self.metrics["train_theta_wake"].append(theta_loss.item())
-
-                        reparam_epoch = reparam_wphi
-                        wake_psi_epoch = wake_psi
-
-                        # Wake phi
-                        psi_loss = self.loss(
-                            x_u=None,
-                            x_s=x_s,
-                            y_s=y_s,
-                            loss_type=wake_psi_epoch,
-                            n_samples=n_samples_phi,
-                            reparam=reparam_epoch,
-                            classification_ratio=classification_ratio,
-                            mode=update_mode,
-                        )
-
-                        psi_val_loss_list.append(psi_loss)
-
-                        if self.iterate % 100 == 0:
-                            self.metrics["train_phi_wake"].append(psi_loss.item())
-                            if self.debug_gradients:
-                                self.metrics["classification_gradients"].append(
-                                    self.model.classifier["default"]
-                                    .classifier[0]
-                                    .to_hidden.weight.grad.cpu()
-                                )
-            
-            epoch_dict["overall_val_loss"]=torch.mean(torch.tensor(overall_val_loss_list)).item()
-            epoch_dict["θ_val_loss"]=torch.mean(torch.tensor(theta_val_loss_list)).item()
-            epoch_dict["φ_val_loss"]=torch.mean(torch.tensor(psi_val_loss_list)).item() 
-
-            logger.info(
-                "Epoch {} Validation: val_loss = {}, θ_val_loss = {}, φ_val_loss {}".format(
-                    epoch,
-                    epoch_dict["overall_val_loss"], 
-                    epoch_dict["θ_val_loss"], 
-                    epoch_dict["φ_val_loss"], 
-                    )
-                    )
-
-            train_res = self.inference(
-                self.validation_loader,
-                keys = [
-                    "qc_z1_all_probas",
-                    "y",
-                    "log_ratios",
-                    "qc_z1",
-                    "preds_is",
-                    "preds_plugin",
-                ],
-                n_samples=1000,
-                encoder_key="default",
-                counts=None
-            )
-
-            y_pred = train_res["preds_plugin"].numpy()
-            y_pred = y_pred / y_pred.sum(1, keepdims=True)
-
-            y_pred_is = train_res["preds_is"].numpy()
-            # y_pred_is = y_pred_is / y_pred_is.sum(1, keepdims=True)
-            assert y_pred.shape == y_pred_is.shape, (y_pred.shape, y_pred_is.sh)
-
-            where_non9 = train_res["y"] != 5
-            y_non9 = train_res["y"][where_non9]
-            y_pred_non9 = y_pred[where_non9].argmax(1)
-            m_accuracy = accuracy_score(y_non9, y_pred_non9)
-
-            epoch_dict["train_acc"]=m_accuracy
-
-            logger.info(
-                "Epoch {} Validation: accuracy = {}".format(epoch, m_accuracy)
-            )
-
-            loss_dict.append(epoch_dict)
-
-
             pbar.set_description("{0:.2f}".format(theta_loss.item()))
-            if model_name is not None:
-                torch.save(self.model.state_dict(), model_name[:-3]+"_epoch_"+str(epoch)+".pt")
-
-            loop_results_dict = res_eval_loop(
-                trainer=self,
-                eval_encoder=None,
-                counts_eval=None,
-                encoder_eval_name="default",
-                do_defensive=False,
-                debug=False,
-            )
-            print(loop_results_dict)
-
-            logging.info("Evaluation resuts: {}".format(loop_results_dict))    
-        
-        write_csv(loss_dict, 'logs/output_{}.csv'.format(self.project_name))
-
-
 
     def train_eval_encoder(
         self,
@@ -421,7 +216,6 @@ class TrentoRTrainer:
         n_samples_phi: int = None,
         classification_ratio: float = 50.0,
         reparam_wphi: bool = True,
-        model_names = None
     ):
         reparam_mapper = dict(
             default=reparam_wphi,
@@ -506,9 +300,6 @@ class TrentoRTrainer:
                     optim_vars[key].step()
                     # torch.cuda.synchronize()
                     self.iterate += 1
-            if model_names is not None and epoch % 20 == 0:
-                for key in model_names:
-                    torch.save(encoders[key].state_dict(), model_names[key][:-3]+"_epoch_"+str(epoch)+".pt")
 
     def train_defensive(
         self,
@@ -520,7 +311,6 @@ class TrentoRTrainer:
         n_samples_theta: int = None,
         classification_ratio: float = 50.0,
         update_mode: str = "all",
-        model_name = None
     ):
         reparams_info = dict(
             CUBO=True, IWELBO=True, IWELBOC=True, ELBO=True, CUBOB=True, REVKL=False
@@ -592,8 +382,6 @@ class TrentoRTrainer:
                     var_loss.backward()
                     optim_vars[key].step()
             self.iterate += 1
-        if model_name is not None:
-            torch.save(self.model.state_dict(), model_name[:-3]+"epoch_"+str(epoch)+".pt")
 
     def loss(
         self,
@@ -614,18 +402,15 @@ class TrentoRTrainer:
 
         if mode == "all":
             outs_s = None
-            if x_u is not None:
-                l_u = self.model.forward(
-                    x_u,
-                    temperature=temp,
-                    loss_type=loss_type,
-                    n_samples=n_samples,
-                    reparam=reparam,
-                    encoder_key=encoder_key,
-                    counts=counts,
-                )
-            else: l_u = torch.tensor([0.0])
-
+            l_u = self.model.forward(
+                x_u,
+                temperature=temp,
+                loss_type=loss_type,
+                n_samples=n_samples,
+                reparam=reparam,
+                encoder_key=encoder_key,
+                counts=counts,
+            )
             l_s = self.model.forward(
                 x_s,
                 temperature=temp,
@@ -791,8 +576,6 @@ class TrentoRTrainer:
         return all_res
 
 
-
-
 def dic_update(dic: dict, new_dic: dict):
     """
     Updates dic by appending `new_dict` values
@@ -812,14 +595,3 @@ def dic_concat(dic: dict, batch_size: int = 128):
         dim = int(dim)
         dic[key] = torch.cat(li, dim=dim)
     return dic
-
-
-def write_csv(dict_list, filename):
-    try:
-        with open(filename, 'w') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=list(dict_list[0].keys()))
-            writer.writeheader()
-            for data in dict_list:
-                writer.writerow(data)
-    except IOError:
-        print("I/O error")

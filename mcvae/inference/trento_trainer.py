@@ -1,6 +1,7 @@
 import logging
 from itertools import cycle
-
+import random
+random.seed(42)
 import pandas as pd
 import numpy as np
 import torch

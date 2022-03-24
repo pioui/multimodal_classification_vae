@@ -4,7 +4,7 @@ import torch
 from torch.distributions import Categorical
 import numpy as np
 from arviz.stats import psislw
-from sklearn.metrics import accuracy_score, precision_score, recall_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
 from tqdm.auto import tqdm
 import random
 random.seed(42)
@@ -94,7 +94,7 @@ def res_eval_loop(
         # mixture and simple statistics
         train_res = trainer.inference(
             # trainer.test_loader,
-            trainer.train_annotated_loader,
+            trainer.train_loader,
             keys=[
                 "qc_z1_all_probas",
                 "y",
@@ -151,7 +151,7 @@ def res_eval_loop(
     with torch.no_grad():
         # Below function integrates both inference methods for
         # mixture and simple statistics
-        train_res = trainer.inference(
+        test_res = trainer.inference(
             trainer.test_loader,
             # trainer.train_loader,
             keys=[
@@ -166,14 +166,14 @@ def res_eval_loop(
             encoder_key=encoder_eval_name,
             counts=counts_eval,
         )
-    y_pred = train_res["preds_plugin"].numpy()
+    y_pred = test_res["preds_plugin"].numpy()
     y_pred = y_pred / y_pred.sum(1, keepdims=True)
 
-    y_pred_is = train_res["preds_is"].numpy()
+    y_pred_is = test_res["preds_is"].numpy()
     # y_pred_is = y_pred_is / y_pred_is.sum(1, keepdims=True)
     assert y_pred.shape == y_pred_is.shape, (y_pred.shape, y_pred_is.shape)
 
-    y_true = train_res["y"].numpy()
+    y_true = test_res["y"].numpy()
 
     # Precision / Recall for discovery class
     # And accuracy
@@ -193,17 +193,19 @@ def res_eval_loop(
     )
 
     # Entropy
-    where9 = train_res["y"] == 5
-    probas9 = train_res["qc_z1_all_probas"].mean(0)[where9]
+    where9 = test_res["y"] == 5
+    probas9 = test_res["qc_z1_all_probas"].mean(0)[where9]
     entropy = (-probas9 * probas9.log()).sum(-1).mean(0)
 
-    where_non9 = train_res["y"] != 5
-    y_non9 = train_res["y"][where_non9]
+    where_non9 = test_res["y"] != 5
+    y_non9 = test_res["y"][where_non9]
     y_pred_non9 = y_pred[where_non9].argmax(1)
     m_accuracy = accuracy_score(y_non9, y_pred_non9)
+    m_confusion_matrix = confusion_matrix(y_non9, y_pred_non9)
 
     y_pred_non9_is = y_pred_is[where_non9].argmax(1)
     m_accuracy_is = accuracy_score(y_non9, y_pred_non9_is)
+    m_confusion_matrix_is = confusion_matrix(y_non9, y_pred_non9_is)
 
     res = {
         # "IWELBO": iwelbo_vals.mean().item(),
@@ -220,6 +222,8 @@ def res_eval_loop(
         "AUC_IS": auc_pr_is,
         "AUC": auc_pr,
         "ENTROPY": entropy,
+        "CONFUSION_MATRIX": m_confusion_matrix,
+        "CONFUSION_MATRIX_IS": m_confusion_matrix_is,
 
         "train_M_ACCURACY": train_m_accuracy,
         "train_MEAN_AP": train_m_ap,
@@ -230,6 +234,6 @@ def res_eval_loop(
         "train_AUC_IS": train_auc_pr_is,
         "train_AUC": train_auc_pr,
         "train_ENTROPY": train_entropy,
-
+        "train_LOSS": trainer.train_loss,
     }
     return res

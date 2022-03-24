@@ -6,8 +6,6 @@ import os
 import logging
 from math import ceil
 
-from mcvae.models.trento_encoders import EncoderB0, EncoderB2, EncoderB3
-
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
@@ -58,11 +56,12 @@ from trento_utils import (
     Y_SAMPLE,
     DO_OVERALL,
     res_eval_loop,
+    model_evaluation,
 )
 device = "cuda" if torch.cuda.is_available() else "cpu"
 N_PARTICULES = 30
 N_LATENT = 10
-N_EPOCHS = 100
+N_EPOCHS = 2
 N_HIDDEN = 128
 LR = 1e-3
 N_EXPERIMENTS = 1
@@ -98,22 +97,22 @@ EVAL_ENCODERS = [
 ]
 
 SCENARIOS = [  # WAKE updates
-    # dict(
-    #     loss_gen="ELBO",
-    #     loss_wvar="ELBO",
-    #     reparam_latent=True,
-    #     counts=None,
-    #     model_name="EncoderB0_VAE",
-    #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB0( 
-    #             n_input=N_INPUT,
-    #             n_output=N_LATENT,
-    #             n_hidden=128,
-    #             dropout_rate=0,
-    #             do_batch_norm=False,
-    #         )}
-    #     ),
-    # ),
+    dict(
+        loss_gen="ELBO",
+        loss_wvar="ELBO",
+        reparam_latent=True,
+        counts=None,
+        model_name="EncoderB0_VAE",
+        encoder_z1=nn.ModuleDict(
+            {"default": EncoderB0( 
+                n_input=N_INPUT,
+                n_output=N_LATENT,
+                n_hidden=128,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+    ),
 
     # dict(
     #     loss_gen="ELBO",
@@ -189,70 +188,70 @@ SCENARIOS = [  # WAKE updates
     #     batch_size=32,
     # ),
 
-        dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        model_name="EncoderB3_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB3( 
-                n_input=N_INPUT,
-                n_output=N_LATENT,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-    ),
-        dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        model_name="EncoderB4_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB4( 
-                n_input=N_INPUT,
-                n_output=N_LATENT,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-    ),
-        dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        model_name="EncoderB5_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB5( 
-                n_input=N_INPUT,
-                n_output=N_LATENT,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-    ),
-        dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        model_name="EncoderB6_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB6( 
-                n_input=N_INPUT,
-                n_output=N_LATENT,
-                n_hidden=512,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-    ),
+#         dict(
+#         loss_gen="ELBO",
+#         loss_wvar="ELBO",
+#         reparam_latent=True,
+#         counts=None,
+#         model_name="EncoderB3_VAE",
+#         encoder_z1=nn.ModuleDict(
+#             {"default": EncoderB3( 
+#                 n_input=N_INPUT,
+#                 n_output=N_LATENT,
+#                 n_hidden=128,
+#                 dropout_rate=0,
+#                 do_batch_norm=False,
+#             )}
+#         ),
+#     ),
+#         dict(
+#         loss_gen="ELBO",
+#         loss_wvar="ELBO",
+#         reparam_latent=True,
+#         counts=None,
+#         model_name="EncoderB4_VAE",
+#         encoder_z1=nn.ModuleDict(
+#             {"default": EncoderB4( 
+#                 n_input=N_INPUT,
+#                 n_output=N_LATENT,
+#                 n_hidden=128,
+#                 dropout_rate=0,
+#                 do_batch_norm=False,
+#             )}
+#         ),
+#     ),
+#         dict(
+#         loss_gen="ELBO",
+#         loss_wvar="ELBO",
+#         reparam_latent=True,
+#         counts=None,
+#         model_name="EncoderB5_VAE",
+#         encoder_z1=nn.ModuleDict(
+#             {"default": EncoderB5( 
+#                 n_input=N_INPUT,
+#                 n_output=N_LATENT,
+#                 n_hidden=128,
+#                 dropout_rate=0,
+#                 do_batch_norm=False,
+#             )}
+#         ),
+#     ),
+#         dict(
+#         loss_gen="ELBO",
+#         loss_wvar="ELBO",
+#         reparam_latent=True,
+#         counts=None,
+#         model_name="EncoderB6_VAE",
+#         encoder_z1=nn.ModuleDict(
+#             {"default": EncoderB6( 
+#                 n_input=N_INPUT,
+#                 n_output=N_LATENT,
+#                 n_hidden=512,
+#                 dropout_rate=0,
+#                 do_batch_norm=False,
+#             )}
+#         ),
+#     ),
 ]
 
 DF_LI = []
@@ -489,7 +488,7 @@ for scenario in SCENARIOS:
                         continue
                     break
             logger.info(trainer.model.encoder_z2_z1.keys())
-            loop_results_dict = res_eval_loop(
+            loop_results_dict = model_evaluation(
                 trainer=trainer,
                 eval_encoder=None,
                 counts_eval=multi_counts_eval,
@@ -503,5 +502,5 @@ for scenario in SCENARIOS:
             DF = pd.DataFrame(DF_LI)
             DF.to_pickle(FILENAME)
 
-DF = pd.DataFrame(DF_LI)
-DF.to_pickle(FILENAME)
+# DF = pd.DataFrame(DF_LI)
+# DF.to_pickle(FILENAME)

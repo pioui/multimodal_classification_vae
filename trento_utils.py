@@ -18,16 +18,16 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 N_EVAL_SAMPLES = 25
 NUM = 300
 N_EXPERIMENTS = 5
-LABELLED_PROPORTIONS = np.array([1/6, 1/6, 1/6, 1/6, 1/6, 0.0])
+LABELLED_PROPORTIONS = np.array([1/6, 1/6, 1/6, 1/6, 1/6, 1/6])
 LABELLED_PROPORTIONS = LABELLED_PROPORTIONS / LABELLED_PROPORTIONS.sum()
 LABELLED_FRACTION = 0.5
 np.random.seed(42)
 N_INPUT = 65
-N_LABELS = 5
+N_LABELS = 6
 
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
-N_EPOCHS = 100
+N_EPOCHS = 2
 LR = 3e-4
 BATCH_SIZE = 512
 DATASET = TrentoDataset(
@@ -234,6 +234,73 @@ def res_eval_loop(
         "train_AUC_IS": train_auc_pr_is,
         "train_AUC": train_auc_pr,
         "train_ENTROPY": train_entropy,
+        "train_LOSS": trainer.train_loss,
+    }
+    return res
+
+
+def model_evaluation(
+    trainer,
+    eval_encoder,
+    counts_eval,
+    encoder_eval_name,
+    do_defensive: bool = False,
+    debug: bool = False,
+):
+
+    logging.info("Train Predictions computation ...")
+    with torch.no_grad():
+        # Below function integrates both inference methods for
+        # mixture and simple statistics
+        train_res = trainer.inference(
+            # trainer.test_loader,
+            trainer.test_loader,
+            keys=[
+                "qc_z1_all_probas",
+                "y",
+                "log_ratios",
+                "qc_z1",
+                "preds_is",
+                "preds_plugin",
+            ],
+            n_samples=N_EVAL_SAMPLES,
+            encoder_key=encoder_eval_name,
+            counts=counts_eval,
+        )
+    y_pred = train_res["preds_plugin"].numpy()
+    y_pred = y_pred / y_pred.sum(1, keepdims=True)
+
+    y_pred_is = train_res["preds_is"].numpy()
+    # y_pred_is = y_pred_is / y_pred_is.sum(1, keepdims=True)
+    assert y_pred.shape == y_pred_is.shape, (y_pred.shape, y_pred_is.shape)
+
+    y_true = train_res["y"].numpy()
+
+    # Precision / Recall for discovery class
+    # And accuracy
+    logging.info("Precision, recall, auc ...")
+    m_precision = precision_score(y_true, y_pred.argmax(1), average = None, zero_division =0)
+    m_recall = recall_score(y_true, y_pred.argmax(1), average = None, zero_division =0)
+    m_accuracy = accuracy_score(y_true, y_pred.argmax(1))
+    m_confusion_matrix = confusion_matrix(y_true, y_pred.argmax(1))
+
+    m_precision_is = precision_score(y_true, y_pred.argmax(1), average = None, zero_division =0)
+    m_recall_is = recall_score(y_true, y_pred.argmax(1), average = None, zero_division =0)
+    m_accuracy_is = accuracy_score(y_true, y_pred_is.argmax(1))
+    m_confusion_matrix_is = confusion_matrix(y_true, y_pred.argmax(1))
+
+
+    res = {
+        "M_ACCURACY": m_accuracy,
+        "MEAN_PRECISION": m_precision,
+        "MEAN_RECALL": m_recall,
+        "CONFUSION_MATRIX": m_confusion_matrix,
+
+        "M_ACCURACY_IS": m_accuracy_is,
+        "MEAN_PRECISION_IS": m_precision_is,
+        "MEAN_RECALL_IS": m_recall_is,
+        "CONFUSION_MATRIX_IS": m_confusion_matrix_is,
+
         "train_LOSS": trainer.train_loss,
     }
     return res

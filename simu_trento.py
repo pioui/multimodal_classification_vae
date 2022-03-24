@@ -62,7 +62,7 @@ from trento_utils import (
 device = "cuda" if torch.cuda.is_available() else "cpu"
 N_PARTICULES = 30
 N_LATENT = 10
-N_EPOCHS = 2
+N_EPOCHS = 100
 N_HIDDEN = 128
 LR = 1e-3
 N_EXPERIMENTS = 1
@@ -205,38 +205,38 @@ SCENARIOS = [  # WAKE updates
             )}
         ),
     ),
-    #     dict(
-    #     loss_gen="ELBO",
-    #     loss_wvar="ELBO",
-    #     reparam_latent=True,
-    #     counts=None,
-    #     model_name="EncoderB4_VAE",
-    #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB4( 
-    #             n_input=N_INPUT,
-    #             n_output=N_LATENT,
-    #             n_hidden=128,
-    #             dropout_rate=0,
-    #             do_batch_norm=False,
-    #         )}
-    #     ),
-    # ),
-    #     dict(
-    #     loss_gen="ELBO",
-    #     loss_wvar="ELBO",
-    #     reparam_latent=True,
-    #     counts=None,
-    #     model_name="EncoderB5_VAE",
-    #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB5( 
-    #             n_input=N_INPUT,
-    #             n_output=N_LATENT,
-    #             n_hidden=128,
-    #             dropout_rate=0,
-    #             do_batch_norm=False,
-    #         )}
-    #     ),
-    # ),
+        dict(
+        loss_gen="ELBO",
+        loss_wvar="ELBO",
+        reparam_latent=True,
+        counts=None,
+        model_name="EncoderB4_VAE",
+        encoder_z1=nn.ModuleDict(
+            {"default": EncoderB4( 
+                n_input=N_INPUT,
+                n_output=N_LATENT,
+                n_hidden=128,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+    ),
+        dict(
+        loss_gen="ELBO",
+        loss_wvar="ELBO",
+        reparam_latent=True,
+        counts=None,
+        model_name="EncoderB5_VAE",
+        encoder_z1=nn.ModuleDict(
+            {"default": EncoderB5( 
+                n_input=N_INPUT,
+                n_output=N_LATENT,
+                n_hidden=128,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+    ),
         dict(
         loss_gen="ELBO",
         loss_wvar="ELBO",

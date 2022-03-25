@@ -21,15 +21,21 @@ for i in range(len(data_dict['LR'])):
     model_name =  data_dict["MODEL_NAME"][i]
     confusion_matrix = data_dict["CONFUSION_MATRIX"][i]
     train_loss = data_dict["train_LOSS"][i]
+    test_loss = data_dict["test_LOSS"][i]
 
     plt.figure()
-
-
     plt.plot(train_loss, color="red")
     plt.title("Train Loss")
     plt.xlabel("Epochs")
     plt.grid()
     plt.savefig(f"outputs/{model_name}_{encoder_type}_train_loss.png")
+
+    plt.figure()
+    plt.plot(test_loss, color="red")
+    plt.title("Test Loss")
+    plt.xlabel("Epochs")
+    plt.grid()
+    plt.savefig(f"outputs/{model_name}_{encoder_type}_test_loss.png")
 
     plt.matshow(confusion_matrix, cmap="YlGn")
     plt.xlabel("True Labels")

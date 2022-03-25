@@ -66,6 +66,7 @@ class TrentoRTrainer:
             classification_gradients=[],
         )
         self.train_loss = []
+        self.test_loss = []
 
     @property
     def temperature(self):
@@ -130,8 +131,7 @@ class TrentoRTrainer:
 
         pbar = tqdm(range(n_epochs))
         for epoch in pbar:
-            running_loss = 0.0
-            
+            running_loss = 0.0 
             for (tensor_all, tensor_superv) in zip(
                 self.train_loader, cycle(self.train_annotated_loader)
             ):
@@ -211,6 +211,77 @@ class TrentoRTrainer:
                             )
                 self.iterate += 1
             self.train_loss.append(running_loss/ len(self.train_loader))
+
+            with torch.no_grad():
+                running_loss = 0.0 
+                for tensor_all in self.test_loader:
+                    self.it += 1
+
+                    x_s, y_s = tensor_all
+
+                    x_s = x_s.to(device)
+                    y_s = y_s.to(device)
+
+                    if overall_loss is not None:
+                        loss = self.loss(
+                            x_u=x_u,
+                            x_s=x_s,
+                            y_s=y_s,
+                            loss_type=overall_loss,
+                            n_samples=n_samples,
+                            reparam=True,
+                            classification_ratio=classification_ratio,
+                            mode=update_mode,
+                        )
+                        running_loss +=loss.item()/len(x_u)
+
+                        # torch.cuda.synchronize()
+
+                        if self.iterate % 100 == 0:
+                            self.metrics["train_loss"].append(loss.item())
+                    else:
+                        # Wake theta
+                        theta_loss = self.loss(
+                            x_u=x_u,
+                            x_s=x_s,
+                            y_s=y_s,
+                            loss_type=wake_theta,
+                            n_samples=n_samples_theta,
+                            reparam=True,
+                            classification_ratio=classification_ratio,
+                            mode=update_mode,
+                        )
+
+                        if self.iterate % 100 == 0:
+                            self.metrics["train_theta_wake"].append(theta_loss.item())
+
+                        reparam_epoch = reparam_wphi
+                        wake_psi_epoch = wake_psi
+
+                        psi_loss = self.loss(
+                            x_u=x_u,
+                            x_s=x_s,
+                            y_s=y_s,
+                            loss_type=wake_psi_epoch,
+                            n_samples=n_samples_phi,
+                            reparam=reparam_epoch,
+                            classification_ratio=classification_ratio,
+                            mode=update_mode,
+                        )
+                        running_loss += psi_loss.item()/len(x_u)
+
+                        # torch.cuda.synchronize()
+                        if self.iterate % 100 == 0:
+                            self.metrics["train_phi_wake"].append(psi_loss.item())
+                            if self.debug_gradients:
+                                self.metrics["classification_gradients"].append(
+                                    self.model.classifier["default"]
+                                    .classifier[0]
+                                    .to_hidden.weight.grad.cpu()
+                                )
+                    self.iterate += 1
+                self.test_loss.append(running_loss/ len(self.test_loader))
+            
             pbar.set_description("{0:.2f}".format(theta_loss.item()))
 
     def train_eval_encoder(
@@ -408,7 +479,9 @@ class TrentoRTrainer:
 
         if mode == "all":
             outs_s = None
-            l_u = self.model.forward(
+            if x_u is None: l_u = torch.Tensor([0.0])
+            else: 
+                l_u = self.model.forward(
                 x_u,
                 temperature=temp,
                 loss_type=loss_type,
@@ -445,7 +518,9 @@ class TrentoRTrainer:
                 )
                 j = l_s.mean()
             else:
-                l_u = self.model.forward(
+                if x_u is None: l_u = torch.Tensor([0.0])
+                else:
+                    l_u = self.model.forward(
                     x_u,
                     temperature=temp,
                     loss_type=loss_type,

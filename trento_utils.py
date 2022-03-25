@@ -27,7 +27,7 @@ N_LABELS = 6
 
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
-N_EPOCHS = 100
+N_EPOCHS = 2
 LR = 1e-4
 BATCH_SIZE = 512
 DATASET = TrentoDataset(
@@ -224,6 +224,7 @@ def res_eval_loop(
         "ENTROPY": entropy,
         "CONFUSION_MATRIX": m_confusion_matrix,
         "CONFUSION_MATRIX_IS": m_confusion_matrix_is,
+        "LOSS": trainer.test_loss,
 
         "train_M_ACCURACY": train_m_accuracy,
         "train_MEAN_AP": train_m_ap,
@@ -300,7 +301,7 @@ def model_evaluation(
         "MEAN_PRECISION_IS": m_precision_is,
         "MEAN_RECALL_IS": m_recall_is,
         "CONFUSION_MATRIX_IS": m_confusion_matrix_is,
-
+        "test_LOSS": trainer.test_loss,
         "train_LOSS": trainer.train_loss,
     }
     return res

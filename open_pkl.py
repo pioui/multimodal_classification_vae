@@ -12,7 +12,7 @@ if not os.path.exists("outputs/"):
 with open('trento-relaxed_nparticules_30.pkl', 'rb') as f:
     data = pickle.load(f)
 
-print(data[['MODEL_NAME', 'encoder_type','train_M_ACCURACY','M_ACCURACY',]])
+print(data[['MODEL_NAME', 'encoder_type','M_ACCURACY',]])
 
 data_dict = data.to_dict()
 

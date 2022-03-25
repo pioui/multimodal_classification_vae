@@ -73,6 +73,7 @@ DEFAULT_MAP = dict(
     IWELBOC="gaussian",
     default="gaussian",
 )
+
 Z1_MAP = dict(gaussian=EncoderB, student=EncoderBStudent,)
 Z2_MAP = dict(gaussian=EncoderA, student=EncoderAStudent,)
 

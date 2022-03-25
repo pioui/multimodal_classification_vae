@@ -65,6 +65,7 @@ class TrentoRTrainer:
             train_cubo=[],
             classification_gradients=[],
         )
+        self.train_loss = []
 
     @property
     def temperature(self):
@@ -129,6 +130,7 @@ class TrentoRTrainer:
 
         pbar = tqdm(range(n_epochs))
         for epoch in pbar:
+            running_loss = 0.0
             
             for (tensor_all, tensor_superv) in zip(
                 self.train_loader, cycle(self.train_annotated_loader)
@@ -153,6 +155,7 @@ class TrentoRTrainer:
                         classification_ratio=classification_ratio,
                         mode=update_mode,
                     )
+                    running_loss +=loss.item()/len(x_u)
                     optim.zero_grad()
                     loss.backward()
                     optim.step()
@@ -193,6 +196,7 @@ class TrentoRTrainer:
                         classification_ratio=classification_ratio,
                         mode=update_mode,
                     )
+                    running_loss += psi_loss.item()/len(x_u)
                     optim_var_wake.zero_grad()
                     psi_loss.backward()
                     optim_var_wake.step()
@@ -205,8 +209,8 @@ class TrentoRTrainer:
                                 .classifier[0]
                                 .to_hidden.weight.grad.cpu()
                             )
-
                 self.iterate += 1
+            self.train_loss.append(running_loss/ len(self.train_loader))
             pbar.set_description("{0:.2f}".format(theta_loss.item()))
 
     def train_eval_encoder(

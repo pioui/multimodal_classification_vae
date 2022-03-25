@@ -28,7 +28,7 @@ class TrentoDataset(Dataset):
 
         assert len(labelled_proportions) == 6
         labelled_proportions = np.array(labelled_proportions)
-        assert abs(labelled_proportions.sum() - 1.0) <= 1e-16
+        assert abs(labelled_proportions.sum() - 1.0) <= 1e-5
         self.labelled_fraction = labelled_fraction
         label_proportions = labelled_fraction * labelled_proportions
 
@@ -116,7 +116,7 @@ class TrentoDataset(Dataset):
         self.train_dataset_labelled = TensorDataset(x_train_labelled, y_train_labelled) # 0 to 4
         self.test_dataset = TensorDataset(x_test, y_test) # 0 to 5
 
-# LABELLED_PROPORTIONS = np.array([1/6, 1/6, 1/6, 1/6, 1/6, 0.0])
+# LABELLED_PROPORTIONS = np.array([1/6, 1/6, 1/6, 1/6, 1/6, 1/6])
 # LABELLED_PROPORTIONS = LABELLED_PROPORTIONS / LABELLED_PROPORTIONS.sum()
 
 # LABELLED_FRACTION = 0.5

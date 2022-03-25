@@ -35,7 +35,9 @@ class TrentoDataset(Dataset):
         image_hyper = torch.tensor(tifffile.imread(data_dir+"hyper_Italy.tif")) # [63,166,600]
         image_lidar = torch.tensor(tifffile.imread(data_dir+"LiDAR_Italy.tif")) # [2,166,600]
         x = torch.cat((image_hyper,image_lidar), dim = 0) # [65,166,600]
-
+        x_all = x
+        x_all = x_all.reshape(len(x_all),-1)
+        x_all = torch.transpose(x_all, 1,0)
         # # Standarization 
         # #TODO: this can be written (more tidy) as a transform with other preprocessin' when making the dataset 
         # mean = torch.mean(x, dim = 0)
@@ -43,6 +45,8 @@ class TrentoDataset(Dataset):
         # x = (x - mean)/std # [99600,65]
 
         y = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"], dtype = torch.int64) # [166,600] 0 to 6
+        y_all = y-1
+        y_all = y_all.reshape(-1)
 
         valid_indeces = (y!=0)
         xv = x[:,valid_indeces] # [65, 30214]
@@ -115,21 +119,25 @@ class TrentoDataset(Dataset):
         self.train_dataset = TensorDataset(x_train, y_train) # 0 to 5
         self.train_dataset_labelled = TensorDataset(x_train_labelled, y_train_labelled) # 0 to 4
         self.test_dataset = TensorDataset(x_test, y_test) # 0 to 5
+        self.full_dataset = TensorDataset(x_all, y_all)
 
-# LABELLED_PROPORTIONS = np.array([1/6, 1/6, 1/6, 1/6, 1/6, 1/6])
-# LABELLED_PROPORTIONS = LABELLED_PROPORTIONS / LABELLED_PROPORTIONS.sum()
+LABELLED_PROPORTIONS = np.array([1/6, 1/6, 1/6, 1/6, 1/6, 1/6])
+LABELLED_PROPORTIONS = LABELLED_PROPORTIONS / LABELLED_PROPORTIONS.sum()
 
-# LABELLED_FRACTION = 0.5
+LABELLED_FRACTION = 0.5
 
-# DATASET = TrentoDataset(
-#     labelled_proportions=LABELLED_PROPORTIONS,
-#     labelled_fraction=LABELLED_FRACTION
-# )
-# x,y = DATASET.train_dataset.tensors # 12085
-# print(x.shape, y.shape, torch.unique(y))
+DATASET = TrentoDataset(
+    labelled_proportions=LABELLED_PROPORTIONS,
+    labelled_fraction=LABELLED_FRACTION
+)
+x,y = DATASET.train_dataset.tensors # 12085
+print(x.shape, y.shape, torch.unique(y))
 
-# x,y = DATASET.train_dataset_labelled.tensors # 6489 subset train  
-# print(x.shape, y.shape, torch.unique(y))
+x,y = DATASET.train_dataset_labelled.tensors # 6489 subset train  
+print(x.shape, y.shape, torch.unique(y))
 
-# x,y = DATASET.test_dataset.tensors # 15107
-# print(x.shape, y.shape, torch.unique(y))
+x,y = DATASET.test_dataset.tensors # 15107
+print(x.shape, y.shape, torch.unique(y))
+
+x,y = DATASET.full_dataset.tensors # 15107
+print(x.shape, y.shape, torch.unique(y))

@@ -51,6 +51,12 @@ class TrentoRTrainer:
             shuffle=False,
             pin_memory=use_cuda,
         )
+        self.full_loader = DataLoader(
+            self.dataset.full_dataset,
+            batch_size=batch_size,
+            shuffle=False,
+            pin_memory=use_cuda,
+        )
         self.cross_entropy_fn = CrossEntropyLoss()
         self.it = 0
 
@@ -211,6 +217,7 @@ class TrentoRTrainer:
                             )
                 self.iterate += 1
             self.train_loss.append(running_loss/ len(self.train_loader))
+            pbar.set_description("{0:.2f}".format(theta_loss.item()))
 
             with torch.no_grad():
                 running_loss = 0.0 

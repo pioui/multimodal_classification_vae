@@ -56,7 +56,7 @@ class TrentoDataset(Dataset):
         y = y[valid_indeces]-1 # [30214] 0 to 5
 
         #reduce the dataset size to make it easier for my pour cpu
-        ind, _ = train_test_split(np.arange(len(x)), train_size=0.2, random_state=42)
+        ind, _ = train_test_split(np.arange(len(x)), train_size=0.5, random_state=42)
         x = x[ind]
         y = y[ind]
 

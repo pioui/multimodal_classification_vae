@@ -61,7 +61,7 @@ from trento_utils import (
 device = "cuda" if torch.cuda.is_available() else "cpu"
 N_PARTICULES = 30
 N_LATENT = 10
-N_EPOCHS = 2
+N_EPOCHS = 200
 N_HIDDEN = 128
 LR = 1e-3
 N_EXPERIMENTS = 1

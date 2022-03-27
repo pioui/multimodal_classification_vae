@@ -5,6 +5,7 @@
 import os
 import logging
 from math import ceil
+import matplotlib.pyplot as plt
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
@@ -61,7 +62,7 @@ from trento_utils import (
 device = "cuda" if torch.cuda.is_available() else "cpu"
 N_PARTICULES = 30
 N_LATENT = 10
-N_EPOCHS = 200
+N_EPOCHS = 2
 N_HIDDEN = 128
 LR = 1e-3
 N_EXPERIMENTS = 1
@@ -365,11 +366,39 @@ for scenario in SCENARIOS:
                             z2_with_elbo=z2_with_elbo,
                             update_mode="all",
                         )
+                    
             except ValueError as e:
                 logger.info(e)
                 continue
             break
         torch.save(mdl.state_dict(), mdl_name)
+
+        with torch.no_grad():
+            train_res = trainer.inference(
+                trainer.full_loader,
+                keys=[
+                    "qc_z1_all_probas",
+                    "y",
+                    "log_ratios",
+                    "qc_z1",
+                    "preds_is",
+                    "preds_plugin",
+                ],
+                n_samples=N_EVAL_SAMPLES,
+            )
+        y_pred = train_res["preds_plugin"].numpy()
+        y_pred = y_pred / y_pred.sum(1, keepdims=True)
+        y_pred = y_pred.argmax(1)
+        y_true = train_res["y"].numpy()
+
+        plt.figure()
+        plt.subplot(211)
+        plt.imshow(y_pred.reshape(166,600))
+        plt.title("Predictions")
+        plt.subplot(212)
+        plt.imshow(y_true.reshape(166,600))
+        plt.title("Ground Truth")
+        plt.savefig(f"outputs/{model_name}_train_classification matrix.png")
 
         mdl.eval()
         # TODO: find something cleaner
@@ -488,6 +517,35 @@ for scenario in SCENARIOS:
                         logger.info(e)
                         continue
                     break
+                torch.save(mdl.state_dict(), mdl_name[:-3]+"tuned"+".pt")
+
+            with torch.no_grad():
+                train_res = trainer.inference(
+                    trainer.full_loader,
+                    keys=[
+                        "qc_z1_all_probas",
+                        "y",
+                        "log_ratios",
+                        "qc_z1",
+                        "preds_is",
+                        "preds_plugin",
+                    ],
+                    n_samples=N_EVAL_SAMPLES,
+                )
+            y_pred = train_res["preds_plugin"].numpy()
+            y_pred = y_pred / y_pred.sum(1, keepdims=True)
+            y_pred = y_pred.argmax(1)
+            y_true = train_res["y"].numpy()
+
+            plt.figure()
+            plt.subplot(211)
+            plt.imshow(y_pred.reshape(166,600))
+            plt.title("Predictions")
+            plt.subplot(212)
+            plt.imshow(y_true.reshape(166,600))
+            plt.title("Ground Truth")
+            plt.savefig(f"outputs/{model_name}_{eval_encoder_name}_classification matrix.png")
+
             logger.info(trainer.model.encoder_z2_z1.keys())
             loop_results_dict = model_evaluation(
                 trainer=trainer,

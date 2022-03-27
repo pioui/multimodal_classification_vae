@@ -27,7 +27,7 @@ N_LABELS = 6
 
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
-N_EPOCHS = 200
+N_EPOCHS = 2
 LR = 1e-4
 BATCH_SIZE = 512
 DATASET = TrentoDataset(
@@ -275,36 +275,36 @@ def model_evaluation(
     m_accuracy = accuracy_score(y_true, y_pred.argmax(1))
     m_confusion_matrix = confusion_matrix(y_true, y_pred.argmax(1))
 
-    with torch.no_grad():
-        train_res = trainer.inference(
-            trainer.full_loader,
-            keys=[
-                "qc_z1_all_probas",
-                "y",
-                "log_ratios",
-                "qc_z1",
-                "preds_is",
-                "preds_plugin",
-            ],
-            n_samples=N_EVAL_SAMPLES,
-            encoder_key=encoder_eval_name,
-            counts=counts_eval,
-        )
-    y_pred = train_res["preds_plugin"].numpy()
-    y_pred = y_pred / y_pred.sum(1, keepdims=True)
-    y_pred = y_pred.argmax(1)
-    y_true = train_res["y"].numpy()
+    # with torch.no_grad():
+    #     train_res = trainer.inference(
+    #         trainer.full_loader,
+    #         keys=[
+    #             "qc_z1_all_probas",
+    #             "y",
+    #             "log_ratios",
+    #             "qc_z1",
+    #             "preds_is",
+    #             "preds_plugin",
+    #         ],
+    #         n_samples=N_EVAL_SAMPLES,
+    #         encoder_key=encoder_eval_name,
+    #         counts=counts_eval,
+    #     )
+    # y_pred = train_res["preds_plugin"].numpy()
+    # y_pred = y_pred / y_pred.sum(1, keepdims=True)
+    # y_pred = y_pred.argmax(1)
+    # y_true = train_res["y"].numpy()
 
-    plt.figure()
-    plt.subplot(211)
-    plt.imshow(y_pred.reshape(166,600))
-    plt.title("Predictions")
+    # plt.figure()
+    # plt.subplot(211)
+    # plt.imshow(y_pred.reshape(166,600))
+    # plt.title("Predictions")
 
-    plt.subplot(212)
-    plt.imshow(y_true.reshape(166,600))
-    plt.title("Ground Truth")
-
-    plt.savefig("classification matrix")
+    # plt.subplot(212)
+    # plt.imshow(y_true.reshape(166,600))
+    # plt.title("Ground Truth")
+    # plt.savefig("classification matrix")
+    
     res = {
         "M_ACCURACY": m_accuracy,
         "MEAN_PRECISION": m_precision,

@@ -12,7 +12,7 @@ import random
 random.seed(42)
 logger = logging.getLogger(__name__)
 
-data_dir = "/Users/plo026/data/Trento/"
+data_dir = "/home/pigi/Documents/UiT_Internship/Trento/Trento/"
 
 class TrentoDataset(Dataset):
     def __init__(
@@ -56,7 +56,7 @@ class TrentoDataset(Dataset):
         y = y[valid_indeces]-1 # [30214] 0 to 5
 
         #reduce the dataset size to make it easier for my pour cpu
-        ind, _ = train_test_split(np.arange(len(x)), train_size=0.5, random_state=42)
+        ind, _ = train_test_split(np.arange(len(x)), train_size=0.1, random_state=42)
         x = x[ind]
         y = y[ind]
 
@@ -134,23 +134,23 @@ class TrentoDataset(Dataset):
         self.test_dataset_labelled = TensorDataset(x_test_labelled, y_test_labelled) # 0 to 5
         self.full_dataset = TensorDataset(x_all, y_all)
 
-LABELLED_PROPORTIONS = np.array([1/6, 1/6, 1/6, 1/6, 1/6, 1/6])
-LABELLED_PROPORTIONS = LABELLED_PROPORTIONS / LABELLED_PROPORTIONS.sum()
+# LABELLED_PROPORTIONS = np.array([1/6, 1/6, 1/6, 1/6, 1/6, 1/6])
+# LABELLED_PROPORTIONS = LABELLED_PROPORTIONS / LABELLED_PROPORTIONS.sum()
 
-LABELLED_FRACTION = 0.5
+# LABELLED_FRACTION = 0.5
 
-DATASET = TrentoDataset(
-    labelled_proportions=LABELLED_PROPORTIONS,
-    labelled_fraction=LABELLED_FRACTION
-)
-x,y = DATASET.train_dataset.tensors # 12085
-print(x.shape, y.shape, torch.unique(y))
+# DATASET = TrentoDataset(
+#     labelled_proportions=LABELLED_PROPORTIONS,
+#     labelled_fraction=LABELLED_FRACTION
+# )
+# x,y = DATASET.train_dataset.tensors # 12085
+# print(x.shape, y.shape, torch.unique(y))
 
-x,y = DATASET.train_dataset_labelled.tensors # 6489 subset train  
-print(x.shape, y.shape, torch.unique(y))
+# x,y = DATASET.train_dataset_labelled.tensors # 6489 subset train  
+# print(x.shape, y.shape, torch.unique(y))
 
-x,y = DATASET.test_dataset.tensors # 15107
-print(x.shape, y.shape, torch.unique(y))
+# x,y = DATASET.test_dataset.tensors # 15107
+# print(x.shape, y.shape, torch.unique(y))
 
-x,y = DATASET.full_dataset.tensors # 15107
-print(x.shape, y.shape, torch.unique(y))
+# x,y = DATASET.full_dataset.tensors # 15107
+# print(x.shape, y.shape, torch.unique(y))

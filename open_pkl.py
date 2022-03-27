@@ -30,7 +30,7 @@ for i in range(len(data_dict['LR'])):
     plt.xlabel("Epochs")
     plt.grid()
     plt.legend()
-    plt.savefig(f"outputs/{model_name}_{encoder_type}_loss.png")
+    plt.savefig(f"outputs/{model_name}_{encoder_type}_test_loss.png")
 
     plt.matshow(confusion_matrix, cmap="YlGn")
     plt.xlabel("True Labels")
@@ -38,9 +38,9 @@ for i in range(len(data_dict['LR'])):
     for k in range (len(confusion_matrix)):
         for l in range(len(confusion_matrix[k])):
             plt.text(k,l,str(confusion_matrix[k][l]), va='center', ha='center')
-    plt.title("Confusion Matrix")
+    plt.title("Test Confusion Matrix")
 
-    plt.savefig(f"outputs/{model_name}_{encoder_type}_confusion_matrix.png")
+    plt.savefig(f"outputs/{model_name}_{encoder_type}_test_confusion_matrix.png")
 
 
 

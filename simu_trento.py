@@ -6,7 +6,8 @@ import os
 import logging
 from math import ceil
 import matplotlib.pyplot as plt
-
+from matplotlib import colors
+from sklearn.metrics import confusion_matrix
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
@@ -62,7 +63,7 @@ from trento_utils import (
 device = "cuda" if torch.cuda.is_available() else "cpu"
 N_PARTICULES = 30
 N_LATENT = 10
-N_EPOCHS = 2
+N_EPOCHS = 20
 N_HIDDEN = 128
 LR = 1e-3
 N_EXPERIMENTS = 1
@@ -388,17 +389,29 @@ for scenario in SCENARIOS:
             )
         y_pred = train_res["preds_plugin"].numpy()
         y_pred = y_pred / y_pred.sum(1, keepdims=True)
-        y_pred = y_pred.argmax(1)
-        y_true = train_res["y"].numpy()
+        y_pred = y_pred.argmax(1)+1
+        y_true = train_res["y"].numpy()+1
 
         plt.figure()
         plt.subplot(211)
-        plt.imshow(y_pred.reshape(166,600))
+        plt.imshow(y_pred.reshape(166,600), cmap = colors.ListedColormap(["green", "orange", "gold", "blue", "purple","red"]))
         plt.title("Predictions")
         plt.subplot(212)
-        plt.imshow(y_true.reshape(166,600))
+        plt.imshow(y_true.reshape(166,600), cmap = colors.ListedColormap(["black","green", "orange", "gold", "blue", "purple","red"]))
         plt.title("Ground Truth")
-        plt.savefig(f"outputs/{model_name}_train_classification matrix.png")
+        plt.savefig(f"outputs/{model_name}_train_classification_matrix.png")
+
+        m_confusion_matrix = confusion_matrix(y_true, y_pred)
+
+        plt.matshow(m_confusion_matrix, cmap="YlGn")
+        plt.xlabel("True Labels")
+        plt.ylabel("Predicted Labels")
+        for k in range (len(m_confusion_matrix)):
+            for l in range(len(m_confusion_matrix[k])):
+                plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center')
+        plt.title("Total Confusion Matrix")
+
+        plt.savefig(f"outputs/{model_name}_train_total_confusion_matrix.png")
 
         mdl.eval()
         # TODO: find something cleaner
@@ -534,17 +547,29 @@ for scenario in SCENARIOS:
                 )
             y_pred = train_res["preds_plugin"].numpy()
             y_pred = y_pred / y_pred.sum(1, keepdims=True)
-            y_pred = y_pred.argmax(1)
-            y_true = train_res["y"].numpy()
+            y_pred = y_pred.argmax(1)+1
+            y_true = train_res["y"].numpy()+1
 
             plt.figure()
             plt.subplot(211)
-            plt.imshow(y_pred.reshape(166,600))
+            plt.imshow(y_pred.reshape(166,600), cmap = colors.ListedColormap(["green", "orange", "gold", "blue", "purple","red"]))
             plt.title("Predictions")
             plt.subplot(212)
-            plt.imshow(y_true.reshape(166,600))
+            plt.imshow(y_true.reshape(166,600), cmap = colors.ListedColormap(['black',"green", "orange", "gold", "blue", "purple","red"]))
             plt.title("Ground Truth")
-            plt.savefig(f"outputs/{model_name}_{eval_encoder_name}_classification matrix.png")
+            plt.savefig(f"outputs/{model_name}_ELBO_classification_matrix.png")
+            
+            m_confusion_matrix = confusion_matrix(y_true, y_pred)
+
+            plt.matshow(m_confusion_matrix, cmap="YlGn")
+            plt.xlabel("True Labels")
+            plt.ylabel("Predicted Labels")
+            for k in range (len(m_confusion_matrix)):
+                for l in range(len(m_confusion_matrix[k])):
+                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center')
+            plt.title("Total Confusion Matrix")
+
+            plt.savefig(f"outputs/{model_name}_ELBO_total_confusion_matrix.png")
 
             logger.info(trainer.model.encoder_z2_z1.keys())
             loop_results_dict = model_evaluation(

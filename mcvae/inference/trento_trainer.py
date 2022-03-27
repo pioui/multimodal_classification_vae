@@ -51,6 +51,12 @@ class TrentoRTrainer:
             shuffle=False,
             pin_memory=use_cuda,
         )
+        self.test_annotated_loader = DataLoader(
+            self.dataset.test_dataset_labelled,
+            batch_size=batch_size,
+            shuffle=False,
+            pin_memory=use_cuda,
+        )
         self.full_loader = DataLoader(
             self.dataset.full_dataset,
             batch_size=batch_size,
@@ -217,15 +223,19 @@ class TrentoRTrainer:
                             )
                 self.iterate += 1
             self.train_loss.append(running_loss/ len(self.train_loader))
+
             pbar.set_description("{0:.2f}".format(theta_loss.item()))
 
             with torch.no_grad():
-                running_loss = 0.0 
-                for tensor_all in self.test_loader:
+                running_loss = 0.0
+                for (tensor_all, tensor_superv) in zip(
+                    self.test_loader, cycle(self.test_annotated_loader)):
                     self.it += 1
 
-                    x_s, y_s = tensor_all
+                    x_u, _ = tensor_all
+                    x_s, y_s = tensor_superv
 
+                    x_u = x_u.to(device)
                     x_s = x_s.to(device)
                     y_s = y_s.to(device)
 
@@ -241,7 +251,9 @@ class TrentoRTrainer:
                             mode=update_mode,
                         )
                         running_loss +=loss.item()/len(x_u)
-
+                        optim.zero_grad()
+                        loss.backward()
+                        optim.step()
                         # torch.cuda.synchronize()
 
                         if self.iterate % 100 == 0:
@@ -258,6 +270,10 @@ class TrentoRTrainer:
                             classification_ratio=classification_ratio,
                             mode=update_mode,
                         )
+                        optim_gen.zero_grad()
+                        theta_loss.backward()
+                        optim_gen.step()
+                        # torch.cuda.synchronize()
 
                         if self.iterate % 100 == 0:
                             self.metrics["train_theta_wake"].append(theta_loss.item())
@@ -276,7 +292,9 @@ class TrentoRTrainer:
                             mode=update_mode,
                         )
                         running_loss += psi_loss.item()/len(x_u)
-
+                        optim_var_wake.zero_grad()
+                        psi_loss.backward()
+                        optim_var_wake.step()
                         # torch.cuda.synchronize()
                         if self.iterate % 100 == 0:
                             self.metrics["train_phi_wake"].append(psi_loss.item())
@@ -384,6 +402,7 @@ class TrentoRTrainer:
                     optim_vars[key].step()
                     # torch.cuda.synchronize()
                     self.iterate += 1
+                    
 
     def train_defensive(
         self,

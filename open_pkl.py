@@ -25,12 +25,17 @@ for i in range(len(data_dict['LR'])):
 
     plt.figure()
     plt.plot(train_loss, color="red")
-    plt.plot(test_loss, color="blue")
-    plt.legend()
+    plt.title("Train Loss")
     plt.xlabel("Epochs")
-    plt.title("Test and Train Loss")
     plt.grid()
-    plt.savefig(f"outputs/{model_name}_{encoder_type}_loss.png")
+    plt.savefig(f"outputs/{model_name}_{encoder_type}_train_loss.png")
+
+    plt.figure()
+    plt.plot(test_loss, color="red")
+    plt.title("Test Loss")
+    plt.xlabel("Epochs")
+    plt.grid()
+    plt.savefig(f"outputs/{model_name}_{encoder_type}_test_loss.png")
 
     plt.matshow(confusion_matrix, cmap="YlGn")
     plt.xlabel("True Labels")

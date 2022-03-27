@@ -99,10 +99,9 @@ class TrentoDataset(Dataset):
         y_train = y[ind_train]
         x_test = x[ind_test]
         y_test = y[ind_test]
-        n_all = len(x_train)
 
         # print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
-
+        n_all = len(x_train)
         n_labelled_per_class = (n_all * label_proportions).astype(int)
         labelled_inds = []
         for label in y.unique():
@@ -115,10 +114,24 @@ class TrentoDataset(Dataset):
         x_train_labelled = x_train[labelled_inds]
         y_train_labelled = y_train[labelled_inds]
 
+        n_all = len(x_test)
+        n_labelled_per_class = (n_all * label_proportions).astype(int)
+        labelled_inds = []
+        for label in y.unique():
+            label_ind = np.where(y_test == label)[0]
+            labelled_exs = np.random.choice(label_ind, size=n_labelled_per_class[label])
+            labelled_inds.append(labelled_exs)
+        labelled_inds = np.concatenate(labelled_inds)
+
+        self.labelled_inds = labelled_inds
+        x_test_labelled = x_test[labelled_inds]
+        y_test_labelled = y_test[labelled_inds]
+
         assert not (np.isin(np.unique(y_train_labelled), non_labelled)).any()
         self.train_dataset = TensorDataset(x_train, y_train) # 0 to 5
-        self.train_dataset_labelled = TensorDataset(x_train_labelled, y_train_labelled) # 0 to 4
+        self.train_dataset_labelled = TensorDataset(x_train_labelled, y_train_labelled) # 0 to 5
         self.test_dataset = TensorDataset(x_test, y_test) # 0 to 5
+        self.test_dataset_labelled = TensorDataset(x_test_labelled, y_test_labelled) # 0 to 5
         self.full_dataset = TensorDataset(x_all, y_all)
 
 LABELLED_PROPORTIONS = np.array([1/6, 1/6, 1/6, 1/6, 1/6, 1/6])

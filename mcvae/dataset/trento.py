@@ -38,6 +38,14 @@ class TrentoDataset(Dataset):
         x_all = x
         x_all = x_all.reshape(len(x_all),-1)
         x_all = torch.transpose(x_all, 1,0)
+                #Normalize to [0,1]
+        if do_preprocess: # TODO: Something more sophisticated?
+            logger.info("Normalize to 0,1")
+            x_min = x_all.min(dim=0)[0] # [65]
+            x_max = x_all.max(dim=0)[0] # [65]
+            x_all = (x_all- x_min)/(x_max-x_min)
+            assert torch.unique(x_all.min(dim=0)[0] == 0.)
+            assert torch.unique(x_all.max(dim=0)[0] == 1.)
         # # Standarization 
         # #TODO: this can be written (more tidy) as a transform with other preprocessin' when making the dataset 
         # mean = torch.mean(x, dim = 0)

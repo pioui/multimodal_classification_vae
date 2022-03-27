@@ -12,7 +12,7 @@ import random
 random.seed(42)
 logger = logging.getLogger(__name__)
 
-data_dir = "/home/pigi/Documents/UiT_Internship/Trento/Trento/"
+data_dir = "/data/Trento/"
 
 class TrentoDataset(Dataset):
     def __init__(

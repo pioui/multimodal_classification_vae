@@ -132,26 +132,20 @@ class EncoderB2(nn.Module):
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
         """  
-        65 - 5x FC 512-32 ->
+        65 - 3x FC 1024-256 ->
         """
         # TODO: describe architecture and choice for people 
         super().__init__()        
         self.encoder_cv = nn.Sequential(
-            nn.Linear(in_features=65, out_features=512),            
+            nn.Linear(in_features=65, out_features=1024),            
             nn.SELU(),
             nn.Dropout(p=dropout_rate),
-            nn.Linear(in_features=512, out_features=256),            
+            nn.Linear(in_features=1024, out_features=512),            
             nn.SELU(),
             nn.Dropout(p=dropout_rate),
-            nn.Linear(in_features=256, out_features=128),            
+            nn.Linear(in_features=512, out_features=n_hidden),            
             nn.SELU(),
             nn.Dropout(p=dropout_rate),            
-            nn.Linear(in_features=128, out_features=64),            
-            nn.SELU(),
-            nn.Dropout(p=dropout_rate),
-            nn.Linear(in_features=64, out_features=n_hidden),            
-            nn.SELU(),
-            nn.Dropout(p=dropout_rate),
         )
 
         self.mean_encoder = nn.Linear(n_hidden, n_output)
@@ -243,28 +237,20 @@ class EncoderB4(nn.Module):
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
         """  
-        65 - 5x Conv 1D 32-512 ->
+        65 - 5x Conv 1D 128-512 ->
         """
         # TODO: describe architecture and choice for people 
         super().__init__()        
         self.encoder_cv = nn.Sequential(
-            nn.Conv1d(in_channels=1, out_channels=32, kernel_size=3),
+            nn.Conv1d(in_channels=1, out_channels=128, kernel_size=9),
             nn.SELU(),
             nn.MaxPool1d(2),
             nn.Dropout(p=dropout_rate),
-            nn.Conv1d(in_channels=32, out_channels=64, kernel_size=3),
+            nn.Conv1d(in_channels=128, out_channels=256, kernel_size=9),
             nn.SELU(),
             nn.MaxPool1d(2),
             nn.Dropout(p=dropout_rate),
-            nn.Conv1d(in_channels=64, out_channels=128, kernel_size=3),
-            nn.SELU(),
-            nn.MaxPool1d(2),
-            nn.Dropout(p=dropout_rate),
-            nn.Conv1d(in_channels=128, out_channels=256, kernel_size=3),
-            nn.SELU(),
-            nn.MaxPool1d(2),
-            nn.Dropout(p=dropout_rate),
-            nn.Conv1d(in_channels=256, out_channels=n_hidden, kernel_size=1),
+            nn.Conv1d(in_channels=256, out_channels=n_hidden, kernel_size=9),
             nn.SELU(),
             nn.MaxPool1d(2),
             nn.Dropout(p=dropout_rate),

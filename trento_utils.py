@@ -27,7 +27,7 @@ N_LABELS = 6
 
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
-N_EPOCHS = 2
+N_EPOCHS = 10
 LR = 3e-4
 BATCH_SIZE = 512
 DATASET = TrentoDataset(
@@ -43,6 +43,16 @@ Y_SAMPLE = Y_TRAIN[RDM_INDICES].to(device)
 DO_OVERALL = True
 
 # Utils functions
+def compute_reject_label(y_pred_prob, threshold):
+    y_pred = y_pred_prob.argmax(1)+1
+
+    max_prob = y_pred_prob.max(1)
+
+    reject_idx = (max_prob<threshold)
+    y_pred[reject_idx]=0
+
+    return y_pred
+
 def compute_reject_score(y_true: np.ndarray, y_pred: np.ndarray, num=20):
     """
         Computes precision recall properties for the discovery label using

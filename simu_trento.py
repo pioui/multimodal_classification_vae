@@ -39,33 +39,41 @@ from mcvae.models.trento_encoders import (
     EncoderB4,
 
 )
-
-from trento_utils import (
-    NUM,
-    LABELLED_PROPORTIONS,
+from trento_config import (
+    data_dir,
+    outputs_dir,
     LABELLED_FRACTION,
-    N_INPUT,
-    N_LABELS,
+    LABELLED_PROPORTIONS,
+    N_PARTICULES,
+    N_LATENT,
+    N_EPOCHS,
+    N_HIDDEN,
+    LR,
+    N_EXPERIMENTS,
+    BATCH_SIZE,
     CLASSIFICATION_RATIO,
     N_EVAL_SAMPLES,
-    BATCH_SIZE,
-    DATASET,
-    X_TRAIN,
-    Y_TRAIN,
-    RDM_INDICES,
-    X_SAMPLE,
-    Y_SAMPLE,
-    DO_OVERALL,
-    res_eval_loop,
+    N_INPUT,
+    N_LABELS,
+    TEST_SIZE,
+    TOTAL_SIZE,
+
+)
+from trento_utils import (
     model_evaluation,
 )
+
+DATASET = TrentoDataset(
+    data_dir = data_dir,
+    labelled_fraction=LABELLED_FRACTION,
+    labelled_proportions=LABELLED_PROPORTIONS,
+    do_1d=True,
+    test_size=TEST_SIZE,
+    total_size = TOTAL_SIZE,
+)
+
 device = "cuda" if torch.cuda.is_available() else "cpu"
-N_PARTICULES = 30
-N_LATENT = 10
-N_EPOCHS = 10
-N_HIDDEN = 128
-LR = 1e-3
-N_EXPERIMENTS = 1
+
 DEFAULT_MAP = dict(
     REVKL="gaussian",
     CUBO="student",
@@ -78,13 +86,15 @@ DEFAULT_MAP = dict(
 Z1_MAP = dict(gaussian=EncoderB, student=EncoderBStudent,)
 Z2_MAP = dict(gaussian=EncoderA, student=EncoderAStudent,)
 
-PROJECT_NAME = "trento-relaxed_nparticules_{}".format(N_PARTICULES)
-FILENAME = "{}.pkl".format(PROJECT_NAME)
-MDL_DIR = "models/{}".format(PROJECT_NAME)
+PROJECT_NAME = "trento"
+FILENAME = f"{outputs_dir}/{PROJECT_NAME}.pkl"
+MDL_DIR = f"models/{PROJECT_NAME}"
 DEBUG = False
 
 if not os.path.exists(MDL_DIR):
     os.makedirs(MDL_DIR)
+if not os.path.exists(outputs_dir):
+    os.makedirs(outputs_dir)
 
 logger = logging.getLogger(__name__)
 
@@ -587,7 +597,7 @@ for scenario in SCENARIOS:
             )
         y_pred = train_res["preds_plugin"].numpy()
         y_pred = y_pred / y_pred.sum(1, keepdims=True)
-        np.save(f"outputs/{model_name}.npy", y_pred)
+        np.save(f"{outputs_dir}{model_name}.npy", y_pred)
 
 
 
@@ -725,7 +735,7 @@ for scenario in SCENARIOS:
                 )
             y_pred = train_res["preds_plugin"].numpy()
             y_pred = y_pred / y_pred.sum(1, keepdims=True)
-            np.save(f"outputs/{model_name}_tuned.npy", y_pred)
+            np.save(f"{outputs_dir}{model_name}_tuned.npy", y_pred)
 
             logger.info(trainer.model.encoder_z2_z1.keys())
             loop_results_dict = model_evaluation(

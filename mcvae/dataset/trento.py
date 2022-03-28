@@ -12,11 +12,11 @@ import random
 random.seed(42)
 logger = logging.getLogger(__name__)
 
-data_dir = "/Users/plo026/data/Trento/"
 
 class TrentoDataset(Dataset):
     def __init__(
         self,
+        data_dir,
         labelled_fraction,
         labelled_proportions,
         test_size=0.7,

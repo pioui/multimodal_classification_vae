@@ -12,7 +12,7 @@ import random
 random.seed(42)
 logger = logging.getLogger(__name__)
 
-data_dir = "/data/Trento/"
+data_dir = "/Users/plo026/data/Trento/"
 
 class TrentoDataset(Dataset):
     def __init__(
@@ -64,7 +64,7 @@ class TrentoDataset(Dataset):
         y = y[valid_indeces]-1 # [30214] 0 to 5
 
         #reduce the dataset size to make it easier for my pour cpu
-        ind, _ = train_test_split(np.arange(len(x)), train_size=0.17, random_state=42)
+        ind, _ = train_test_split(np.arange(len(x)), train_size=0.1, random_state=42)
         x = x[ind]
         y = y[ind]
 

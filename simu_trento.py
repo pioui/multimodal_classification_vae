@@ -7,6 +7,8 @@ import logging
 from math import ceil
 import matplotlib.pyplot as plt
 from matplotlib import colors
+import matplotlib.patches as mpatches
+
 from sklearn.metrics import confusion_matrix
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
@@ -60,7 +62,7 @@ from trento_utils import (
 device = "cuda" if torch.cuda.is_available() else "cpu"
 N_PARTICULES = 30
 N_LATENT = 10
-N_EPOCHS = 100
+N_EPOCHS = 2
 N_HIDDEN = 128
 LR = 1e-3
 N_EXPERIMENTS = 1
@@ -97,22 +99,22 @@ EVAL_ENCODERS = [
 ]
 
 SCENARIOS = [  # WAKE updates
-    dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        model_name="EncoderB0_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB0( 
-                n_input=N_INPUT,
-                n_output=N_LATENT,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-    ),
+    # dict(
+    #     loss_gen="ELBO",
+    #     loss_wvar="ELBO",
+    #     reparam_latent=True,
+    #     counts=None,
+    #     model_name="EncoderB0_VAE",
+    #     encoder_z1=nn.ModuleDict(
+    #         {"default": EncoderB0( 
+    #             n_input=N_INPUT,
+    #             n_output=N_LATENT,
+    #             n_hidden=128,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #         )}
+    #     ),
+    # ),
 
     dict(
         loss_gen="ELBO",
@@ -131,57 +133,57 @@ SCENARIOS = [  # WAKE updates
         ),
     ),
 
-    dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        model_name="EncoderB2_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB2( 
-                n_input=N_INPUT,
-                n_output=N_LATENT,
-                n_hidden=32,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-        batch_size=128,
-    ),
+    # dict(
+    #     loss_gen="ELBO",
+    #     loss_wvar="ELBO",
+    #     reparam_latent=True,
+    #     counts=None,
+    #     model_name="EncoderB2_VAE",
+    #     encoder_z1=nn.ModuleDict(
+    #         {"default": EncoderB2( 
+    #             n_input=N_INPUT,
+    #             n_output=N_LATENT,
+    #             n_hidden=32,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #         )}
+    #     ),
+    #     batch_size=128,
+    # ),
 
-        dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        model_name="EncoderB3_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB3( 
-                n_input=N_INPUT,
-                n_output=N_LATENT,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-    ),
+    #     dict(
+    #     loss_gen="ELBO",
+    #     loss_wvar="ELBO",
+    #     reparam_latent=True,
+    #     counts=None,
+    #     model_name="EncoderB3_VAE",
+    #     encoder_z1=nn.ModuleDict(
+    #         {"default": EncoderB3( 
+    #             n_input=N_INPUT,
+    #             n_output=N_LATENT,
+    #             n_hidden=128,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #         )}
+    #     ),
+    # ),
 
-        dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        model_name="EncoderB4_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB4( 
-                n_input=N_INPUT,
-                n_output=N_LATENT,
-                n_hidden=512,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-    ),
+    #     dict(
+    #     loss_gen="ELBO",
+    #     loss_wvar="ELBO",
+    #     reparam_latent=True,
+    #     counts=None,
+    #     model_name="EncoderB4_VAE",
+    #     encoder_z1=nn.ModuleDict(
+    #         {"default": EncoderB4( 
+    #             n_input=N_INPUT,
+    #             n_output=N_LATENT,
+    #             n_hidden=512,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #         )}
+    #     ),
+    # ),
 ]
 
 DF_LI = []
@@ -316,29 +318,9 @@ for scenario in SCENARIOS:
             )
         y_pred = train_res["preds_plugin"].numpy()
         y_pred = y_pred / y_pred.sum(1, keepdims=True)
-        y_pred = y_pred.argmax(1)+1
-        y_true = train_res["y"].numpy()+1
+        np.save(f"outputs/{model_name}.npy", y_pred)
 
-        plt.figure()
-        plt.subplot(211)
-        plt.imshow(y_pred.reshape(166,600), cmap = colors.ListedColormap(["green", "orange", "gold", "blue", "purple","red"]))
-        plt.title("Predictions")
-        plt.subplot(212)
-        plt.imshow(y_true.reshape(166,600), cmap = colors.ListedColormap(["black","green", "orange", "gold", "blue", "purple","red"]))
-        plt.title("Ground Truth")
-        plt.savefig(f"outputs/{model_name}_train_classification_matrix.png")
 
-        m_confusion_matrix = confusion_matrix(y_true, y_pred)
-
-        plt.matshow(m_confusion_matrix, cmap="YlGn")
-        plt.xlabel("True Labels")
-        plt.ylabel("Predicted Labels")
-        for k in range (len(m_confusion_matrix)):
-            for l in range(len(m_confusion_matrix[k])):
-                plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center')
-        plt.title("Total Confusion Matrix")
-
-        plt.savefig(f"outputs/{model_name}_train_total_confusion_matrix.png")
 
         mdl.eval()
         # TODO: find something cleaner
@@ -474,29 +456,7 @@ for scenario in SCENARIOS:
                 )
             y_pred = train_res["preds_plugin"].numpy()
             y_pred = y_pred / y_pred.sum(1, keepdims=True)
-            y_pred = y_pred.argmax(1)+1
-            y_true = train_res["y"].numpy()+1
-
-            plt.figure()
-            plt.subplot(211)
-            plt.imshow(y_pred.reshape(166,600), cmap = colors.ListedColormap(["green", "orange", "gold", "blue", "purple","red"]))
-            plt.title("Predictions")
-            plt.subplot(212)
-            plt.imshow(y_true.reshape(166,600), cmap = colors.ListedColormap(['black',"green", "orange", "gold", "blue", "purple","red"]))
-            plt.title("Ground Truth")
-            plt.savefig(f"outputs/{model_name}_ELBO_classification_matrix.png")
-            
-            m_confusion_matrix = confusion_matrix(y_true, y_pred)
-
-            plt.matshow(m_confusion_matrix, cmap="YlGn")
-            plt.xlabel("True Labels")
-            plt.ylabel("Predicted Labels")
-            for k in range (len(m_confusion_matrix)):
-                for l in range(len(m_confusion_matrix[k])):
-                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center')
-            plt.title("Total Confusion Matrix")
-
-            plt.savefig(f"outputs/{model_name}_ELBO_total_confusion_matrix.png")
+            np.save(f"outputs/{model_name}_tuned.npy", y_pred)
 
             logger.info(trainer.model.encoder_z2_z1.keys())
             loop_results_dict = model_evaluation(

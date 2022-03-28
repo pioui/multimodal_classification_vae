@@ -20,6 +20,7 @@ class TrentoDataset(Dataset):
         labelled_fraction,
         labelled_proportions,
         test_size=0.7,
+        total_size = 0.17,
         do_1d=False,
         do_preprocess=True,
         # **kwargs
@@ -64,7 +65,7 @@ class TrentoDataset(Dataset):
         y = y[valid_indeces]-1 # [30214] 0 to 5
 
         #reduce the dataset size to make it easier for my pour cpu
-        ind, _ = train_test_split(np.arange(len(x)), train_size=0.1, random_state=42)
+        ind, _ = train_test_split(np.arange(len(x)), train_size=total_size, random_state=42)
         x = x[ind]
         y = y[ind]
 

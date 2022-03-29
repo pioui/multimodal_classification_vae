@@ -718,7 +718,7 @@ for scenario in SCENARIOS:
                         logger.info(e)
                         continue
                     break
-                torch.save(mdl.state_dict(), mdl_name[:-3]+"ELBO"+".pt")
+                torch.save(mdl.state_dict(), mdl_name[:-3]+"train"+".pt")
 
             with torch.no_grad():
                 train_res = trainer.inference(

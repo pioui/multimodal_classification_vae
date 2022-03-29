@@ -39,7 +39,8 @@ class TrentoDataset(Dataset):
         x_all = x
         x_all = x_all.reshape(len(x_all),-1)
         x_all = torch.transpose(x_all, 1,0)
-                #Normalize to [0,1]
+        
+        #Normalize to [0,1]
         if do_preprocess: # TODO: Something more sophisticated?
             logger.info("Normalize to 0,1")
             x_min = x_all.min(dim=0)[0] # [65]
@@ -47,11 +48,6 @@ class TrentoDataset(Dataset):
             x_all = (x_all- x_min)/(x_max-x_min)
             assert torch.unique(x_all.min(dim=0)[0] == 0.)
             assert torch.unique(x_all.max(dim=0)[0] == 1.)
-        # # Standarization 
-        # #TODO: this can be written (more tidy) as a transform with other preprocessin' when making the dataset 
-        # mean = torch.mean(x, dim = 0)
-        # std= torch.std(x, dim = 0)
-        # x = (x - mean)/std # [99600,65]
 
         y = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"], dtype = torch.int64) # [166,600] 0 to 6
         y_all = y-1
@@ -79,9 +75,6 @@ class TrentoDataset(Dataset):
         if len(non_labelled) >= 1:
             y[np.isin(y, non_labelled)] = int(non_labelled[0])
 
-
-        # print(torch.unique(y), torch.max(x), torch.min(x), x.shape, y.shape)
-
         #Normalize to [0,1]
         if do_preprocess: # TODO: Something more sophisticated?
             logger.info("Normalize to 0,1")
@@ -95,8 +88,6 @@ class TrentoDataset(Dataset):
             n_examples = len(x)
             x = x.view(n_examples, -1)
         
-        # print(torch.unique(y), torch.max(x), torch.min(x), x.shape, y.shape)
-
         if test_size > 0.0:
             ind_train, ind_test = train_test_split(
                 np.arange(len(x)), test_size=test_size, random_state=42
@@ -109,7 +100,6 @@ class TrentoDataset(Dataset):
         x_test = x[ind_test]
         y_test = y[ind_test]
 
-        # print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
         n_all = len(x_train)
         n_labelled_per_class = (n_all * label_proportions).astype(int)
         labelled_inds = []

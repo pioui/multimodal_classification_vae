@@ -2,7 +2,7 @@ import numpy as np
 import logging
 import os
 
-data_dir = "/home/plo026/data/Trento/"
+data_dir = "/Users/plo026/data/Trento/"
 outputs_dir = "outputs/"
 labels = ["Unknown", "Apple Trees", "Buildings", "Ground", "Wood", "Vineyard", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]

@@ -12,13 +12,14 @@ from trento_config import (
     labels,
     color,
     data_dir,
-    images_dir
+    images_dir,
+    outputs_dir,
 )
 
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
 
-with open(f"{images_dir}trento.pkl", 'rb') as f:
+with open(f"{outputs_dir}trento.pkl", 'rb') as f:
     data = pickle.load(f)
 
 print(data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]])
@@ -59,23 +60,24 @@ for i in range(len(data_dict['LR'])):
 y = np.array(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"]) # [166,600] 0 to 6
 y_true = y.reshape(-1)
 
-for subdir, dir, files in os.walk(images_dir):
+for subdir, dir, files in os.walk(outputs_dir):
     for file in files:
         if os.path.splitext(file)[-1].lower()=='.npy':
             model_name = file[:-4]
 
-            y_pred_prob = np.load(os.path.join(images_dir,file))
+            y_pred_prob = np.load(os.path.join(outputs_dir,file))
             y_pred = y_pred_prob.argmax(1)+1
             
             plt.figure()
             plt.subplot(211)
-            plt.imshow(y_pred.reshape(166,600), interpolation='nearest', cmap = colors.ListedColormap(color[1:]))
-            plt.axis('off')
-            plt.title("Predictions")
-            plt.subplot(212)
             plt.imshow(y_true.reshape(166,600), interpolation='nearest', cmap = colors.ListedColormap(color))
             plt.axis('off')
             plt.title("Ground Truth")
+            plt.subplot(212)
+            plt.imshow(y_pred.reshape(166,600), interpolation='nearest', cmap = colors.ListedColormap(color[1:]))
+            plt.axis('off')
+            plt.title("Predictions")
+
             handles = []
             for c,l in zip(color, labels):
                 handles.append(mpatches.Patch(color=c, label=l))
@@ -96,7 +98,7 @@ for subdir, dir, files in os.walk(images_dir):
             plt.title("Total Confusion Matrix")
             plt.savefig(f"{images_dir}{model_name}_total_confusion_matrix.png",bbox_inches='tight')
 
-            y_pred = compute_reject_label(y_pred_prob, threshold=0.5)
+            y_pred = compute_reject_label(y_pred_prob, threshold=0.7)
 
             plt.figure()
             plt.subplot(211)
@@ -126,5 +128,6 @@ for subdir, dir, files in os.walk(images_dir):
                     plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center')
             plt.title("Total Confusion Matrix")
             plt.savefig(f"{images_dir}{model_name}_reject_total_confusion_matrix.png",bbox_inches='tight')
+
 
 

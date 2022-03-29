@@ -12,14 +12,15 @@ import random
 random.seed(42)
 logger = logging.getLogger(__name__)
 
-data_dir = "/Users/plo026/data/Trento/"
 
 class TrentoDataset(Dataset):
     def __init__(
         self,
+        data_dir,
         labelled_fraction,
         labelled_proportions,
         test_size=0.7,
+        total_size = 0.17,
         do_1d=False,
         do_preprocess=True,
         # **kwargs
@@ -35,7 +36,17 @@ class TrentoDataset(Dataset):
         image_hyper = torch.tensor(tifffile.imread(data_dir+"hyper_Italy.tif")) # [63,166,600]
         image_lidar = torch.tensor(tifffile.imread(data_dir+"LiDAR_Italy.tif")) # [2,166,600]
         x = torch.cat((image_hyper,image_lidar), dim = 0) # [65,166,600]
-
+        x_all = x
+        x_all = x_all.reshape(len(x_all),-1)
+        x_all = torch.transpose(x_all, 1,0)
+                #Normalize to [0,1]
+        if do_preprocess: # TODO: Something more sophisticated?
+            logger.info("Normalize to 0,1")
+            x_min = x_all.min(dim=0)[0] # [65]
+            x_max = x_all.max(dim=0)[0] # [65]
+            x_all = (x_all- x_min)/(x_max-x_min)
+            assert torch.unique(x_all.min(dim=0)[0] == 0.)
+            assert torch.unique(x_all.max(dim=0)[0] == 1.)
         # # Standarization 
         # #TODO: this can be written (more tidy) as a transform with other preprocessin' when making the dataset 
         # mean = torch.mean(x, dim = 0)
@@ -43,6 +54,8 @@ class TrentoDataset(Dataset):
         # x = (x - mean)/std # [99600,65]
 
         y = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"], dtype = torch.int64) # [166,600] 0 to 6
+        y_all = y-1
+        y_all = y_all.reshape(-1)
 
         valid_indeces = (y!=0)
         xv = x[:,valid_indeces] # [65, 30214]
@@ -52,7 +65,7 @@ class TrentoDataset(Dataset):
         y = y[valid_indeces]-1 # [30214] 0 to 5
 
         #reduce the dataset size to make it easier for my pour cpu
-        ind, _ = train_test_split(np.arange(len(x)), train_size=0.17, random_state=42)
+        ind, _ = train_test_split(np.arange(len(x)), train_size=total_size, random_state=42)
         x = x[ind]
         y = y[ind]
 
@@ -95,10 +108,9 @@ class TrentoDataset(Dataset):
         y_train = y[ind_train]
         x_test = x[ind_test]
         y_test = y[ind_test]
-        n_all = len(x_train)
 
         # print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
-
+        n_all = len(x_train)
         n_labelled_per_class = (n_all * label_proportions).astype(int)
         labelled_inds = []
         for label in y.unique():
@@ -111,10 +123,25 @@ class TrentoDataset(Dataset):
         x_train_labelled = x_train[labelled_inds]
         y_train_labelled = y_train[labelled_inds]
 
+        n_all = len(x_test)
+        n_labelled_per_class = (n_all * label_proportions).astype(int)
+        labelled_inds = []
+        for label in y.unique():
+            label_ind = np.where(y_test == label)[0]
+            labelled_exs = np.random.choice(label_ind, size=n_labelled_per_class[label])
+            labelled_inds.append(labelled_exs)
+        labelled_inds = np.concatenate(labelled_inds)
+
+        self.labelled_inds = labelled_inds
+        x_test_labelled = x_test[labelled_inds]
+        y_test_labelled = y_test[labelled_inds]
+
         assert not (np.isin(np.unique(y_train_labelled), non_labelled)).any()
         self.train_dataset = TensorDataset(x_train, y_train) # 0 to 5
-        self.train_dataset_labelled = TensorDataset(x_train_labelled, y_train_labelled) # 0 to 4
+        self.train_dataset_labelled = TensorDataset(x_train_labelled, y_train_labelled) # 0 to 5
         self.test_dataset = TensorDataset(x_test, y_test) # 0 to 5
+        self.test_dataset_labelled = TensorDataset(x_test_labelled, y_test_labelled) # 0 to 5
+        self.full_dataset = TensorDataset(x_all, y_all)
 
 # LABELLED_PROPORTIONS = np.array([1/6, 1/6, 1/6, 1/6, 1/6, 1/6])
 # LABELLED_PROPORTIONS = LABELLED_PROPORTIONS / LABELLED_PROPORTIONS.sum()
@@ -132,4 +159,7 @@ class TrentoDataset(Dataset):
 # print(x.shape, y.shape, torch.unique(y))
 
 # x,y = DATASET.test_dataset.tensors # 15107
+# print(x.shape, y.shape, torch.unique(y))
+
+# x,y = DATASET.full_dataset.tensors # 15107
 # print(x.shape, y.shape, torch.unique(y))

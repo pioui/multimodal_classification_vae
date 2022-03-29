@@ -94,7 +94,6 @@ ENV/
 
 
 #model  data
-models/
 *.pkl
 *.pt
 

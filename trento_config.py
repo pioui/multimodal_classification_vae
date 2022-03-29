@@ -2,7 +2,7 @@ import numpy as np
 import logging
 import os
 
-data_dir = "/Users/plo026/data/Trento/"
+data_dir = "/home/plo026/data/Trento/"
 outputs_dir = "outputs/"
 labels = ["Unknown", "Apple Trees", "Buildings", "Ground", "Wood", "Vineyard", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
@@ -31,5 +31,5 @@ if not os.path.exists(outputs_dir):
 
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
-    
+
 logging.basicConfig(filename = f'{outputs_dir}trento_logs.log',level=logging.DEBUG)

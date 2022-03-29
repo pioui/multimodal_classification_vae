@@ -718,7 +718,7 @@ for scenario in SCENARIOS:
                         logger.info(e)
                         continue
                     break
-                torch.save(mdl.state_dict(), mdl_name[:-3]+"tuned"+".pt")
+                torch.save(mdl.state_dict(), mdl_name[:-3]+"ELBO"+".pt")
 
             with torch.no_grad():
                 train_res = trainer.inference(
@@ -735,7 +735,7 @@ for scenario in SCENARIOS:
                 )
             y_pred = train_res["preds_plugin"].numpy()
             y_pred = y_pred / y_pred.sum(1, keepdims=True)
-            np.save(f"{outputs_dir}{model_name}_tuned.npy", y_pred)
+            np.save(f"{outputs_dir}{model_name}_ELBO.npy", y_pred)
 
             logger.info(trainer.model.encoder_z2_z1.keys())
             loop_results_dict = model_evaluation(

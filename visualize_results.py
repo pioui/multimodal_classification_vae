@@ -67,16 +67,21 @@ for subdir, dir, files in os.walk(outputs_dir):
 
             y_pred_prob = np.load(os.path.join(outputs_dir,file))
             y_pred = y_pred_prob.argmax(1)+1
-            
+            y_pred_reject = compute_reject_label(y_pred_prob, threshold=0.7)
+
             plt.figure()
-            plt.subplot(211)
+            plt.subplot(311)
             plt.imshow(y_true.reshape(166,600), interpolation='nearest', cmap = colors.ListedColormap(color))
             plt.axis('off')
             plt.title("Ground Truth")
-            plt.subplot(212)
+            plt.subplot(312)
             plt.imshow(y_pred.reshape(166,600), interpolation='nearest', cmap = colors.ListedColormap(color[1:]))
             plt.axis('off')
             plt.title("Predictions")
+            plt.subplot(313)
+            plt.imshow(y_pred_reject.reshape(166,600), interpolation='nearest', cmap = colors.ListedColormap(color))
+            plt.axis('off')
+            plt.title("Predictions with Uknown Class")
 
             handles = []
             for c,l in zip(color, labels):
@@ -98,24 +103,7 @@ for subdir, dir, files in os.walk(outputs_dir):
             plt.title("Total Confusion Matrix")
             plt.savefig(f"{images_dir}{model_name}_total_confusion_matrix.png",bbox_inches='tight')
 
-            y_pred = compute_reject_label(y_pred_prob, threshold=0.7)
-
-            plt.figure()
-            plt.subplot(211)
-            plt.imshow(y_pred.reshape(166,600), interpolation='nearest', cmap = colors.ListedColormap(color))
-            plt.axis('off')
-            plt.title("Predictions")
-            plt.subplot(212)
-            plt.imshow(y_true.reshape(166,600), interpolation='nearest', cmap = colors.ListedColormap(color))
-            plt.axis('off')
-            plt.title("Ground Truth")
-            handles = []
-            for c,l in zip(color, labels):
-                handles.append(mpatches.Patch(color=c, label=l))
-            plt.legend(handles=handles, loc='lower center', prop={'size':10}, bbox_to_anchor=(0.5,-0.55), ncol=4, borderaxespad=0.)
-            plt.savefig(f"{images_dir}{model_name}_reject_classification_matrix.png",bbox_inches='tight')
-
-            m_confusion_matrix = confusion_matrix(y_true, y_pred)
+            m_confusion_matrix = confusion_matrix(y_true, y_pred_reject)
             m_confusion_matrix = m_confusion_matrix[1:,1:]
             plt.figure()
             plt.matshow(m_confusion_matrix, cmap="YlGn")

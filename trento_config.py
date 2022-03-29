@@ -7,7 +7,7 @@ outputs_dir = "outputs/"
 labels = ["Unknown", "Apple Trees", "Buildings", "Ground", "Wood", "Vineyard", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
 
-N_EPOCHS = 10
+N_EPOCHS = 200
 LR = 1e-3
 N_PARTICULES = 30
 N_LATENT = 10
@@ -23,7 +23,7 @@ CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 512
 TEST_SIZE = 0.5
-TOTAL_SIZE = 0.1
+TOTAL_SIZE = 0.17
 
 if not os.path.exists(outputs_dir):
     os.makedirs(outputs_dir)

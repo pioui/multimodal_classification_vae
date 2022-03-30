@@ -4,7 +4,7 @@ import os
 
 data_dir = "/Users/plo026/data/Trento/"
 outputs_dir = "outputs/"
-labels = ["Unknown", "Apple Trees", "Buildings", "Ground", "Wood", "Vineyard", "Roads"]
+labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
 images_dir =  "images/"
 

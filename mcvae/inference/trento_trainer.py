@@ -223,6 +223,7 @@ class TrentoRTrainer:
                                 .to_hidden.weight.grad.cpu()
                             )
                 self.iterate += 1
+            logger.info(f"Train Loss: {running_loss/ len(self.train_loader)}")
             self.train_loss.append(running_loss/ len(self.train_loader))
 
             pbar.set_description("{0:.2f}".format(theta_loss.item()))
@@ -282,7 +283,8 @@ class TrentoRTrainer:
                         )
                         running_loss += psi_loss.item()/len(x_u)
             self.test_loss.append(running_loss/ len(self.test_loader))
-            
+            logger.info(f"Test Loss: {running_loss/ len(self.test_loader)}")
+
 
         
     def train_eval_encoder(
@@ -382,6 +384,7 @@ class TrentoRTrainer:
                     # torch.cuda.synchronize()
                     self.iterate += 1
             self.train_loss.append(running_loss/ len(self.train_loader))
+            logger.info(f"Train Loss: {running_loss/ len(self.train_loss)}")
 
 
             with torch.no_grad():
@@ -419,6 +422,7 @@ class TrentoRTrainer:
                         running_loss +=psi_loss.item()/len(x_u)
                         # torch.cuda.synchronize()
             self.test_loss.append(running_loss/ len(self.test_loader))
+            logger.info(f"Test Loss: {running_loss/ len(self.test_loss)}")
 
 
 
@@ -512,6 +516,7 @@ class TrentoRTrainer:
                     var_loss.backward()
                     optim_vars[key].step()
             self.train_loss.append(running_loss/ len(self.train_loader))
+            logger.info(f"Train Loss: {running_loss/ len(self.train_loss)}")
             self.iterate += 1
 
             with torch.no_grad():
@@ -559,6 +564,7 @@ class TrentoRTrainer:
                         running_loss +=var_loss.item()/len(x_u)
 
             self.test_loss.append(running_loss/ len(self.test_loader))
+            logger.info(f"Test Loss: {running_loss/ len(self.test_loader)}")
 
     def loss(
         self,

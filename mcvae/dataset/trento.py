@@ -11,6 +11,7 @@ import random
 import matplotlib.pyplot as plt
 random.seed(42)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class TrentoDataset(Dataset):
@@ -89,7 +90,7 @@ class TrentoDataset(Dataset):
         plt.savefig("images/lidar_distribution.png")
 
         x_test_labelled, _, y_test_labelled, _ = train_test_split(x_test, y_test, train_size= 0.9, stratify = y_test)
-        
+
         self.labelled_fraction = len(y_train_labelled)/len(y_train)
         self.train_dataset = TensorDataset(x_train, y_train-1) # 0 to 5
         self.train_dataset_labelled = TensorDataset(x_train_labelled, y_train_labelled-1) # 0 to 5

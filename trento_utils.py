@@ -17,6 +17,7 @@ from trento_config import (
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 np.random.seed(42)
 

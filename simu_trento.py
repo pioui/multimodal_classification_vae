@@ -92,6 +92,7 @@ if not os.path.exists(outputs_dir):
     os.makedirs(outputs_dir)
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 logger.info("train all examples {}".format(len(DATASET.train_dataset.tensors[0])))

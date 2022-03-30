@@ -14,6 +14,8 @@ from tqdm.auto import tqdm
 from mcvae.dataset import TrentoDataset
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class TrentoRTrainer:

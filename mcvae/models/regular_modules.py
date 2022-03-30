@@ -10,6 +10,8 @@ import torch.distributions as db
 from mcvae.models.distributions import EllipticalStudent
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class FCLayersA(nn.Module):

@@ -104,7 +104,7 @@ for subdir, dir, files in os.walk(outputs_dir):
             handles = []
             for c,l in zip(color, labels):
                 handles.append(mpatches.Patch(color=c, label=l))
-            plt.legend(handles=handles, loc='lower center', prop={'size':10}, bbox_to_anchor=(0.5,-1), ncol=3, borderaxespad=0.)
+            plt.legend(handles=handles, fontsize = 6, loc='lower center', prop={'size':10}, bbox_to_anchor=(0.5,-1), ncol=3, borderaxespad=0.)
             plt.savefig(f"{images_dir}{model_name}_classification_matrix.png",bbox_inches='tight')
 
             m_confusion_matrix = confusion_matrix(y_true, y_pred)

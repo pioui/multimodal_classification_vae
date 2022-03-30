@@ -114,7 +114,7 @@ SCENARIOS = [  # WAKE updates
         loss_wvar="ELBO",
         reparam_latent=True,
         counts=None,
-        model_name="EncoderB0_L5_VAE",
+        model_name="EncoderB0_L05_VAE",
         n_latent = 5,
         encoder_z1=nn.ModuleDict(
             {"default": EncoderB0( 
@@ -185,7 +185,7 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent =5,
-        model_name="EncoderB1_L5_VAE",
+        model_name="EncoderB1_L05_VAE",
         encoder_z1=nn.ModuleDict(
             {"default": EncoderB1( 
                 n_input=N_INPUT,
@@ -256,7 +256,7 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=5,
-        model_name="EncoderB2_L5_VAE",
+        model_name="EncoderB2_L05_VAE",
         encoder_z1=nn.ModuleDict(
             {"default": EncoderB2( 
                 n_input=N_INPUT,
@@ -330,7 +330,7 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=5,
-        model_name="EncoderB3_L5_VAE",
+        model_name="EncoderB3_L05_VAE",
         encoder_z1=nn.ModuleDict(
             {"default": EncoderB3( 
                 n_input=N_INPUT,
@@ -400,7 +400,7 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=5,
-        model_name="EncoderB4_L5_VAE",
+        model_name="EncoderB4_L05_VAE",
         encoder_z1=nn.ModuleDict(
             {"default": EncoderB4( 
                 n_input=N_INPUT,

@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import logging
 import random
-
+import matplotlib.pyplot as plt
 random.seed(42)
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,8 @@ class TrentoDataset(Dataset):
         x_all = x
         x_all = x_all.reshape(len(x_all),-1)
         x_all = torch.transpose(x_all, 1,0)
-                #Normalize to [0,1]
+        
+        #Normalize to [0,1]
         if do_preprocess: # TODO: Something more sophisticated?
             logger.info("Normalize to 0,1")
             x_min = x_all.min(dim=0)[0] # [65]
@@ -47,11 +48,6 @@ class TrentoDataset(Dataset):
             x_all = (x_all- x_min)/(x_max-x_min)
             assert torch.unique(x_all.min(dim=0)[0] == 0.)
             assert torch.unique(x_all.max(dim=0)[0] == 1.)
-        # # Standarization 
-        # #TODO: this can be written (more tidy) as a transform with other preprocessin' when making the dataset 
-        # mean = torch.mean(x, dim = 0)
-        # std= torch.std(x, dim = 0)
-        # x = (x - mean)/std # [99600,65]
 
         y = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"], dtype = torch.int64) # [166,600] 0 to 6
         y_all = y-1
@@ -60,9 +56,48 @@ class TrentoDataset(Dataset):
         valid_indeces = (y!=0)
         xv = x[:,valid_indeces] # [65, 30214]
         
-        x = torch.transpose(xv,1,0)
+        x = torch.transpose(xv,1,0) # [30214, 65]
         assert sum(xv[:,0] != x[0,:]) == 0
-        y = y[valid_indeces]-1 # [30214] 0 to 5
+        y = y[valid_indeces] # [30214] 1 to 6
+
+        #Normalize to [0,1]
+        if do_preprocess: # TODO: Something more sophisticated?
+            logger.info("Normalize to 0,1")
+            x_min = x.min(dim=0)[0] # [65]
+            x_max = x.max(dim=0)[0] # [65]
+            x = (x- x_min)/(x_max-x_min)
+            assert torch.unique(x.min(dim=0)[0] == 0.)
+            assert torch.unique(x.max(dim=0)[0] == 1.)
+
+        plt.figure()
+        plt.suptitle('Distribution Lidar pixel values')
+        plt.subplot(211)
+        for label,name in zip([1,5],["A. Trees", 'Vineyards']):
+            label_ind = np.where(y == label)[0]
+            hist_values = x[label_ind, -1]
+            histogram, bin_edges = np.histogram(hist_values, bins=100, range=(0, 0.2))
+            plt.plot(bin_edges[:-1], histogram, label = name)
+            plt.title("Channel 1", fontsize = 6)
+            plt.xlabel("normalized pixel value")
+            plt.ylabel("number of pixels")
+            plt.legend()
+        plt.subplot(212)
+        for label,name in zip([1,5],["A. Trees", 'Vineyards']):
+            label_ind = np.where(y == label)[0]
+            hist_values = x[label_ind, -2]
+            histogram, bin_edges = np.histogram(hist_values, bins=100, range=(0, 0.2))
+            plt.plot(bin_edges[:-1], histogram, label = name)
+            plt.title("Channel 2", fontsize = 6)
+            plt.xlabel("normalized pixel value")
+            plt.ylabel("number of pixels")
+            plt.legend()
+        plt.savefig("images/lidar_distribution.png")
+
+
+
+
+
+        y = y-1 # [30214] 0 to 5
 
         #reduce the dataset size to make it easier for my pour cpu
         ind, _ = train_test_split(np.arange(len(x)), train_size=total_size, random_state=42)
@@ -80,23 +115,11 @@ class TrentoDataset(Dataset):
             y[np.isin(y, non_labelled)] = int(non_labelled[0])
 
 
-        # print(torch.unique(y), torch.max(x), torch.min(x), x.shape, y.shape)
-
-        #Normalize to [0,1]
-        if do_preprocess: # TODO: Something more sophisticated?
-            logger.info("Normalize to 0,1")
-            x_min = x.min(dim=0)[0] # [65]
-            x_max = x.max(dim=0)[0] # [65]
-            x = (x- x_min)/(x_max-x_min)
-            assert torch.unique(x.min(dim=0)[0] == 0.)
-            assert torch.unique(x.max(dim=0)[0] == 1.)
 
         if do_1d:
             n_examples = len(x)
             x = x.view(n_examples, -1)
         
-        # print(torch.unique(y), torch.max(x), torch.min(x), x.shape, y.shape)
-
         if test_size > 0.0:
             ind_train, ind_test = train_test_split(
                 np.arange(len(x)), test_size=test_size, random_state=42
@@ -109,7 +132,6 @@ class TrentoDataset(Dataset):
         x_test = x[ind_test]
         y_test = y[ind_test]
 
-        # print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
         n_all = len(x_train)
         n_labelled_per_class = (n_all * label_proportions).astype(int)
         labelled_inds = []
@@ -143,15 +165,16 @@ class TrentoDataset(Dataset):
         self.test_dataset_labelled = TensorDataset(x_test_labelled, y_test_labelled) # 0 to 5
         self.full_dataset = TensorDataset(x_all, y_all)
 
-# LABELLED_PROPORTIONS = np.array([1/6, 1/6, 1/6, 1/6, 1/6, 1/6])
-# LABELLED_PROPORTIONS = LABELLED_PROPORTIONS / LABELLED_PROPORTIONS.sum()
+LABELLED_PROPORTIONS = np.array([1/6, 1/6, 1/6, 1/6, 1/6, 1/6])
+LABELLED_PROPORTIONS = LABELLED_PROPORTIONS / LABELLED_PROPORTIONS.sum()
 
-# LABELLED_FRACTION = 0.5
+LABELLED_FRACTION = 0.5
 
-# DATASET = TrentoDataset(
-#     labelled_proportions=LABELLED_PROPORTIONS,
-#     labelled_fraction=LABELLED_FRACTION
-# )
+DATASET = TrentoDataset(
+    data_dir = "/Users/plo026/data/Trento/",
+    labelled_proportions=LABELLED_PROPORTIONS,
+    labelled_fraction=LABELLED_FRACTION
+)
 # x,y = DATASET.train_dataset.tensors # 12085
 # print(x.shape, y.shape, torch.unique(y))
 

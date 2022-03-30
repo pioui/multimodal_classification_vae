@@ -65,29 +65,31 @@ class TrentoDataset(Dataset):
         x_test = x_all[test_indeces] # [29595, 65]
         y_test = y_all[test_indeces]  # [29595]
 
+        plt.figure(dpi=1000)
+        plt.suptitle('Distribution HSI and Lidar pixel values')
+        for channel in range(x_all.shape[-1]):
+            plt.subplot(10,7,channel+1)
+            for label,name in zip([1,5],["A. Trees", "Vineyards"]):
+                plt.axis("off")
+                label_ind = np.where(y == label)[0]
+                hist_values = x_all[label_ind, channel]
+                histogram, bin_edges = np.histogram(hist_values, bins=100, range=(0, 1))
+                plt.plot(bin_edges[:-1], histogram, label = name, linewidth = 0.5, alpha = 0.6)
+
+        plt.savefig("images/trento_apples_vines_distribution.png")
+        
+        label_ind = np.where(y == 1)[0]
+        one_apple = x_all[label_ind][50]
+        label_ind = np.where(y == 5)[0]
+        one_vine = x_all[label_ind][76]
+
         plt.figure()
-        plt.suptitle('Distribution Lidar pixel values')
-        plt.subplot(211)
-        for label,name in zip([1,5],["A. Trees", 'Vineyards']):
-            label_ind = np.where(y == label)[0]
-            hist_values = x_all[label_ind, -1]
-            histogram, bin_edges = np.histogram(hist_values, bins=100, range=(0, 0.2))
-            plt.plot(bin_edges[:-1], histogram, label = name)
-            plt.title("Channel 1", fontsize = 6)
-            plt.xlabel("normalized pixel value")
-            plt.ylabel("number of pixels")
-            plt.legend()
-        plt.subplot(212)
-        for label,name in zip([1,5],["A. Trees", 'Vineyards']):
-            label_ind = np.where(y == label)[0]
-            hist_values = x_all[label_ind, -2]
-            histogram, bin_edges = np.histogram(hist_values, bins=100, range=(0, 0.2))
-            plt.plot(bin_edges[:-1], histogram, label = name)
-            plt.title("Channel 2", fontsize = 6)
-            plt.xlabel("normalized pixel value")
-            plt.ylabel("number of pixels")
-            plt.legend()
-        plt.savefig("images/lidar_distribution.png")
+        plt.grid(which='both')
+        plt.scatter(np.arange(0,65),one_apple, label = "A. Trees")
+        plt.scatter(np.arange(0,65),one_vine, label = "Vineyards")
+        plt.legend()
+        plt.savefig("images/trento_apples_vines_channels.png")
+
 
         x_test_labelled, _, y_test_labelled, _ = train_test_split(x_test, y_test, train_size= 0.9, stratify = y_test)
 
@@ -99,9 +101,9 @@ class TrentoDataset(Dataset):
         self.full_dataset = TensorDataset(x_all, y_all) # 0 to 6
 
 
-# DATASET = TrentoDataset(
-#     data_dir = "/Users/plo026/data/Trento/",
-# )
+DATASET = TrentoDataset(
+    data_dir = "/Users/plo026/data/Trento/",
+)
 # x,y = DATASET.train_dataset.tensors # 819
 # print(x.shape, y.shape, torch.unique(y))
 

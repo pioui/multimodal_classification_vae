@@ -368,11 +368,8 @@ for scenario in SCENARIOS:
             logger.info(trainer.model.encoder_z2_z1.keys())
             loop_results_dict = model_evaluation(
                 trainer=trainer,
-                eval_encoder=None,
                 counts_eval=multi_counts_eval,
                 encoder_eval_name="default",
-                do_defensive=do_defensive_eval,
-                debug=DEBUG,
             )
             res = {**loop_setup_dict, **loop_results_dict, **eval_encoder_loop}
             logger.info(res)

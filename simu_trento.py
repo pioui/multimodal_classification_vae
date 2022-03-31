@@ -65,11 +65,6 @@ from trento_utils import (
 
 DATASET = TrentoDataset(
     data_dir = data_dir,
-    labelled_fraction=LABELLED_FRACTION,
-    labelled_proportions=LABELLED_PROPORTIONS,
-    do_1d=True,
-    test_size=TEST_SIZE,
-    total_size = TOTAL_SIZE,
 )
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -97,6 +92,7 @@ if not os.path.exists(outputs_dir):
     os.makedirs(outputs_dir)
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 logger.info("train all examples {}".format(len(DATASET.train_dataset.tensors[0])))

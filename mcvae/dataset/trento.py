@@ -11,34 +11,25 @@ import random
 import matplotlib.pyplot as plt
 random.seed(42)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class TrentoDataset(Dataset):
     def __init__(
         self,
         data_dir,
-        labelled_fraction,
-        labelled_proportions,
-        test_size=0.7,
-        total_size = 0.17,
-        do_1d=False,
+        unlabelled_size=1000,
         do_preprocess=True,
         # **kwargs
     ) -> None:
         super().__init__()
-
-        assert len(labelled_proportions) == 6
-        labelled_proportions = np.array(labelled_proportions)
-        assert abs(labelled_proportions.sum() - 1.0) <= 1e-5
-        self.labelled_fraction = labelled_fraction
-        label_proportions = labelled_fraction * labelled_proportions
 
         image_hyper = torch.tensor(tifffile.imread(data_dir+"hyper_Italy.tif")) # [63,166,600]
         image_lidar = torch.tensor(tifffile.imread(data_dir+"LiDAR_Italy.tif")) # [2,166,600]
         x = torch.cat((image_hyper,image_lidar), dim = 0) # [65,166,600]
         x_all = x
         x_all = x_all.reshape(len(x_all),-1)
-        x_all = torch.transpose(x_all, 1,0)
+        x_all = torch.transpose(x_all, 1,0) # [99600,65]
         
         #Normalize to [0,1]
         if do_preprocess: # TODO: Something more sophisticated?
@@ -50,138 +41,79 @@ class TrentoDataset(Dataset):
             assert torch.unique(x_all.max(dim=0)[0] == 1.)
 
         y = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"], dtype = torch.int64) # [166,600] 0 to 6
-        y_all = y-1
-        y_all = y_all.reshape(-1)
+        y_train_labelled = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Train.mat")["TNsecSUBS_Train"], dtype = torch.int64) # [166,600] 0 to 6
+        y_test = y-y_train_labelled
 
-        valid_indeces = (y!=0)
-        xv = x[:,valid_indeces] # [65, 30214]
+        y_all = y
+        y_all = y_all.reshape(-1) # [99600]
+        y_train_labelled = y_train_labelled.reshape(-1) # [99600]
+        y_test = y_test.reshape(-1) # [99600]
+
+        train_labelled_indeces = (y_train_labelled!=0)
+        x_train_labelled = x_all[train_labelled_indeces] # [819, 65]
+        y_train_labelled = y_all[train_labelled_indeces]  # [819]
+
+        unlabelled_indeces = (y_all==0)
+        x_unlabelled = x_all[unlabelled_indeces] # []
+        y_unlabelled = y_all[unlabelled_indeces] # []
+        x_train_unlabelled, _, y_train_unlabelled,_ = train_test_split(x_unlabelled,y_unlabelled,train_size = unlabelled_size)
+
+        x_train = torch.cat((x_train_labelled,x_train_unlabelled), dim=0)
+        y_train = torch.cat((y_train_labelled,y_train_unlabelled), dim=0)
+
+        test_indeces = (y_test!=0)
+        x_test = x_all[test_indeces] # [29595, 65]
+        y_test = y_all[test_indeces]  # [29595]
+
+        plt.figure(dpi=1000)
+        plt.suptitle('Distribution HSI and Lidar pixel values')
+        for channel in range(x_all.shape[-1]):
+            plt.subplot(10,7,channel+1)
+            for label,name in zip([1,5],["A. Trees", "Vineyards"]):
+                plt.axis("off")
+                label_ind = np.where(y == label)[0]
+                hist_values = x_all[label_ind, channel]
+                histogram, bin_edges = np.histogram(hist_values, bins=100, range=(0, 1))
+                plt.plot(bin_edges[:-1], histogram, label = name, linewidth = 0.5, alpha = 0.6)
+
+        plt.savefig("images/trento_apples_vines_distribution.png")
         
-        x = torch.transpose(xv,1,0) # [30214, 65]
-        assert sum(xv[:,0] != x[0,:]) == 0
-        y = y[valid_indeces] # [30214] 1 to 6
-
-        #Normalize to [0,1]
-        if do_preprocess: # TODO: Something more sophisticated?
-            logger.info("Normalize to 0,1")
-            x_min = x.min(dim=0)[0] # [65]
-            x_max = x.max(dim=0)[0] # [65]
-            x = (x- x_min)/(x_max-x_min)
-            assert torch.unique(x.min(dim=0)[0] == 0.)
-            assert torch.unique(x.max(dim=0)[0] == 1.)
+        label_ind = np.where(y == 1)[0]
+        one_apple = x_all[label_ind][50]
+        label_ind = np.where(y == 5)[0]
+        one_vine = x_all[label_ind][76]
 
         plt.figure()
-        plt.suptitle('Distribution Lidar pixel values')
-        plt.subplot(211)
-        for label,name in zip([1,5],["A. Trees", 'Vineyards']):
-            label_ind = np.where(y == label)[0]
-            hist_values = x[label_ind, -1]
-            histogram, bin_edges = np.histogram(hist_values, bins=100, range=(0, 0.2))
-            plt.plot(bin_edges[:-1], histogram, label = name)
-            plt.title("Channel 1", fontsize = 6)
-            plt.xlabel("normalized pixel value")
-            plt.ylabel("number of pixels")
-            plt.legend()
-        plt.subplot(212)
-        for label,name in zip([1,5],["A. Trees", 'Vineyards']):
-            label_ind = np.where(y == label)[0]
-            hist_values = x[label_ind, -2]
-            histogram, bin_edges = np.histogram(hist_values, bins=100, range=(0, 0.2))
-            plt.plot(bin_edges[:-1], histogram, label = name)
-            plt.title("Channel 2", fontsize = 6)
-            plt.xlabel("normalized pixel value")
-            plt.ylabel("number of pixels")
-            plt.legend()
-        plt.savefig("images/lidar_distribution.png")
+        plt.grid(which='both')
+        plt.scatter(np.arange(0,65),one_apple, label = "A. Trees")
+        plt.scatter(np.arange(0,65),one_vine, label = "Vineyards")
+        plt.legend()
+        plt.savefig("images/trento_apples_vines_channels.png")
 
 
+        x_test_labelled, _, y_test_labelled, _ = train_test_split(x_test, y_test, train_size= 0.9, stratify = y_test)
 
+        self.labelled_fraction = len(y_train_labelled)/len(y_train)
+        self.train_dataset = TensorDataset(x_train, y_train-1) # 0 to 5
+        self.train_dataset_labelled = TensorDataset(x_train_labelled, y_train_labelled-1) # 0 to 5
+        self.test_dataset = TensorDataset(x_test, y_test-1) # 0 to 5
+        self.test_dataset_labelled = TensorDataset(x_test_labelled, y_test_labelled-1) # 0 to 5
+        self.full_dataset = TensorDataset(x_all, y_all) # 0 to 6
 
-
-        y = y-1 # [30214] 0 to 5
-
-        #reduce the dataset size to make it easier for my pour cpu
-        ind, _ = train_test_split(np.arange(len(x)), train_size=total_size, random_state=42)
-        x = x[ind]
-        y = y[ind]
-
-        non_labelled = labelled_proportions == 0.0
-        assert (
-            non_labelled[1:].astype(int) - non_labelled[:-1].astype(int) >= 0
-        ).all(), (
-            "For convenience please ensure that non labelled numbers are the last ones"
-        )
-        non_labelled = np.where(labelled_proportions == 0.0)[0]
-        if len(non_labelled) >= 1:
-            y[np.isin(y, non_labelled)] = int(non_labelled[0])
-
-
-
-        if do_1d:
-            n_examples = len(x)
-            x = x.view(n_examples, -1)
-        
-        if test_size > 0.0:
-            ind_train, ind_test = train_test_split(
-                np.arange(len(x)), test_size=test_size, random_state=42
-            )
-        else:
-            ind_train = np.arange(len(x))
-            ind_test = []
-        x_train = x[ind_train]
-        y_train = y[ind_train]
-        x_test = x[ind_test]
-        y_test = y[ind_test]
-
-        n_all = len(x_train)
-        n_labelled_per_class = (n_all * label_proportions).astype(int)
-        labelled_inds = []
-        for label in y.unique():
-            label_ind = np.where(y_train == label)[0]
-            labelled_exs = np.random.choice(label_ind, size=n_labelled_per_class[label])
-            labelled_inds.append(labelled_exs)
-        labelled_inds = np.concatenate(labelled_inds)
-
-        self.labelled_inds = labelled_inds
-        x_train_labelled = x_train[labelled_inds]
-        y_train_labelled = y_train[labelled_inds]
-
-        n_all = len(x_test)
-        n_labelled_per_class = (n_all * label_proportions).astype(int)
-        labelled_inds = []
-        for label in y.unique():
-            label_ind = np.where(y_test == label)[0]
-            labelled_exs = np.random.choice(label_ind, size=n_labelled_per_class[label])
-            labelled_inds.append(labelled_exs)
-        labelled_inds = np.concatenate(labelled_inds)
-
-        self.labelled_inds = labelled_inds
-        x_test_labelled = x_test[labelled_inds]
-        y_test_labelled = y_test[labelled_inds]
-
-        assert not (np.isin(np.unique(y_train_labelled), non_labelled)).any()
-        self.train_dataset = TensorDataset(x_train, y_train) # 0 to 5
-        self.train_dataset_labelled = TensorDataset(x_train_labelled, y_train_labelled) # 0 to 5
-        self.test_dataset = TensorDataset(x_test, y_test) # 0 to 5
-        self.test_dataset_labelled = TensorDataset(x_test_labelled, y_test_labelled) # 0 to 5
-        self.full_dataset = TensorDataset(x_all, y_all)
-
-LABELLED_PROPORTIONS = np.array([1/6, 1/6, 1/6, 1/6, 1/6, 1/6])
-LABELLED_PROPORTIONS = LABELLED_PROPORTIONS / LABELLED_PROPORTIONS.sum()
-
-LABELLED_FRACTION = 0.5
 
 DATASET = TrentoDataset(
     data_dir = "/Users/plo026/data/Trento/",
-    labelled_proportions=LABELLED_PROPORTIONS,
-    labelled_fraction=LABELLED_FRACTION
 )
-# x,y = DATASET.train_dataset.tensors # 12085
+# x,y = DATASET.train_dataset.tensors # 819
 # print(x.shape, y.shape, torch.unique(y))
 
-# x,y = DATASET.train_dataset_labelled.tensors # 6489 subset train  
+# x,y = DATASET.train_dataset_labelled.tensors # 409 
 # print(x.shape, y.shape, torch.unique(y))
 
 # x,y = DATASET.test_dataset.tensors # 15107
+# print(x.shape, y.shape, torch.unique(y))
+
+# x,y = DATASET.test_dataset_labelled.tensors # 15107
 # print(x.shape, y.shape, torch.unique(y))
 
 # x,y = DATASET.full_dataset.tensors # 15107

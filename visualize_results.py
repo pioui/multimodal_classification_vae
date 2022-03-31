@@ -80,31 +80,37 @@ for subdir, dir, files in os.walk(outputs_dir):
             model_name = file[:-4]
 
             y_pred_prob = np.load(os.path.join(outputs_dir,file))
+            y_pred_max_prob = y_pred_prob.max(1)
             y_pred = y_pred_prob.argmax(1)+1
-            y_pred_reject = compute_reject_label(y_pred_prob, threshold=0.7)
+            y_pred_reject = compute_reject_label(y_pred_prob, threshold=0.5)
 
             plt.figure(dpi=1000)
-            plt.subplot(411)
+            plt.subplot(511)
             plt.imshow(hyperrgb)
             plt.axis('off')
-            plt.title("HSI", fontsize=6)
-            plt.subplot(412)
+            plt.title("HSI", fontsize=3)
+            plt.subplot(512)
             plt.imshow(y_true.reshape(166,600), interpolation='nearest', cmap = colors.ListedColormap(color))
             plt.axis('off')
-            plt.title("Ground Truth", fontsize=6)
-            plt.subplot(413)
+            plt.title("Ground Truth", fontsize=3)
+            plt.subplot(513)
             plt.imshow(y_pred.reshape(166,600), interpolation='nearest', cmap = colors.ListedColormap(color[1:]))
             plt.axis('off')
-            plt.title("Predictions", fontsize=6)
-            plt.subplot(414)
+            plt.title("Predictions", fontsize=3)
+            plt.subplot(514)
             plt.imshow(y_pred_reject.reshape(166,600), interpolation='nearest', cmap = colors.ListedColormap(color))
             plt.axis('off')
-            plt.title("Predictions with Uknown Class", fontsize=6)
-
+            plt.title("Predictions with Uknown Class", fontsize=3)
             handles = []
             for c,l in zip(color, labels):
                 handles.append(mpatches.Patch(color=c, label=l))
-            plt.legend(handles=handles, fontsize = 6, loc='lower center', prop={'size':10}, bbox_to_anchor=(0.5,-1), ncol=3, borderaxespad=0.)
+            plt.legend(handles=handles, fontsize = 3, loc='lower center', prop={'size':10}, bbox_to_anchor=(0.5,-2.5), ncol=3, borderaxespad=0.)
+            plt.subplot(515)
+            plt.imshow((y_pred_max_prob*(1-y_pred_max_prob)).reshape(166,600), interpolation='nearest')
+            plt.axis('off')
+            plt.title("Uncertainty", fontsize=3)
+            cbar = plt.colorbar(location='right', shrink=0.8)
+            cbar.ax.tick_params(labelsize =2 )
             plt.savefig(f"{images_dir}{model_name}_classification_matrix.png",bbox_inches='tight')
 
             m_confusion_matrix = confusion_matrix(y_true, y_pred)
@@ -134,5 +140,7 @@ for subdir, dir, files in os.walk(outputs_dir):
                     plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center')
             plt.title("Total Confusion Matrix")
             plt.savefig(f"{images_dir}{model_name}_reject_total_confusion_matrix.png",bbox_inches='tight')
+            
+            
 
 

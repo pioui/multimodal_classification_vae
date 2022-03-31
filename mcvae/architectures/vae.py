@@ -4,7 +4,6 @@ import pandas as pd
 import torch
 from torch import nn
 from torch.distributions import (
-    Bernoulli,
     Categorical,
     Normal,
     RelaxedOneHotCategorical,

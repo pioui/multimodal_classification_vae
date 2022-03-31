@@ -1,5 +1,5 @@
-from .trento_trainer import TrentoRTrainer
+from .trento_trainer import VAE_M1M2_Trainer
 
 __all__ = [
-    "TrentoRTrainer",
+    "VAE_M1M2_Trainer",
 ]

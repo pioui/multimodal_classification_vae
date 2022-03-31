@@ -23,7 +23,7 @@ from tqdm.auto import tqdm
 
 from mcvae.dataset import TrentoDataset
 from mcvae.architectures import VAE_M1M2
-from mcvae.inference import TrentoRTrainer
+from mcvae.inference import VAE_M1M2_Trainer
 from mcvae.architectures.regular_modules import (
     EncoderA,
     EncoderB,
@@ -31,14 +31,7 @@ from mcvae.architectures.regular_modules import (
     EncoderAStudent,
     EncoderBStudent,
 )
-from mcvae.architectures.trento_encoders import (
-    EncoderB0,
-    EncoderB1,
-    EncoderB2,
-    EncoderB3,
-    EncoderB4,
 
-)
 from trento_config import (
     outputs_dir,
     N_PARTICULES,
@@ -175,7 +168,7 @@ for scenario in SCENARIOS:
                     logger.info("model exists; loading from .pt")
                     mdl.load_state_dict(torch.load(mdl_name))
                 mdl.to(device)
-                trainer = TrentoRTrainer(
+                trainer = VAE_M1M2_Trainer(
                     dataset=DATASET,
                     model=mdl,
                     use_cuda=True,

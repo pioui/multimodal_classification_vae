@@ -2,6 +2,7 @@ import numpy as np
 import logging
 import os
 from mcvae.dataset import TrentoDataset
+import torch.nn as nn
 from mcvae.architectures.trento_encoders import (
     EncoderB0,
     EncoderB1,
@@ -23,16 +24,11 @@ N_LATENT = 10
 N_HIDDEN = 128
 N_EXPERIMENTS = 1
 NUM = 300
-LABELLED_PROPORTIONS = np.array([1/6, 1/6, 1/6, 1/6, 1/6, 1/6])
-LABELLED_PROPORTIONS = LABELLED_PROPORTIONS / LABELLED_PROPORTIONS.sum()
-LABELLED_FRACTION = 0.5 
 N_INPUT = 65
 N_LABELS = 6
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 512
-TEST_SIZE = 0.5
-TOTAL_SIZE = 0.1
 PROJECT_NAME = "trento"
 
 DATASET = TrentoDataset(

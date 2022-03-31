@@ -101,9 +101,9 @@ class TrentoDataset(Dataset):
         self.full_dataset = TensorDataset(x_all, y_all) # 0 to 6
 
 
-DATASET = TrentoDataset(
-    data_dir = "/Users/plo026/data/Trento/",
-)
+# DATASET = TrentoDataset(
+#     data_dir = "/Users/plo026/data/Trento/",
+# )
 # x,y = DATASET.train_dataset.tensors # 819
 # print(x.shape, y.shape, torch.unique(y))
 

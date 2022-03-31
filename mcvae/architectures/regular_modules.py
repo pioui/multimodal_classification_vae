@@ -7,7 +7,7 @@ import torch.nn as nn
 # from torch.distributions import MultivariateNormal, Normal
 import torch.distributions as db
 
-from mcvae.models.distributions import EllipticalStudent
+from mcvae.architectures.distributions import EllipticalStudent
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

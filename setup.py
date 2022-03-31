@@ -34,7 +34,7 @@ setup(
     name="mcvae",
     packages=[
         'mcvae', 
-        'mcvae.models', 
+        'mcvae.architectures', 
         'mcvae.dataset', 
         'mcvae.inference'
         ],

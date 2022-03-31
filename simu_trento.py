@@ -22,16 +22,16 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score
 from tqdm.auto import tqdm
 
 from mcvae.dataset import TrentoDataset
-from mcvae.models import TrentoVAE
+from mcvae.architectures import TrentoVAE
 from mcvae.inference import TrentoRTrainer
-from mcvae.models.regular_modules import (
+from mcvae.architectures.regular_modules import (
     EncoderA,
     EncoderB,
     ClassifierA,
     EncoderAStudent,
     EncoderBStudent,
 )
-from mcvae.models.trento_encoders import (
+from mcvae.architectures.trento_encoders import (
     EncoderB0,
     EncoderB1,
     EncoderB2,

@@ -1,5 +1,5 @@
-from .trento_vae import TrentoVAE
+from .trento_vae import VAE_M1M2
 
 __all__ = [
-    "TrentoVAE",
+    "VAE_M1M2",
 ]

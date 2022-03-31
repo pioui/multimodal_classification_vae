@@ -37,11 +37,8 @@ def compute_reject_label(y_pred_prob, threshold):
 
 def model_evaluation(
     trainer,
-    eval_encoder,
     counts_eval,
     encoder_eval_name,
-    do_defensive: bool = False,
-    debug: bool = False,
 ):
 
     logger.info("Train Predictions computation ...")

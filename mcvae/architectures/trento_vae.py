@@ -22,7 +22,7 @@ from mcvae.architectures.regular_modules import (
 )
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-class TrentoVAE(nn.Module):
+class VAE_M1M2(nn.Module):
     r"""
 
     """

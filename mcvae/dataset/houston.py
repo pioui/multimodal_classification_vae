@@ -20,7 +20,7 @@ class HoustonDataset(Dataset):
     def __init__(
         self,
         data_dir,
-        train_size=0.3,
+        train_size=0.2,
         do_preprocess=True,
         # **kwargs
     ) -> None:

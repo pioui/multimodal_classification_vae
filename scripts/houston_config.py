@@ -40,7 +40,7 @@ N_INPUT = 57
 N_LABELS = 20
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
-BATCH_SIZE = 512
+BATCH_SIZE = 1024
 PROJECT_NAME = "houston"
 
 DATASET = HoustonDataset(
@@ -213,7 +213,6 @@ SCENARIOS = [  # WAKE updates
                 do_batch_norm=False,
             )}
         ),
-        batch_size=128,
     ),
     dict(
         loss_gen="ELBO",
@@ -231,7 +230,6 @@ SCENARIOS = [  # WAKE updates
                 do_batch_norm=False,
             )}
         ),
-        batch_size=128,
     ),
     dict(
         loss_gen="ELBO",
@@ -249,7 +247,6 @@ SCENARIOS = [  # WAKE updates
                 do_batch_norm=False,
             )}
         ),
-        batch_size=128,
     ),
     dict(
         loss_gen="ELBO",
@@ -267,7 +264,6 @@ SCENARIOS = [  # WAKE updates
                 do_batch_norm=False,
             )}
         ),
-        batch_size=128,
     ),
 
 

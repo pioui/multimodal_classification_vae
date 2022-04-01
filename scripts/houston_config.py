@@ -11,7 +11,7 @@ from mcvae.architectures.trento_encoders import (
     EncoderB4,
 )
 
-data_dir = "/Users/plo026/data/Houston/"
+data_dir = "/home/plo026/data/Houston/"
 outputs_dir = "outputs/"
 labels = [
     "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 

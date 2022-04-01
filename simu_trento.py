@@ -48,7 +48,7 @@ from trento_config import (
     PROJECT_NAME,
     SCENARIOS,
 )
-from utility_functions import (
+from mcvae.utils.utility_functions import (
     model_evaluation,
 )
 
@@ -369,6 +369,7 @@ for scenario in SCENARIOS:
                 trainer=trainer,
                 counts_eval=multi_counts_eval,
                 encoder_eval_name="default",
+                n_samples = N_EVAL_SAMPLES,
             )
             res = {**loop_setup_dict, **loop_results_dict, **eval_encoder_loop}
             logger.info(res)

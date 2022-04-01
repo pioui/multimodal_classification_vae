@@ -7,7 +7,7 @@ from scipy import io
 from sklearn.metrics import confusion_matrix
 import os
 import numpy as np
-from utility_functions import compute_reject_label
+from mcvae.utils.utility_functions import compute_reject_label
 import torch
 import tifffile
 from trento_config import (

@@ -11,10 +11,6 @@ random.seed(42)
 from mcvae.dataset import TrentoDataset
 import matplotlib.pyplot as plt
 
-from trento_config import (
-    N_EVAL_SAMPLES,
-)
-
 device = "cuda" if torch.cuda.is_available() else "cpu"
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -22,6 +18,20 @@ logger.setLevel(logging.DEBUG)
 np.random.seed(42)
 
 DO_OVERALL = True
+
+def normalize(x):
+    """
+    normalize at [0,1] in channels dimention tensor x of size (channels, N)
+    
+    """
+    logger.info("Normalize to 0,1")
+    x_min = x.min(dim=0)[0] # [57]
+    x_max = x.max(dim=0)[0] # [57]
+    xn = (x- x_min)/(x_max-x_min)
+    assert torch.unique(xn.min(dim=0)[0] == 0.)
+    assert torch.unique(xn.max(dim=0)[0] == 1.)
+    return xn
+
 
 # Utils functions
 def compute_reject_label(y_pred_prob, threshold):
@@ -39,6 +49,7 @@ def model_evaluation(
     trainer,
     counts_eval,
     encoder_eval_name,
+    n_eval_samples,
 ):
 
     logger.info("Train Predictions computation ...")
@@ -53,7 +64,7 @@ def model_evaluation(
                 "preds_is",
                 "preds_plugin",
             ],
-            n_samples=N_EVAL_SAMPLES,
+            n_samples=n_eval_samples,
             encoder_key=encoder_eval_name,
             counts=counts_eval,
         )

@@ -29,36 +29,27 @@ class HoustonDataset(Dataset):
         image_hyper = torch.tensor(tifffile.imread(data_dir+"houston_hyper.tif")) # [50,1202,4768]
         image_lidar = torch.tensor(tifffile.imread(data_dir+"houston_lidar.tif")) # [7,1202,4768]
         x = torch.cat((image_hyper,image_lidar), dim = 0) # [57,1202,4768]
-        y = torch.tensor(tifffile.imread(data_dir+"houston_gt.tif"), dtype = torch.int16) # [1202,4768]
+        y = torch.tensor(tifffile.imread(data_dir+"houston_gt.tif"), dtype = torch.int64) # [1202,4768]
 
         x_all = x
         x_all = x_all.reshape(len(x_all),-1) # [57,5731136]
         x_all = torch.transpose(x_all, 1,0) # [5731136,57]
         if do_preprocess: 
-            x_all = normalize(x_all)
+            x_all = normalize(x_all).float()
         y_all = y
         y_all = y_all.reshape(-1) # [5731136] 0 to 20
-        print(y_all.unique())
-
         
         x_train, x_test, y_train, y_test = train_test_split(
             x_all, y_all, train_size = train_size, random_state = 42, stratify = y_all
         ) # 0 to 20
 
-        print(y_train.unique())
-
-
         train_labelled_indeces = (y_train!=0)
         x_train_labelled = x_train[train_labelled_indeces] # [787260,57]
         y_train_labelled = y_train[train_labelled_indeces] # [787260] 0 to 18, 255
-        print(y_train_labelled.unique())
-
-        print(y_test.unique())
 
         test_labelled_indeces = (y_test!=0)
         x_test_labelled = x_test[test_labelled_indeces] # [787260,57]
         y_test_labelled = y_test[test_labelled_indeces] # [787260] 0 to 18, 255
-        print(y_test_labelled.unique())
 
         self.labelled_fraction = len(y_train_labelled)/len(y_train)
         self.train_dataset = TensorDataset(x_train, y_train-1) # 0 to 5

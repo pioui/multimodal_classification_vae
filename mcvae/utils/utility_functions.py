@@ -8,8 +8,6 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, confu
 from tqdm.auto import tqdm
 import random
 random.seed(42)
-from mcvae.dataset import TrentoDataset
-import matplotlib.pyplot as plt
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 logger = logging.getLogger(__name__)

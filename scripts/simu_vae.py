@@ -21,6 +21,7 @@ from arviz.stats import psislw
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from tqdm.auto import tqdm
 
+
 from mcvae.architectures import VAE_M1M2
 from mcvae.inference import VAE_M1M2_Trainer
 from mcvae.architectures.regular_modules import (
@@ -31,7 +32,7 @@ from mcvae.architectures.regular_modules import (
     EncoderBStudent,
 )
 
-from trento_config import (
+from houston_config import (
     outputs_dir,
     N_PARTICULES,
     N_LATENT,
@@ -369,7 +370,7 @@ for scenario in SCENARIOS:
                 trainer=trainer,
                 counts_eval=multi_counts_eval,
                 encoder_eval_name="default",
-                n_samples = N_EVAL_SAMPLES,
+                n_eval_samples = N_EVAL_SAMPLES,
             )
             res = {**loop_setup_dict, **loop_results_dict, **eval_encoder_loop}
             logger.info(res)

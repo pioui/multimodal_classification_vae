@@ -11,7 +11,7 @@ from mcvae.architectures.trento_encoders import (
     EncoderB4
 )
 
-data_dir = "/home/plo026/data/Trento/"
+data_dir = "/Users/plo026/data/Trento/"
 outputs_dir = "outputs/"
 labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
@@ -31,6 +31,7 @@ N_EVAL_SAMPLES = 25
 BATCH_SIZE = 512
 PROJECT_NAME = "trento"
 
+print(data_dir)
 DATASET = TrentoDataset(
     data_dir = data_dir,
 )

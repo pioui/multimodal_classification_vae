@@ -1,22 +1,32 @@
 import numpy as np
 import logging
 import os
-from mcvae.dataset import TrentoDataset
+from mcvae.dataset import HoustonDataset
 import torch.nn as nn
 from mcvae.architectures.trento_encoders import (
     EncoderB0,
     EncoderB1,
     EncoderB2,
+    EncoderB3,
+    EncoderB4,
 )
 
-data_dir = "/Users/plo026/data/Houston/",
+data_dir = "/Users/plo026/data/Houston/"
 outputs_dir = "outputs/"
 labels = [
-    "Unknown", "H. Grass", "A. Grass", "A. Turf", "Evergreen Trees", 
+    "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 
     "Deciduous Trees", "Bare Earth", "Water", "Residential buildings",
     "Non-residential buildings", "Roads", "Sidewalks", "Crosswalks",
+    "Major thoroughfaces", "Highways", "Railways", "Paved parking lots", "Unpaved parking lots",
+    "Cars", "Trains", "Stadium seats"
     ]
-color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
+color = [
+    "black", "chartreuse1", "chartreuse2", "chartreuse3", "chartreuse4", 
+    "darkgreen", "chocolate4", "aqua", "white", 
+    "lightpink3",  "red", "darkgray", "dimgray",
+    "firebrick4", "violetred4", "darkorange3", "yellow", "orange",
+    "magenta", "blue", "skyblue3"
+    ]
 images_dir =  "images/"
 
 N_EPOCHS = 2
@@ -26,14 +36,14 @@ N_LATENT = 10
 N_HIDDEN = 128
 N_EXPERIMENTS = 1
 NUM = 300
-N_INPUT = 65
-N_LABELS = 6
+N_INPUT = 57
+N_LABELS = 20
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 512
-PROJECT_NAME = "trento"
+PROJECT_NAME = "houston"
 
-DATASET = TrentoDataset(
+DATASET = HoustonDataset(
     data_dir = data_dir,
 )
 
@@ -43,7 +53,7 @@ if not os.path.exists(outputs_dir):
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
 
-logging.basicConfig(filename = f'{outputs_dir}trento_logs.log')
+logging.basicConfig(filename = f'{outputs_dir}houston_logs.log')
 
 SCENARIOS = [  # WAKE updates
     dict(
@@ -275,6 +285,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=128,
                 dropout_rate=0,
                 do_batch_norm=False,
+                kernel_size = 7,
             )}
         ),
     ),
@@ -292,6 +303,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=128,
                 dropout_rate=0,
                 do_batch_norm=False,
+                kernel_size = 7,
             )}
         ),
     ),
@@ -309,6 +321,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=128,
                 dropout_rate=0,
                 do_batch_norm=False,
+                kernel_size = 7,
             )}
         ),
     ),
@@ -326,6 +339,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=128,
                 dropout_rate=0,
                 do_batch_norm=False,
+                kernel_size = 7,
             )}
         ),
     ),
@@ -345,6 +359,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=512,
                 dropout_rate=0,
                 do_batch_norm=False,
+                kernel_size = 7,
             )}
         ),
     ),
@@ -362,6 +377,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=512,
                 dropout_rate=0,
                 do_batch_norm=False,
+                kernel_size = 7,
             )}
         ),
     ),
@@ -379,6 +395,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=512,
                 dropout_rate=0,
                 do_batch_norm=False,
+                kernel_size = 7,
             )}
         ),
     ),
@@ -396,6 +413,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=512,
                 dropout_rate=0,
                 do_batch_norm=False,
+                kernel_size = 7,
             )}
         ),
     ),

@@ -29,7 +29,7 @@ color = [
     ]
 images_dir =  "images/"
 
-N_EPOCHS = 2
+N_EPOCHS = 10
 LR = 1e-3
 N_PARTICULES = 30
 N_LATENT = 10

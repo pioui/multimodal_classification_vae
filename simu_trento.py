@@ -21,7 +21,6 @@ from arviz.stats import psislw
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from tqdm.auto import tqdm
 
-from mcvae.dataset import TrentoDataset
 from mcvae.architectures import VAE_M1M2
 from mcvae.inference import VAE_M1M2_Trainer
 from mcvae.architectures.regular_modules import (

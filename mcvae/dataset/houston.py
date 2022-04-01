@@ -20,7 +20,8 @@ class HoustonDataset(Dataset):
     def __init__(
         self,
         data_dir,
-        train_size=0.2,
+        total_size = 5000, 
+        train_size=0.5,
         do_preprocess=True,
         # **kwargs
     ) -> None:
@@ -39,6 +40,8 @@ class HoustonDataset(Dataset):
         y_all = y
         y_all = y_all.reshape(-1) # [5731136] 0 to 20
         
+        x_all,_, y_all,_ = train_test_split(x_all, y_all, train_size = total_size, stratify = y_all)
+
         x_train, x_test, y_train, y_test = train_test_split(
             x_all, y_all, train_size = train_size, random_state = 42, stratify = y_all
         ) # 0 to 20

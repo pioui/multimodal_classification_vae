@@ -40,11 +40,13 @@ class HoustonDataset(Dataset):
         y_all = y
         y_all = y_all.reshape(-1) # [5731136] 0 to 20
         
-        x_all,_, y_all,_ = train_test_split(x_all, y_all, train_size = total_size, stratify = y_all)
+        x_train,_, y_train,_ = train_test_split(
+            x_all, y_all, train_size = total_size, stratify = y_all
+            )
 
         x_train, x_test, y_train, y_test = train_test_split(
-            x_all, y_all, train_size = train_size, random_state = 42, stratify = y_all
-        ) # 0 to 20
+            x_train, y_train, train_size = train_size, random_state = 42, stratify = y_train
+            ) # 0 to 20
 
         train_labelled_indeces = (y_train!=0)
         x_train_labelled = x_train[train_labelled_indeces] # [787260,57]

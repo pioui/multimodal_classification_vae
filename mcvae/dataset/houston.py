@@ -59,9 +59,14 @@ class HoustonDataset(Dataset):
         x_all_train = x_all[train_inds]
         y_all_train = y_all[train_inds]
         
+        x_train,_, y_train,_ = train_test_split(
+            x_all, y_all, train_size = total_size, stratify = y_all
+            )
+
         x_train, x_test, y_train, y_test = train_test_split(
             x_all_train, y_all_train, train_size = train_size, random_state = 42, stratify = y_all_train
         ) # 0 to 20
+
 
         train_labelled_indeces = (y_train!=0)
         x_train_labelled = x_train[train_labelled_indeces] # [787260,57]

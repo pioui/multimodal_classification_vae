@@ -85,9 +85,9 @@ class HoustonDataset(Dataset):
         log_train_test_split([y_all, y_train, y_train_labelled, y_test, y_test_labelled])
 
 
-DATASET = HoustonDataset(
-    data_dir = "/Users/plo026/data/Houston/",
-)
+# DATASET = HoustonDataset(
+#     data_dir = "/Users/plo026/data/Houston/",
+# )
 
 # x,y = DATASET.full_dataset.tensors # [5731136] 0 to 20
 # print(x.shape, y.shape, torch.unique(y))

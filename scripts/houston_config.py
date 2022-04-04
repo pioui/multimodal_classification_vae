@@ -53,7 +53,7 @@ PROJECT_NAME = "houston"
 
 DATASET = HoustonDataset(
     data_dir = data_dir,
-    samples_per_class=100,
+    samples_per_class=200,
 )
 
 SCENARIOS = [  # WAKE updates

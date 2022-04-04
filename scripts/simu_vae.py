@@ -32,7 +32,25 @@ from mcvae.architectures.regular_modules import (
     EncoderBStudent,
 )
 
-from houston_config import (
+# from houston_config import (
+#     outputs_dir,
+#     N_PARTICULES,
+#     N_LATENT,
+#     N_EPOCHS,
+#     N_HIDDEN,
+#     LR,
+#     N_EXPERIMENTS,
+#     BATCH_SIZE,
+#     CLASSIFICATION_RATIO,
+#     N_EVAL_SAMPLES,
+#     N_INPUT,
+#     N_LABELS,
+#     DATASET,
+#     PROJECT_NAME,
+#     SCENARIOS,
+# )
+
+from trento_config import (
     outputs_dir,
     N_PARTICULES,
     N_LATENT,
@@ -210,22 +228,22 @@ for scenario in SCENARIOS:
             break
         torch.save(mdl.state_dict(), mdl_name)
 
-        with torch.no_grad():
-            train_res = trainer.inference(
-                trainer.full_loader,
-                keys=[
-                    "qc_z1_all_probas",
-                    "y",
-                    "log_ratios",
-                    "qc_z1",
-                    "preds_is",
-                    "preds_plugin",
-                ],
-                n_samples=N_EVAL_SAMPLES,
-            )
-        y_pred = train_res["preds_plugin"].numpy()
-        y_pred = y_pred / y_pred.sum(1, keepdims=True)
-        np.save(f"{outputs_dir}{model_name}.npy", y_pred)
+        # with torch.no_grad():
+        #     train_res = trainer.inference(
+        #         trainer.full_loader,
+        #         keys=[
+        #             "qc_z1_all_probas",
+        #             "y",
+        #             "log_ratios",
+        #             "qc_z1",
+        #             "preds_is",
+        #             "preds_plugin",
+        #         ],
+        #         n_samples=N_EVAL_SAMPLES,
+        #     )
+        # y_pred = train_res["preds_plugin"].numpy()
+        # y_pred = y_pred / y_pred.sum(1, keepdims=True)
+        # np.save(f"{outputs_dir}{model_name}.npy", y_pred)
 
 
 
@@ -348,22 +366,22 @@ for scenario in SCENARIOS:
                     break
                 torch.save(mdl.state_dict(), mdl_name[:-3]+"train"+".pt")
 
-            with torch.no_grad():
-                train_res = trainer.inference(
-                    trainer.full_loader,
-                    keys=[
-                        "qc_z1_all_probas",
-                        "y",
-                        "log_ratios",
-                        "qc_z1",
-                        "preds_is",
-                        "preds_plugin",
-                    ],
-                    n_samples=N_EVAL_SAMPLES,
-                )
-            y_pred = train_res["preds_plugin"].numpy()
-            y_pred = y_pred / y_pred.sum(1, keepdims=True)
-            np.save(f"{outputs_dir}{model_name}_ELBO.npy", y_pred)
+            # with torch.no_grad():
+            #     train_res = trainer.inference(
+            #         trainer.full_loader,
+            #         keys=[
+            #             "qc_z1_all_probas",
+            #             "y",
+            #             "log_ratios",
+            #             "qc_z1",
+            #             "preds_is",
+            #             "preds_plugin",
+            #         ],
+            #         n_samples=N_EVAL_SAMPLES,
+            #     )
+            # y_pred = train_res["preds_plugin"].numpy()
+            # y_pred = y_pred / y_pred.sum(1, keepdims=True)
+            # np.save(f"{outputs_dir}{model_name}_ELBO.npy", y_pred)
 
             logger.info(trainer.model.encoder_z2_z1.keys())
             loop_results_dict = model_evaluation(

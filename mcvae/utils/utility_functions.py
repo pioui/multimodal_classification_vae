@@ -85,3 +85,10 @@ def model_evaluation(
         "train_LOSS": trainer.train_loss,
     }
     return res
+
+def log_train_test_split(list_of_tensors):
+    for y in list_of_tensors:
+        logger.info(f'Total: {len(y)}, {y.unique()}')
+        for l in torch.unique(y):
+            logger.info(f'Label {l}: {torch.sum(y==l)}')
+        logger.info('')

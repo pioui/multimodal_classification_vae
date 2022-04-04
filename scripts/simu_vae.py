@@ -228,22 +228,22 @@ for scenario in SCENARIOS:
             break
         torch.save(mdl.state_dict(), mdl_name)
 
-        # with torch.no_grad():
-        #     train_res = trainer.inference(
-        #         trainer.full_loader,
-        #         keys=[
-        #             "qc_z1_all_probas",
-        #             "y",
-        #             "log_ratios",
-        #             "qc_z1",
-        #             "preds_is",
-        #             "preds_plugin",
-        #         ],
-        #         n_samples=N_EVAL_SAMPLES,
-        #     )
-        # y_pred = train_res["preds_plugin"].numpy()
-        # y_pred = y_pred / y_pred.sum(1, keepdims=True)
-        # np.save(f"{outputs_dir}{model_name}.npy", y_pred)
+        with torch.no_grad():
+            train_res = trainer.inference(
+                trainer.full_loader,
+                keys=[
+                    "qc_z1_all_probas",
+                    "y",
+                    "log_ratios",
+                    "qc_z1",
+                    "preds_is",
+                    "preds_plugin",
+                ],
+                n_samples=N_EVAL_SAMPLES,
+            )
+        y_pred = train_res["preds_plugin"].numpy()
+        y_pred = y_pred / y_pred.sum(1, keepdims=True)
+        np.save(f"{outputs_dir}{model_name}.npy", y_pred)
 
 
 
@@ -366,22 +366,22 @@ for scenario in SCENARIOS:
                     break
                 torch.save(mdl.state_dict(), mdl_name[:-3]+"train"+".pt")
 
-            # with torch.no_grad():
-            #     train_res = trainer.inference(
-            #         trainer.full_loader,
-            #         keys=[
-            #             "qc_z1_all_probas",
-            #             "y",
-            #             "log_ratios",
-            #             "qc_z1",
-            #             "preds_is",
-            #             "preds_plugin",
-            #         ],
-            #         n_samples=N_EVAL_SAMPLES,
-            #     )
-            # y_pred = train_res["preds_plugin"].numpy()
-            # y_pred = y_pred / y_pred.sum(1, keepdims=True)
-            # np.save(f"{outputs_dir}{model_name}_ELBO.npy", y_pred)
+            with torch.no_grad():
+                train_res = trainer.inference(
+                    trainer.full_loader,
+                    keys=[
+                        "qc_z1_all_probas",
+                        "y",
+                        "log_ratios",
+                        "qc_z1",
+                        "preds_is",
+                        "preds_plugin",
+                    ],
+                    n_samples=N_EVAL_SAMPLES,
+                )
+            y_pred = train_res["preds_plugin"].numpy()
+            y_pred = y_pred / y_pred.sum(1, keepdims=True)
+            np.save(f"{outputs_dir}{model_name}_ELBO.npy", y_pred)
 
             logger.info(trainer.model.encoder_z2_z1.keys())
             loop_results_dict = model_evaluation(

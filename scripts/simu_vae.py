@@ -32,25 +32,7 @@ from mcvae.architectures.regular_modules import (
     EncoderBStudent,
 )
 
-# from houston_config import (
-#     outputs_dir,
-#     N_PARTICULES,
-#     N_LATENT,
-#     N_EPOCHS,
-#     N_HIDDEN,
-#     LR,
-#     N_EXPERIMENTS,
-#     BATCH_SIZE,
-#     CLASSIFICATION_RATIO,
-#     N_EVAL_SAMPLES,
-#     N_INPUT,
-#     N_LABELS,
-#     DATASET,
-#     PROJECT_NAME,
-#     SCENARIOS,
-# )
-
-from trento_config import (
+from houston_config import (
     outputs_dir,
     N_PARTICULES,
     N_LATENT,
@@ -67,6 +49,24 @@ from trento_config import (
     PROJECT_NAME,
     SCENARIOS,
 )
+
+# from trento_config import (
+#     outputs_dir,
+#     N_PARTICULES,
+#     N_LATENT,
+#     N_EPOCHS,
+#     N_HIDDEN,
+#     LR,
+#     N_EXPERIMENTS,
+#     BATCH_SIZE,
+#     CLASSIFICATION_RATIO,
+#     N_EVAL_SAMPLES,
+#     N_INPUT,
+#     N_LABELS,
+#     DATASET,
+#     PROJECT_NAME,
+#     SCENARIOS,
+# )
 from mcvae.utils.utility_functions import (
     model_evaluation,
 )

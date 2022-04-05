@@ -11,13 +11,13 @@ from mcvae.architectures.trento_encoders import (
     EncoderB4
 )
 
-data_dir = "/Users/plo026/data/Trento/"
+data_dir = "/home/plo026/data/Trento/"
 outputs_dir = "outputs/"
 labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
 images_dir =  "images/"
 
-N_EPOCHS = 1
+N_EPOCHS = 200
 LR = 1e-3
 N_PARTICULES = 30
 N_LATENT = 10

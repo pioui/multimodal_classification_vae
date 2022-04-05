@@ -303,7 +303,7 @@ for scenario in SCENARIOS:
                         new_classifier = nn.ModuleDict(
                             {
                                 key: ClassifierA(
-                                    n_latent,
+                                    n_input= 2*n_latent,
                                     n_output=N_LABELS,
                                     do_batch_norm=False,
                                     dropout_rate=0.1,

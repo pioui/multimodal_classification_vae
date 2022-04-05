@@ -17,7 +17,7 @@ labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roa
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
 images_dir =  "images/"
 
-N_EPOCHS = 200
+N_EPOCHS = 1
 LR = 1e-3
 N_PARTICULES = 30
 N_LATENT = 10
@@ -43,7 +43,7 @@ if not os.path.exists(outputs_dir):
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
 
-logging.basicConfig(filename = f'{outputs_dir}trento_logs.log')
+logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
 SCENARIOS = [  # WAKE updates
     # dict(

@@ -208,7 +208,7 @@ class MVAE_M1M2(nn.Module):
                     log_generative = (
                         outs["log_pc"]
                         + outs["log_pu"]
-                        + outs["log_pz1z2_u"]
+                        + outs["log_pz1z2_uc"]
                         + outs["log_px1_z1"]
                         + outs["log_px2_z2"]
 
@@ -311,6 +311,7 @@ class MVAE_M1M2(nn.Module):
             log_qz2 = log_qz2.sum(-1)
 
         z1_z2 = torch.car([z1,z2], dim=-1)
+        print(z1.shape, z2.shape, z1_z2.shape)
         qc_z1z2 = self.classifier[encoder_key](z1_z2)
         log_qc_z1z2 = qc_z1z2.log()
         y_int = y.argmax(-1)

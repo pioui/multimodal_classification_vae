@@ -344,13 +344,6 @@ class MVAE_M1M2_Trainer:
             classifier=classifier, encoder_z1=encoder_z1, encoder_z2=encoder_z2,encoder_u=encoder_u,
         )
 
-        # params_var = filter(
-        #     lambda p: p.requires_grad,
-        #     list(classifier.parameters())
-        #     + list(encoder_z1.parameters())
-        #     + list(encoder_z2_z1.parameters()),
-        # )
-        # optim_var_wake = Adam(params_var, lr=lr)
 
         if type(wake_psi) == list:
             encoder_keys = wake_psi

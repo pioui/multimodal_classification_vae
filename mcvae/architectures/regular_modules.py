@@ -383,6 +383,7 @@ class ClassifierA(nn.Module):
         )
 
     def forward(self, x):
+        print(x.shape)
         probas = self.classifier(x)
         probas = probas + 1e-16
         probas = probas / probas.sum(-1, keepdim=True)

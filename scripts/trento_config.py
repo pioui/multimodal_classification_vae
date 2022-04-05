@@ -1,3 +1,4 @@
+from tkinter import E
 import numpy as np
 import logging
 import os
@@ -42,7 +43,7 @@ if not os.path.exists(outputs_dir):
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
 
-logging.basicConfig(filename = f'{outputs_dir}trento_logs.log')
+logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
 SCENARIOS = [  # WAKE updates
     # dict(

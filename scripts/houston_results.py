@@ -16,12 +16,13 @@ from houston_config import (
     data_dir,
     images_dir,
     outputs_dir,
+    PROJECT_NAME
 )
 
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
 
-with open(f"{outputs_dir}houston.pkl", 'rb') as f:
+with open(f"{outputs_dir}{PROJECT_NAME}.pkl", 'rb') as f:
     data = pickle.load(f)
 
 print(data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]])

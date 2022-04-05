@@ -391,7 +391,7 @@ for scenario in SCENARIOS:
             y_pred = y_pred / y_pred.sum(1, keepdims=True)
             np.save(f"{outputs_dir}{model_name}_ELBO.npy", y_pred)
 
-            logger.info(trainer.model.encoder_z2_z1.keys())
+            logger.info(trainer.model.encoder_u.keys())
             loop_results_dict = model_evaluation(
                 trainer=trainer,
                 counts_eval=multi_counts_eval,

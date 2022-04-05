@@ -101,20 +101,20 @@ class TrentoMultimodalDataset(Dataset):
         self.full_dataset = TensorDataset(x_all[:,:63],x_all[:,63:], y_all) # 0 to 6
 
 
-DATASET = TrentoMultimodalDataset(
-    data_dir = "/Users/plo026/data/Trento/",
-)
-x1,x2,y = DATASET.train_dataset.tensors # 1819, -1 to 5
-print(x1.shape, x2.shape, y.shape, torch.unique(y))
+# DATASET = TrentoMultimodalDataset(
+#     data_dir = "/Users/plo026/data/Trento/",
+# )
+# x1,x2,y = DATASET.train_dataset.tensors # 1819, -1 to 5
+# print(x1.shape, x2.shape, y.shape, torch.unique(y))
 
-x1,x2,y = DATASET.train_dataset_labelled.tensors # 819 0 to 5
-print(x1.shape, x2.shape, y.shape, torch.unique(y))
+# x1,x2,y = DATASET.train_dataset_labelled.tensors # 819 0 to 5
+# print(x1.shape, x2.shape, y.shape, torch.unique(y))
 
-x1,x2,y = DATASET.test_dataset.tensors # 29395, 0 to 5
-print(x1.shape, x2.shape, y.shape, torch.unique(y))
+# x1,x2,y = DATASET.test_dataset.tensors # 29395, 0 to 5
+# print(x1.shape, x2.shape, y.shape, torch.unique(y))
 
-x1,x2,y = DATASET.test_dataset_labelled.tensors # 26455, 0 to 5
-print(x1.shape, x2.shape, y.shape, torch.unique(y))
+# x1,x2,y = DATASET.test_dataset_labelled.tensors # 26455, 0 to 5
+# print(x1.shape, x2.shape, y.shape, torch.unique(y))
 
-x1,x2,y = DATASET.full_dataset.tensors # 99600, 0 to 6
-print(x1.shape, x2.shape, y.shape, torch.unique(y))
+# x1,x2,y = DATASET.full_dataset.tensors # 99600, 0 to 6
+# print(x1.shape, x2.shape, y.shape, torch.unique(y))

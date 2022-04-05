@@ -18,7 +18,7 @@ logger.setLevel(logging.DEBUG)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-class VAE_M1M2_Trainer:
+class MVAE_M1M2_Trainer:
     def __init__(
         self,
         dataset: TrentoDataset,
@@ -102,7 +102,7 @@ class VAE_M1M2_Trainer:
         classification_ratio: float = 50.0,
         update_mode: str = "all",
         reparam_wphi: bool = True,
-        z2_with_elbo: bool = False,
+        u_with_elbo: bool = False,
     ):
         assert update_mode in ["all", "alternate"]
         assert (n_samples_phi is None) == (n_samples_theta is None)
@@ -126,8 +126,9 @@ class VAE_M1M2_Trainer:
         else:
             params_gen = filter(
                 lambda p: p.requires_grad,
-                list(self.model.decoder_z1_z2.parameters())
-                + list(self.model.x_decoder.parameters()),
+                list(self.model.decoder_z1z2.parameters())
+                + list(self.model.decoder_x1.parameters()),
+                + list(self.model.decoder_x2.parameters())
             )
             optim_gen = Adam(params_gen, lr=lr)
 
@@ -135,7 +136,9 @@ class VAE_M1M2_Trainer:
                 lambda p: p.requires_grad,
                 list(self.model.classifier.parameters())
                 + list(self.model.encoder_z1.parameters())
-                + list(self.model.encoder_z2_z1.parameters()),
+                + list(self.model.encoder_z2.parameters()),
+                + list(self.model.encoder_u.parameters()),
+
             )
 
             optim_var_wake = Adam(params_var, lr=lr)
@@ -152,17 +155,23 @@ class VAE_M1M2_Trainer:
             ):
                 self.it += 1
 
-                x_u, _ = tensor_all
-                x_s, y_s = tensor_superv
+                x_u1, x_u2, _ = tensor_all
+                x_s1, x_u2, y_s = tensor_superv
 
-                x_u = x_u.to(device)
-                x_s = x_s.to(device)
+                x_u1 = x_u1.to(device)
+                x_u2 = x_u2.to(device)
+
+                x_s1 = x_s1.to(device)
+                x_s2 = x_s2.to(device)
+
                 y_s = y_s.to(device)
 
                 if overall_loss is not None:
                     loss = self.loss(
-                        x_u=x_u,
-                        x_s=x_s,
+                        x_u1=x_u1,
+                        x_u2=x_u2,
+                        x_s1=x_s1,
+                        x_s2=x_s2,
                         y_s=y_s,
                         loss_type=overall_loss,
                         n_samples=n_samples,
@@ -170,7 +179,7 @@ class VAE_M1M2_Trainer:
                         classification_ratio=classification_ratio,
                         mode=update_mode,
                     )
-                    running_loss +=loss.item()/len(x_u)
+                    running_loss +=loss.item()/len(x_u1)
                     optim.zero_grad()
                     loss.backward()
                     optim.step()
@@ -181,8 +190,10 @@ class VAE_M1M2_Trainer:
                 else:
                     # Wake theta
                     theta_loss = self.loss(
-                        x_u=x_u,
-                        x_s=x_s,
+                        x_u1=x_u1,
+                        x_u2=x_u2,
+                        x_s1=x_s1,
+                        x_s2=x_s2,
                         y_s=y_s,
                         loss_type=wake_theta,
                         n_samples=n_samples_theta,
@@ -202,8 +213,10 @@ class VAE_M1M2_Trainer:
                     wake_psi_epoch = wake_psi
 
                     psi_loss = self.loss(
-                        x_u=x_u,
-                        x_s=x_s,
+                        x_u1=x_u1,
+                        x_u2=x_u2,
+                        x_s1=x_s1,
+                        x_s2=x_s2,
                         y_s=y_s,
                         loss_type=wake_psi_epoch,
                         n_samples=n_samples_phi,
@@ -211,7 +224,7 @@ class VAE_M1M2_Trainer:
                         classification_ratio=classification_ratio,
                         mode=update_mode,
                     )
-                    running_loss += psi_loss.item()/len(x_u)
+                    running_loss += psi_loss.item()/len(x_u1)
                     optim_var_wake.zero_grad()
                     psi_loss.backward()
                     optim_var_wake.step()
@@ -236,17 +249,23 @@ class VAE_M1M2_Trainer:
                     self.test_loader, cycle(self.test_annotated_loader)):
                     self.it += 1
 
-                    x_u, _ = tensor_all
-                    x_s, y_s = tensor_superv
+                    x_u1, x_u2, _ = tensor_all
+                    x_s1, x_u2, y_s = tensor_superv
 
-                    x_u = x_u.to(device)
-                    x_s = x_s.to(device)
+                    x_u1 = x_u1.to(device)
+                    x_u2 = x_u2.to(device)
+
+                    x_s1 = x_s1.to(device)
+                    x_s2 = x_s2.to(device)
+
                     y_s = y_s.to(device)
 
                     if overall_loss is not None:
                         loss = self.loss(
-                            x_u=x_u,
-                            x_s=x_s,
+                            x_u1=x_u1,
+                            x_u2=x_u2,
+                            x_s1=x_s1,
+                            x_s2=x_s2,
                             y_s=y_s,
                             loss_type=overall_loss,
                             n_samples=n_samples,
@@ -254,14 +273,16 @@ class VAE_M1M2_Trainer:
                             classification_ratio=classification_ratio,
                             mode=update_mode,
                         )
-                        running_loss +=loss.item()/len(x_u)
+                        running_loss +=loss.item()/len(x_u1)
                         # torch.cuda.synchronize()
 
                     else:
                         # Wake theta
                         theta_loss = self.loss(
-                            x_u=x_u,
-                            x_s=x_s,
+                            x_u1=x_u1,
+                            x_u2=x_u2,
+                            x_s1=x_s1,
+                            x_s2=x_s2,
                             y_s=y_s,
                             loss_type=wake_theta,
                             n_samples=n_samples_theta,
@@ -274,8 +295,10 @@ class VAE_M1M2_Trainer:
                         wake_psi_epoch = wake_psi
 
                         psi_loss = self.loss(
-                            x_u=x_u,
-                            x_s=x_s,
+                            x_u1=x_u1,
+                            x_u2=x_u2,
+                            x_s1=x_s1,
+                            x_s2=x_s2,
                             y_s=y_s,
                             loss_type=wake_psi_epoch,
                             n_samples=n_samples_phi,
@@ -283,7 +306,7 @@ class VAE_M1M2_Trainer:
                             classification_ratio=classification_ratio,
                             mode=update_mode,
                         )
-                        running_loss += psi_loss.item()/len(x_u)
+                        running_loss += psi_loss.item()/len(x_u1)
             self.test_loss.append(running_loss/ len(self.test_loader))
             logger.info(f"Test Loss: {running_loss/ len(self.test_loader)}")
 
@@ -315,9 +338,10 @@ class VAE_M1M2_Trainer:
         )
         classifier = encoders["classifier"]
         encoder_z1 = encoders["encoder_z1"]
-        encoder_z2_z1 = encoders["encoder_z2_z1"]
+        encoder_z2 = encoders["encoder_z2"]
+        encoder_u = encoders["encoder_u"]
         self.model.update_q(
-            classifier=classifier, encoder_z1=encoder_z1, encoder_z2_z1=encoder_z2_z1,
+            classifier=classifier, encoder_z1=encoder_z1, encoder_z2=encoder_z2,encoder_u=encoder_u,
         )
 
         # params_var = filter(
@@ -338,7 +362,8 @@ class VAE_M1M2_Trainer:
                 lambda p: p.requires_grad,
                 list(classifier[key].parameters())
                 + list(encoder_z1[key].parameters())
-                + list(encoder_z2_z1[key].parameters()),
+                + list(encoder_z2[key].parameters())
+                + list(encoder_u[key].parameters()),
             )
 
         params_var = {key: get_params(key) for key in encoder_keys}
@@ -353,11 +378,15 @@ class VAE_M1M2_Trainer:
                 self.train_loader, cycle(self.train_annotated_loader)
             ):
 
-                x_u, _ = tensor_all
-                x_s, y_s = tensor_superv
+                x_u1, x_u2, _ = tensor_all
+                x_s1, x_u2, y_s = tensor_superv
 
-                x_u = x_u.to(device)
-                x_s = x_s.to(device)
+                x_u1 = x_u1.to(device)
+                x_u2 = x_u2.to(device)
+
+                x_s1 = x_s1.to(device)
+                x_s2 = x_s2.to(device)
+
                 y_s = y_s.to(device)
 
                 # Wake phi
@@ -370,8 +399,10 @@ class VAE_M1M2_Trainer:
                         wake_psi_epoch = key
 
                     psi_loss = self.loss(
-                        x_u=x_u,
-                        x_s=x_s,
+                        x_u1=x_u1,
+                        x_u2=x_u2,
+                        x_s1=x_s1,
+                        x_s2=x_s2,
                         y_s=y_s,
                         loss_type=wake_psi_epoch,
                         n_samples=n_samples_phi,
@@ -382,7 +413,7 @@ class VAE_M1M2_Trainer:
                     optim_vars[key].zero_grad()
                     psi_loss.backward()
                     optim_vars[key].step()
-                    running_loss +=psi_loss.item()/len(x_u)
+                    running_loss +=psi_loss.item()/len(x_u1)
                     # torch.cuda.synchronize()
                     self.iterate += 1
             self.train_loss.append(running_loss/ len(self.train_loader))
@@ -395,11 +426,15 @@ class VAE_M1M2_Trainer:
                     self.test_loader, cycle(self.test_annotated_loader)
                 ):
 
-                    x_u, _ = tensor_all
-                    x_s, y_s = tensor_superv
+                    x_u1, x_u2, _ = tensor_all
+                    x_s1, x_u2, y_s = tensor_superv
 
-                    x_u = x_u.to(device)
-                    x_s = x_s.to(device)
+                    x_u1 = x_u1.to(device)
+                    x_u2 = x_u2.to(device)
+
+                    x_s1 = x_s1.to(device)
+                    x_s2 = x_s2.to(device)
+
                     y_s = y_s.to(device)
 
                     # Wake phi
@@ -412,8 +447,10 @@ class VAE_M1M2_Trainer:
                             wake_psi_epoch = key
 
                         psi_loss = self.loss(
-                            x_u=x_u,
-                            x_s=x_s,
+                            x_u1=x_u1,
+                            x_u2=x_u2,
+                            x_s1=x_s1,
+                            x_s2=x_s2,
                             y_s=y_s,
                             loss_type=wake_psi_epoch,
                             n_samples=n_samples_phi,
@@ -421,7 +458,7 @@ class VAE_M1M2_Trainer:
                             encoder_key=key,
                             classification_ratio=classification_ratio,
                         )
-                        running_loss +=psi_loss.item()/len(x_u)
+                        running_loss +=psi_loss.item()/len(x_u1)
                         # torch.cuda.synchronize()
             self.test_loss.append(running_loss/ len(self.test_loader))
             logger.info(f"Test Loss: {running_loss/ len(self.test_loss)}")
@@ -448,8 +485,10 @@ class VAE_M1M2_Trainer:
 
         params_gen = filter(
             lambda p: p.requires_grad,
-            list(self.model.decoder_z1_z2.parameters())
-            + list(self.model.x_decoder.parameters()),
+            list(self.model.decoder_z1z2.parameters())
+            + list(self.model.decoder_x1.parameters()),
+            + list(self.model.decoder_x2.parameters()),
+
         )
         optim_gen = Adam(params_gen, lr=lr)
 
@@ -458,7 +497,8 @@ class VAE_M1M2_Trainer:
                 lambda p: p.requires_grad,
                 list(self.model.classifier[key].parameters())
                 + list(self.model.encoder_z1[key].parameters())
-                + list(self.model.encoder_z2_z1[key].parameters()),
+                + list(self.model.encoder_z2[key].parameters())
+                + list(self.model.encoder_u[key].parameters()),
             )
 
         encoder_keys = counts.loc[lambda x: x.index != "prior"].keys()
@@ -473,17 +513,23 @@ class VAE_M1M2_Trainer:
                 self.train_loader, cycle(self.train_annotated_loader)
             ):
 
-                x_u, _ = tensor_all
-                x_s, y_s = tensor_superv
+                x_u1, x_u2, _ = tensor_all
+                x_s1, x_u2, y_s = tensor_superv
 
-                x_u = x_u.to(device)
-                x_s = x_s.to(device)
+                x_u1 = x_u1.to(device)
+                x_u2 = x_u2.to(device)
+
+                x_s1 = x_s1.to(device)
+                x_s2 = x_s2.to(device)
+
                 y_s = y_s.to(device)
 
                 # Wake theta
                 theta_loss = self.loss(
-                    x_u=x_u,
-                    x_s=x_s,
+                    x_u1=x_u1,
+                    x_u2=x_u2,
+                    x_s1=x_s1,
+                    x_s2=x_s2,
                     y_s=y_s,
                     loss_type=wake_theta,
                     n_samples=n_samples_theta,
@@ -492,7 +538,7 @@ class VAE_M1M2_Trainer:
                     encoder_key="defensive",
                     counts=counts,
                 )
-                running_loss +=theta_loss.item()/len(x_u)
+                running_loss +=theta_loss.item()/len(x_u1)
 
                 optim_gen.zero_grad()
                 theta_loss.backward()
@@ -504,8 +550,10 @@ class VAE_M1M2_Trainer:
                 for key in encoder_keys:
                     do_reparam = reparams_info[key]
                     var_loss = self.loss(
-                        x_u=x_u,
-                        x_s=x_s,
+                        x_u1=x_u1,
+                        x_u2=x_u2,
+                        x_s1=x_s1,
+                        x_s2=x_s2,
                         y_s=y_s,
                         loss_type=key,
                         n_samples=n_samples_phi,
@@ -513,7 +561,7 @@ class VAE_M1M2_Trainer:
                         classification_ratio=classification_ratio,
                         encoder_key=key,
                     )
-                    running_loss +=var_loss.item()/len(x_u)
+                    running_loss +=var_loss.item()/len(x_u1)
                     optim_vars[key].zero_grad()
                     var_loss.backward()
                     optim_vars[key].step()
@@ -526,17 +574,23 @@ class VAE_M1M2_Trainer:
                     self.test_loader, cycle(self.test_annotated_loader)
                 ):
 
-                    x_u, _ = tensor_all
-                    x_s, y_s = tensor_superv
+                    x_u1, x_u2, _ = tensor_all
+                    x_s1, x_u2, y_s = tensor_superv
 
-                    x_u = x_u.to(device)
-                    x_s = x_s.to(device)
+                    x_u1 = x_u1.to(device)
+                    x_u2 = x_u2.to(device)
+
+                    x_s1 = x_s1.to(device)
+                    x_s2 = x_s2.to(device)
+
                     y_s = y_s.to(device)
 
                     # Wake theta
                     theta_loss = self.loss(
-                        x_u=x_u,
-                        x_s=x_s,
+                        x_u1=x_u1,
+                        x_u2=x_u2,
+                        x_s1=x_s1,
+                        x_s2=x_s2,
                         y_s=y_s,
                         loss_type=wake_theta,
                         n_samples=n_samples_theta,
@@ -545,7 +599,7 @@ class VAE_M1M2_Trainer:
                         encoder_key="defensive",
                         counts=counts,
                     )
-                    running_loss +=theta_loss.item()/len(x_u)
+                    running_loss +=theta_loss.item()/len(x_u1)
 
 
                     # if self.iterate % 100 == 0:
@@ -554,8 +608,10 @@ class VAE_M1M2_Trainer:
                     for key in encoder_keys:
                         do_reparam = reparams_info[key]
                         var_loss = self.loss(
-                            x_u=x_u,
-                            x_s=x_s,
+                            x_u1=x_u1,
+                            x_u2=x_u2,
+                            x_s1=x_s1,
+                            x_s2=x_s2,
                             y_s=y_s,
                             loss_type=key,
                             n_samples=n_samples_phi,
@@ -563,15 +619,17 @@ class VAE_M1M2_Trainer:
                             classification_ratio=classification_ratio,
                             encoder_key=key,
                         )
-                        running_loss +=var_loss.item()/len(x_u)
+                        running_loss +=var_loss.item()/len(x_u1)
 
             self.test_loss.append(running_loss/ len(self.test_loader))
             logger.info(f"Test Loss: {running_loss/ len(self.test_loader)}")
 
     def loss(
         self,
-        x_u,
-        x_s,
+        x_u1,
+        x_u2,
+        x_s1,
+        x_s2,
         y_s,
         loss_type,
         n_samples=5,
@@ -587,10 +645,11 @@ class VAE_M1M2_Trainer:
 
         if mode == "all":
             outs_s = None
-            if x_u is None: l_u = torch.Tensor([0.0])
+            if x_u1 is None: l_u = torch.Tensor([0.0])
             else: 
                 l_u = self.model.forward(
-                x_u,
+                x_u1,
+                x_u2,
                 temperature=temp,
                 loss_type=loss_type,
                 n_samples=n_samples,
@@ -599,7 +658,8 @@ class VAE_M1M2_Trainer:
                 counts=counts,
             )
             l_s = self.model.forward(
-                x_s,
+                x_s1,
+                x_s2,
                 temperature=temp,
                 loss_type=loss_type,
                 y=y_s,
@@ -615,7 +675,8 @@ class VAE_M1M2_Trainer:
             outs_s = None
             if self.iterate % s_every == 0:
                 l_s = self.model.forward(
-                    x_s,
+                    x_s1,
+                    x_s2,
                     temperature=temp,
                     loss_type=loss_type,
                     y=y_s,
@@ -626,10 +687,11 @@ class VAE_M1M2_Trainer:
                 )
                 j = l_s.mean()
             else:
-                if x_u is None: l_u = torch.Tensor([0.0])
+                if x_u1 is None: l_u = torch.Tensor([0.0])
                 else:
                     l_u = self.model.forward(
-                    x_u,
+                    x_u1,
+                    x_u2,
                     temperature=temp,
                     loss_type=loss_type,
                     n_samples=n_samples,
@@ -653,13 +715,14 @@ class VAE_M1M2_Trainer:
             # )
             if self.classify_mode != "vanilla":
                 y_pred = self.model.classify(
-                    x_s,
+                    x_s1,
+                    x_s2,
                     encoder_key=encoder_key,
                     mode=self.classify_mode,
                     n_samples=n_samples,
                 )
             else:
-                y_pred = self.model.classify(x_s, encoder_key=encoder_key)
+                y_pred = self.model.classify(x_s1, x_s2, encoder_key=encoder_key)
             l_class = self.cross_entropy_fn(y_pred, target=y_s)
         loss = j + classification_ratio * l_class
 
@@ -685,8 +748,9 @@ class VAE_M1M2_Trainer:
         else:
             self.model = self.model.train()
         for tensor_all in data_loader:
-            x, y = tensor_all
-            x = x.to(device)
+            x1, x2, y = tensor_all
+            x1 = x1.to(device)
+            x2 = x1.to(device)
             y = y.to(device)
             if not do_supervised:
                 res = self.model.inference(

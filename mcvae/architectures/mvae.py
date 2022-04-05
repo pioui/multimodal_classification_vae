@@ -21,14 +21,15 @@ from mcvae.architectures.regular_modules import (
 )
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-class VAE_M1M2(nn.Module):
+class MVAE_M1M2(nn.Module):
     r"""
 
     """
 
     def __init__(
         self,
-        n_input: int,
+        n1_input: int,
+        n2_input: int,
         n_labels: int = 0,
         n_hidden: int = 128,
         n_latent: int = 10,
@@ -78,7 +79,7 @@ class VAE_M1M2(nn.Module):
                     # key: EncoderA(
                     # key: EncoderB(
                     key: z1_map[vdist_map[key]](
-                        n_input=n_input,
+                        n_input=n1_input,
                         n_output=n_latent,
                         n_hidden=n_hidden,
                         dropout_rate=dropout_rate,
@@ -97,7 +98,7 @@ class VAE_M1M2(nn.Module):
                     # key: EncoderA(
                     # key: EncoderB(
                     key: z2_map[vdist_map[key]](
-                        n_input=n_input,
+                        n_input=n2_input,
                         n_output=n_latent,
                         n_hidden=n_hidden,
                         dropout_rate=dropout_rate,
@@ -133,11 +134,11 @@ class VAE_M1M2(nn.Module):
         )
 
         self.decoder_x1 = BernoulliDecoderA(
-            n_input=n_latent, n_output=n_input, do_batch_norm=do_batch_norm
+            n_input=n_latent, n_output=n1_input, do_batch_norm=do_batch_norm
         )
 
         self.decoder_x2 = BernoulliDecoderA(
-            n_input=n_latent, n_output=n_input, do_batch_norm=do_batch_norm
+            n_input=n_latent, n_output=n2_input, do_batch_norm=do_batch_norm
         )
 
         y_prior_probs = (
@@ -213,7 +214,7 @@ class VAE_M1M2(nn.Module):
 
                     )
                     log_predictive = (
-                        outs["log_qz1_x1"] + outs["log_qz2_x2"] + outs["log_qu_z1z2"]  # + outs["log_qc_z1z2"]
+                        outs["log_qz1_x1"] + outs["log_qz2_x2"] + outs["log_qu_z1z2c"]  # + outs["log_qc_z1z2"]
                     )
                     log_w = log_generative - log_predictive
                 else:
@@ -275,7 +276,7 @@ class VAE_M1M2(nn.Module):
         z1 = Normal(pz1z2_uc_m[:self.n_latent], pz1z2_uc_v[:self.n_latent]).sample()
         z2 = Normal(pz1z2_uc_m[self.n_latent:], pz1z2_uc_v[self.n_latent:]).sample()
 
-        return dict(z1=z1, z1=z2, u=u, ys=ys)
+        return dict(z1=z1, z2=z2, u=u, ys=ys)
 
     def latent_prior_log_proba(self, z1, z2, u, y):
         log_pc = -np.log(self.n_labels)
@@ -287,7 +288,7 @@ class VAE_M1M2(nn.Module):
         log_pz1z2_uc = Normal(pz1z2_uc_m, pz1z2_uc_v.sqrt()).log_prob(z1_z2).sum(-1)
         return dict(
             log_pc=log_pc * torch.ones_like(log_pz1z2_uc),
-            log_pz1z2_u=log_pz1z2_uc,
+            log_pz1z2_uc=log_pz1z2_uc,
             log_pu=log_pu,
             sum_unsupervised=log_pc + log_pu + log_pz1z2_uc,
             sum_supervised=log_pu + log_pz1z2_uc,
@@ -434,13 +435,13 @@ class VAE_M1M2(nn.Module):
 
         # U | Z1,Z2, C
         z1_z2_y = torch.cat([z1s, z2s, ys], dim=-1)
-        qu_z1z2 = self.encoder_u[encoder_key](z1_z2_y, n_samples=1, reparam=reparam)
-        u = qu_z1z2["latent"]
-        qu_z1z2_m = qu_z1z2["q_m"]
-        qu_z1z2_v = qu_z1z2["q_v"]
-        log_qu_z1z2 = qu_z1z2["dist"].log_prob(z2)
-        if qu_z1z2["sum_last"]:
-            log_qu_z1z2 = log_qu_z1z2.sum(-1)
+        qu_z1z2c = self.encoder_u[encoder_key](z1_z2_y, n_samples=1, reparam=reparam)
+        u = qu_z1z2c["latent"]
+        qu_z1z2c_m = qu_z1z2c["q_m"]
+        qu_z1z2c_v = qu_z1z2c["q_v"]
+        log_qu_z1z2c = qu_z1z2c["dist"].log_prob(u)
+        if qu_z1z2c["sum_last"]:
+            log_qu_z1z2c = log_qu_z1z2c.sum(-1)
         u_y = torch.cat([u, ys], dim=-1)
         pz1z2_uc_m, pz1z2_uc_v = self.decoder_z1z2(u_y)
         z1_z2 = torch.cat([z1s, z2s], dim=-1)
@@ -448,14 +449,14 @@ class VAE_M1M2(nn.Module):
 
         log_pu = Normal(torch.zeros_like(u), torch.ones_like(u)).log_prob(u).sum(-1)
 
-        px1_z1_loc = self.x_decoder(z1)
+        px1_z1_loc = self.decoder_x1(z1)
         log_px1_z1 = torch.nn.BCELoss()(px1_z1_loc,x1.expand(px1_z1_loc.shape[0],-1,-1)).sum(-1)
 
-        px2_z2_loc = self.x_decoder(z2)
+        px2_z2_loc = self.decoder_x2(z2)
         log_px2_z2 = torch.nn.BCELoss()(px2_z2_loc,x2.expand(px2_z2_loc.shape[0],-1,-1)).sum(-1)
 
         generative_density = log_pu + log_pc + log_pz1z2_uc + log_px1_z1 + log_px2_z2
-        variational_density = log_qz1_x1 +log_qz2_x2+ log_qu_z1z2
+        variational_density = log_qz1_x1 +log_qz2_x2+ log_qu_z1z2c
         log_ratio = generative_density - variational_density
 
         variables = dict(
@@ -465,21 +466,23 @@ class VAE_M1M2(nn.Module):
             u=u,
             qz1_m=qz1_m,
             qz1_v=qz1_v,
-            qu_z1z2_m=qu_z1z2_m,
-            qu_z1z2_v=qu_z1z2_v,
-            pz1z2_u_m=pz1z2_uc_m,
-            pz1z2_u_v=pz1z2_uc_v,
+            qz2_m=qz2_m,
+            qz2_v=qz2_v,
+            qu_z1z2c_m=qu_z1z2c_m,
+            qu_z1z2c_v=qu_z1z2c_v,
+            pz1z2_uc_m=pz1z2_uc_m,
+            pz1z2_uc_v=pz1z2_uc_v,
             px1_z1_m=px1_z1_loc,
             px2_z2_m=px2_z2_loc,
             log_qz1_x1=log_qz1_x1,
             log_qz2_x2=log_qz2_x2,
             qc_z1z2=qc_z1z2,
             log_qc_z1z2=log_qc_z1z2,
-            log_qu_z1z2=log_qu_z1z2,
+            log_qu_z1z2c=log_qu_z1z2c,
             log_pu=log_pu,
             log_pc=log_pc,
             pc=pc,
-            log_pz1z2_u=log_pz1z2_uc,
+            log_pz1z2_uc=log_pz1z2_uc,
             log_px1_z1=log_px1_z1,
             log_px2_z2=log_px2_z2,
             generative_density=generative_density,
@@ -585,7 +588,7 @@ class VAE_M1M2(nn.Module):
             qc_z1z2=qc_z1z2,
             qc_z1z2_all_probas=qc_all,
             log_pc=res_prior["log_pc"],
-            log_pz1z2_u=res_prior["log_pz1z2_u"],
+            log_pz1z2_uc=res_prior["log_pz1z2_uc"],
             log_pu=res_prior["log_pu"],
             z1=z1_all,
             z2=z2_all,
@@ -625,7 +628,7 @@ class VAE_M1M2(nn.Module):
             log_ratio = vars["log_ratio"]
         else:
             log_ratio = (
-                vars["generative_density"] - vars["log_qz1_x1"]-vars["log_qz2_x2"] - vars["log_qu_z1z2"]
+                vars["generative_density"] - vars["log_qz1_x1"]-vars["log_qz2_x2"] - vars["log_qu_z1z2c"]
             )
             if not is_labelled:
                 log_ratio -= vars["log_qc_z1z2"]
@@ -734,9 +737,9 @@ class VAE_M1M2(nn.Module):
         # TODO Triple check
         ws = torch.softmax(log_ratios, dim=0)
         if is_labelled:
-            sum_log_q = kwargs["log_qz1_x"] + kwargs["log_qz2_z1"]
+            sum_log_q = kwargs["log_qz1_x1"] + kwargs["log_qz2_x2"]+ kwargs["log_qu_z1z2c"]
         else:
-            sum_log_q = kwargs["log_qz1_x"] + kwargs["log_qz2_z1"] + kwargs["log_qc_z1"]
+            sum_log_q = kwargs["log_qz1_x1"] +kwargs["log_qz2_x2"] + kwargs["log_qu_z1z2c"] + kwargs["log_qc_z1z2"]
         rev_kl = ws.detach() * (-1) * sum_log_q
         return rev_kl.sum(dim=0)
 

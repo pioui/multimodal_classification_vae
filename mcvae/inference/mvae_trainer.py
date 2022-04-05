@@ -127,8 +127,8 @@ class MVAE_M1M2_Trainer:
             params_gen = filter(
                 lambda p: p.requires_grad,
                 list(self.model.decoder_z1z2.parameters())
-                + list(self.model.decoder_x1.parameters()),
-                + list(self.model.decoder_x2.parameters())
+                + list(self.model.decoder_x1.parameters())
+                + list(self.model.decoder_x2.parameters()),
             )
             optim_gen = Adam(params_gen, lr=lr)
 
@@ -136,7 +136,7 @@ class MVAE_M1M2_Trainer:
                 lambda p: p.requires_grad,
                 list(self.model.classifier.parameters())
                 + list(self.model.encoder_z1.parameters())
-                + list(self.model.encoder_z2.parameters()),
+                + list(self.model.encoder_z2.parameters())
                 + list(self.model.encoder_u.parameters()),
 
             )
@@ -156,7 +156,7 @@ class MVAE_M1M2_Trainer:
                 self.it += 1
 
                 x_u1, x_u2, _ = tensor_all
-                x_s1, x_u2, y_s = tensor_superv
+                x_s1, x_s2, y_s = tensor_superv
 
                 x_u1 = x_u1.to(device)
                 x_u2 = x_u2.to(device)
@@ -250,7 +250,7 @@ class MVAE_M1M2_Trainer:
                     self.it += 1
 
                     x_u1, x_u2, _ = tensor_all
-                    x_s1, x_u2, y_s = tensor_superv
+                    x_s1, x_s2, y_s = tensor_superv
 
                     x_u1 = x_u1.to(device)
                     x_u2 = x_u2.to(device)
@@ -379,7 +379,7 @@ class MVAE_M1M2_Trainer:
             ):
 
                 x_u1, x_u2, _ = tensor_all
-                x_s1, x_u2, y_s = tensor_superv
+                x_s1, x_s2, y_s = tensor_superv
 
                 x_u1 = x_u1.to(device)
                 x_u2 = x_u2.to(device)
@@ -427,7 +427,7 @@ class MVAE_M1M2_Trainer:
                 ):
 
                     x_u1, x_u2, _ = tensor_all
-                    x_s1, x_u2, y_s = tensor_superv
+                    x_s1, x_s2, y_s = tensor_superv
 
                     x_u1 = x_u1.to(device)
                     x_u2 = x_u2.to(device)
@@ -486,7 +486,7 @@ class MVAE_M1M2_Trainer:
         params_gen = filter(
             lambda p: p.requires_grad,
             list(self.model.decoder_z1z2.parameters())
-            + list(self.model.decoder_x1.parameters()),
+            + list(self.model.decoder_x1.parameters())
             + list(self.model.decoder_x2.parameters()),
 
         )
@@ -514,7 +514,7 @@ class MVAE_M1M2_Trainer:
             ):
 
                 x_u1, x_u2, _ = tensor_all
-                x_s1, x_u2, y_s = tensor_superv
+                x_s1, x_s2, y_s = tensor_superv
 
                 x_u1 = x_u1.to(device)
                 x_u2 = x_u2.to(device)
@@ -575,7 +575,7 @@ class MVAE_M1M2_Trainer:
                 ):
 
                     x_u1, x_u2, _ = tensor_all
-                    x_s1, x_u2, y_s = tensor_superv
+                    x_s1, x_s2, y_s = tensor_superv
 
                     x_u1 = x_u1.to(device)
                     x_u2 = x_u2.to(device)
@@ -750,11 +750,12 @@ class MVAE_M1M2_Trainer:
         for tensor_all in data_loader:
             x1, x2, y = tensor_all
             x1 = x1.to(device)
-            x2 = x1.to(device)
+            x2 = x2.to(device)
             y = y.to(device)
             if not do_supervised:
                 res = self.model.inference(
-                    x,
+                    x1,
+                    x2,
                     n_samples=n_samples,
                     encoder_key=encoder_key,
                     counts=counts,
@@ -764,7 +765,8 @@ class MVAE_M1M2_Trainer:
             else:
                 raise ValueError("Not sure")
                 res = self.model.inference(
-                    x,
+                    x1,
+                    x2,
                     y=y,
                     n_samples=n_samples,
                     encoder_key=encoder_key,
@@ -779,7 +781,8 @@ class MVAE_M1M2_Trainer:
                 filtered_res = res
             if "preds_is" in keys:
                 filtered_res["preds_is"] = self.model.classify(
-                    x,
+                    x1,
+                    x2,
                     n_samples=n_samples,
                     mode="is",
                     counts=counts,
@@ -787,7 +790,8 @@ class MVAE_M1M2_Trainer:
                 )
             if "preds_plugin" in keys:
                 filtered_res["preds_plugin"] = self.model.classify(
-                    x,
+                    x1,
+                    x2,
                     n_samples=n_samples,
                     mode="plugin",
                     counts=counts,
@@ -797,13 +801,15 @@ class MVAE_M1M2_Trainer:
             is_labelled = False
             if counts is None:
                 log_ratios = (
-                    res["log_pz2"]
+                    res["log_pu"]
                     + res["log_pc"]
-                    + res["log_pz1_z2"]
-                    + res["log_px_z"]
-                    - res["log_qz1_x"]
-                    - res["log_qz2_z1"]
-                    - res["log_qc_z1"]
+                    + res["log_pz1z2_uc"]
+                    + res["log_px1_z1"]
+                    + res["log_px2_z2"]
+                    - res["log_qz1_x1"]
+                    - res["log_qz2_x2"]
+                    - res["log_qu_z1z2c"]
+                    - res["log_qc_z1z2"]
                 )
             else:
                 log_ratios = res["log_ratio"]

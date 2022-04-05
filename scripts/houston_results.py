@@ -50,9 +50,9 @@ for i in range(len(data_dict['LR'])):
     m_confusion_matrix = m_confusion_matrix[1:,1:]
     plt.matshow(m_confusion_matrix[1:,1:], cmap="YlGn")
     plt.xlabel("True Labels")
-    plt.xticks(np.arange(0,N_LABELS+1,1), labels[1:])
+    plt.xticks(np.arange(0,N_LABELS,1), labels[1:])
     plt.ylabel("Predicted Labels")
-    plt.yticks(np.arange(0,N_LABELS+1,1), labels[1:])
+    plt.yticks(np.arange(0,N_LABELS,1), labels[1:])
 
     for k in range (len(m_confusion_matrix)):
         for l in range(len(m_confusion_matrix[k])):
@@ -108,7 +108,7 @@ for subdir, dir, files in os.walk(outputs_dir):
                 handles.append(mpatches.Patch(color=c, label=l))
             plt.legend(handles=handles, fontsize = 3, loc='lower center', prop={'size':10}, bbox_to_anchor=(0.5,-4), ncol=3, borderaxespad=0.)
             plt.subplot(515)
-            plt.imshow((y_pred_max_prob*(1-y_pred_max_prob)).reshape(1202,4768), interpolation='nearest')
+            plt.imshow((y_pred_max_prob*(1-y_pred_max_prob)).reshape(1202,4768))
             plt.axis('off')
             plt.title("Uncertainty", fontsize=3)
             cbar = plt.colorbar(location='right', shrink=0.8)

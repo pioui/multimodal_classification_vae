@@ -74,10 +74,10 @@ class trentoDataset(Dataset):
 
         # plt.savefig("images/trento_apples_vines_distribution.png")
         
-        label_ind = np.where(y == 1)[0]
-        one_apple = x_all[label_ind][50]
-        label_ind = np.where(y == 5)[0]
-        one_vine = x_all[label_ind][76]
+        # label_ind = np.where(y == 1)[0]
+        # one_apple = x_all[label_ind][50]
+        # label_ind = np.where(y == 5)[0]
+        # one_vine = x_all[label_ind][76]
 
         # plt.figure()
         # plt.grid(which='both')

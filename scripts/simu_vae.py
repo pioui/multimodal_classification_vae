@@ -70,7 +70,6 @@ if dataset=="houston":
         N_EVAL_SAMPLES,
         N_INPUT,
         N_LABELS,
-        DATASET,
         PROJECT_NAME,
         SCENARIOS,
         SAMPLES_PER_CLASS,

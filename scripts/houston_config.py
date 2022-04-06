@@ -35,7 +35,7 @@ if not os.path.exists(outputs_dir):
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
 
-N_EPOCHS = 300
+N_EPOCHS = 1
 LR = 1e-3
 N_PARTICULES = 30
 N_LATENT = 10
@@ -49,7 +49,7 @@ CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 256
 PROJECT_NAME = "houston"
-SAMPLES_PER_CLASS = 500
+SAMPLES_PER_CLASS = 10
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 

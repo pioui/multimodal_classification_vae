@@ -13,11 +13,10 @@ import tifffile
 
 from mcvae.utils.utility_functions import compute_reject_label
 
+print(os.listdir('outputs/'))
 
 for dataset in os.listdir('outputs/'):
-    print("we are at ", dataset)
     if dataset == 'trento':
-        print("here")
         from trento_config import (
             labels,
             color,
@@ -29,6 +28,7 @@ for dataset in os.listdir('outputs/'):
             SHAPE
         )
     elif dataset == 'trento_multimodal':
+
         from trento_multimodal_config import (
             labels,
             color,
@@ -39,25 +39,25 @@ for dataset in os.listdir('outputs/'):
             N_LABELS,
             SHAPE
         )
-    elif dataset == 'houston':
-        from houston_config import (
-            labels,
-            color,
-            data_dir,
-            images_dir,
-            outputs_dir,
-            PROJECT_NAME,
-            N_LABELS,
-            SHAPE,
-        )
+    # elif dataset == 'houston':
+    #     print("here")
+    #     from houston_config import (
+    #         labels,
+    #         color,
+    #         data_dir,
+    #         images_dir,
+    #         outputs_dir,
+    #         PROJECT_NAME,
+    #         N_LABELS,
+    #         SHAPE,
+    #     )
     else:
-        print(dataset, 'here')
         continue
 
     # Accuracies
-    print(f"{outputs_dir}{PROJECT_NAME}.pkl")
     with open(f"{outputs_dir}{PROJECT_NAME}.pkl", 'rb') as f:
         data = pickle.load(f)
+    print(dataset)
     print(data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]])
     data_csv = data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]]
     data_csv.to_csv(f'{outputs_dir}/{PROJECT_NAME}_accuracies.csv')

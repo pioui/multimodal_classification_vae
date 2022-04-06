@@ -1,8 +1,7 @@
-from tkinter import E
 import numpy as np
 import logging
 import os
-from mcvae.dataset import TrentoDataset
+from mcvae.dataset import TrentoMultimodalDataset
 import torch.nn as nn
 from mcvae.architectures.trento_encoders import (
     EncoderB0,
@@ -12,7 +11,7 @@ from mcvae.architectures.trento_encoders import (
     EncoderB4
 )
 
-data_dir = "/Users/plo026/data/Trento/"
+data_dir = "/home/plo026/data/Trento/"
 outputs_dir = "outputs/"
 labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
@@ -25,15 +24,16 @@ N_LATENT = 10
 N_HIDDEN = 128
 N_EXPERIMENTS = 1
 NUM = 300
-N_INPUT = 65
+N1_INPUT = 63
+N2_INPUT = 2
 N_LABELS = 6
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 512
-PROJECT_NAME = "trento"
+PROJECT_NAME = "trento_multimodal"
 
 print(data_dir)
-DATASET = TrentoDataset(
+DATASET = TrentoMultimodalDataset(
     data_dir = data_dir,
 )
 
@@ -142,7 +142,16 @@ SCENARIOS = [  # WAKE updates
         model_name="EncoderB1_L10_VAE",
         encoder_z1=nn.ModuleDict(
             {"default": EncoderB1( 
-                n_input=N_INPUT,
+                n_input=N1_INPUT,
+                n_output=10,
+                n_hidden=128,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+        encoder_z2=nn.ModuleDict(
+            {"default": EncoderB1( 
+                n_input=N2_INPUT,
                 n_output=10,
                 n_hidden=128,
                 dropout_rate=0,

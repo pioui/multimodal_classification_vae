@@ -55,10 +55,10 @@ def model_evaluation(
         train_res = trainer.inference(
             trainer.test_loader,
             keys=[
-                "qc_z1_all_probas",
+                "qc_z1z2_all_probas",
                 "y",
                 "log_ratios",
-                "qc_z1",
+                "qc_z1z2",
                 "preds_is",
                 "preds_plugin",
             ],

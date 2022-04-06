@@ -85,22 +85,22 @@ class HoustonDataset(Dataset):
 # for l in torch.unique(y):
 #     print(f'Label {l}: {torch.sum(y==l)}')
 
-# x,y = DATASET.train_dataset.tensors # [1719340] -1 to 19, 255
+# x,y = DATASET.train_dataset.tensors # [1719340] -1 to 19
 # print(x.shape, y.shape, torch.unique(y)) 
 # for l in torch.unique(y):
 #     print(f'Label {l}: {torch.sum(y==l)}')
 
-# x,y = DATASET.train_dataset_labelled.tensors # [605673] 0 to 19, 255
+# x,y = DATASET.train_dataset_labelled.tensors # [605673] 0 to 19
 # print(x.shape, y.shape, torch.unique(y))
 # for l in torch.unique(y):
 #     print(f'Label {l}: {torch.sum(y==l)}')
 
-# x,y = DATASET.test_dataset.tensors # [4011796] -1 to 19, 255
+# x,y = DATASET.test_dataset.tensors # [4011796] -1 to 19
 # print(x.shape, y.shape, torch.unique(y))
 # for l in torch.unique(y):
 #     print(f'Label {l}: {torch.sum(y==l)}')
 
-# x,y = DATASET.test_dataset_labelled.tensors # [1413237] 0 to 19, 255
+# x,y = DATASET.test_dataset_labelled.tensors # [1413237] 0 to 19
 # print(x.shape, y.shape, torch.unique(y))
 # for l in torch.unique(y):
 #     print(f'Label {l}: {torch.sum(y==l)}')

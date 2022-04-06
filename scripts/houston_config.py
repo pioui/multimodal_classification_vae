@@ -35,7 +35,6 @@ if not os.path.exists(outputs_dir):
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
 
-logging.basicConfig(filename = f'{outputs_dir}houston_logs.log')
 
 N_EPOCHS = 300
 LR = 1e-3
@@ -50,6 +49,8 @@ CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 256
 PROJECT_NAME = "houston"
+
+logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
 DATASET = HoustonDataset(
     data_dir = data_dir,

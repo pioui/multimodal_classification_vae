@@ -10,19 +10,30 @@ import numpy as np
 from mcvae.utils.utility_functions import compute_reject_label
 import torch
 import tifffile
-from trento_config import (
+
+# from trento_config import (
+#     labels,
+#     color,
+#     data_dir,
+#     images_dir,
+#     outputs_dir,
+#     PROJECT_NAME
+# )
+
+from trento_multimodal_config import (
     labels,
-    color,
+    color,git 
     data_dir,
     images_dir,
     outputs_dir,
+    PROJECT_NAME
     N_LABELS,
 )
 
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
 
-with open(f"{outputs_dir}trento.pkl", 'rb') as f:
+with open(f"{outputs_dir}{PROJECT_NAME}.pkl", 'rb') as f:
     data = pickle.load(f)
 
 print(data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]])

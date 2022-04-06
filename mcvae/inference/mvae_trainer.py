@@ -11,7 +11,7 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
-from mcvae.dataset import TrentoDataset
+from mcvae.dataset import trentoDataset
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -21,7 +21,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 class MVAE_M1M2_Trainer:
     def __init__(
         self,
-        dataset: TrentoDataset,
+        dataset: trentoDataset,
         model,
         batch_size: int = 128,
         classify_mode: str = "vanilla",

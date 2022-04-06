@@ -1,8 +1,7 @@
-from tkinter import E
 import numpy as np
 import logging
 import os
-from mcvae.dataset import TrentoDataset
+from mcvae.dataset import trentoDataset
 import torch.nn as nn
 from mcvae.architectures.trento_encoders import (
     EncoderB0,
@@ -12,11 +11,17 @@ from mcvae.architectures.trento_encoders import (
     EncoderB4
 )
 
-data_dir = "/Users/plo026/data/Trento/"
-outputs_dir = "outputs/"
+data_dir = "/Users/plo026/data/trento/"
+outputs_dir = "outputs/trento/"
 labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
-images_dir =  "images/"
+images_dir =  "outputs/trento/images/"
+
+if not os.path.exists(outputs_dir):
+    os.makedirs(outputs_dir)
+
+if not os.path.exists(images_dir):
+    os.makedirs(images_dir)
 
 N_EPOCHS = 200
 LR = 1e-3
@@ -32,19 +37,12 @@ N_EVAL_SAMPLES = 25
 BATCH_SIZE = 512
 PROJECT_NAME = "trento"
 
+logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
 print(data_dir)
-DATASET = TrentoDataset(
+DATASET = trentoDataset(
     data_dir = data_dir,
 )
-
-if not os.path.exists(outputs_dir):
-    os.makedirs(outputs_dir)
-
-if not os.path.exists(images_dir):
-    os.makedirs(images_dir)
-
-logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
 SCENARIOS = [  # WAKE updates
     # dict(

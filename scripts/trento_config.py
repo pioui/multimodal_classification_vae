@@ -32,6 +32,7 @@ N_EVAL_SAMPLES = 25
 BATCH_SIZE = 512
 PROJECT_NAME = "trento"
 
+
 print(data_dir)
 DATASET = TrentoDataset(
     data_dir = data_dir,

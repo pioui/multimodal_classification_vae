@@ -4,7 +4,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-# from torch.distributions import MultivariateNormal, Normal
 import torch.distributions as db
 
 from mcvae.architectures.distributions import EllipticalStudent
@@ -31,7 +30,6 @@ class FCLayersA(nn.Module):
         self.to_out = nn.Linear(in_features=n_middle, out_features=n_output)
         self.dropout = nn.Dropout(p=dropout_rate)
         self.activation = nn.SELU()
-        # self.activation = nn.ReLU()
 
     def forward(self, x):
         res = self.to_hidden(x)
@@ -75,17 +73,8 @@ class EncoderA(nn.Module):
         q = self.encoder(x)
         q_m = self.mean_encoder(q)
         q_v = self.var_encoder(q)
-
-        # q_v = 16.0 * self.tanh(q_v)
-        # q_v = torch.clamp(q_v, min=-17., max=14.)
-
-        # PREVIOUS TO KEEP
-        # q_m = torch.clamp(q_m, min=-1000, max=1000)
-
-        # q_v = torch.clamp(q_v, min=-17.0, max=8.0)
         q_v = torch.clamp(q_v, min=-17.0, max=10.0)
         q_v = q_v.exp()
-        # q_v = 1e-16 + q_v.exp()
 
         variational_dist = db.Normal(loc=q_m, scale=q_v.sqrt())
 
@@ -188,25 +177,11 @@ class EncoderBStudent(EncoderB):
         q_v = torch.clamp(q_v, min=-17.0, max=10.0)
         q_v = q_v.exp()
 
-        # df = self.df_fn(q)
         df = 1.0 + self.df_fn(q).exp()
         df = torch.clamp(df, max=1e5)
 
-        # print("df : ", df.shape)
-        # print("q_m : ", q_m.shape)
-        # print("q_v : ", q_v.shape)
-
         st_dist = EllipticalStudent(df=df, loc=q_m, scale=torch.sqrt(q_v))
-        # if n_samples == 1 and squeeze:
-        #     sample_shape = []
-        # else:
-        #     sample_shape = (n_samples,)
-        # latent = self.reparameterize(
-        #     st_dist, sample_shape=sample_shape, reparam=reparam
-        # )
-        # return dict(
-        #     q_m=q_m, q_v=q_v, df=df, dist=st_dist, latent=latent, sum_last=False
-        # )
+
         if n_samples == 1 and squeeze:
             sample_shape = []
         else:
@@ -287,8 +262,6 @@ class EncoderAStudent(nn.Module):
         return dict(
             q_m=q_m, q_v=q_v, df=df_to_use, dist=st_dist, latent=latent, sum_last=False
         )
-        # return dict(q_m=q_m, q_v=q_v, latent=latent)
-
 
 class LinearEncoder(nn.Module):
     def __init__(self, n_input, n_output):
@@ -357,15 +330,7 @@ class DecoderA(nn.Module):
         p = self.decoder(x, *cat_list)
         p_m = self.mean_decoder(p)
         p_v = self.var_decoder(p)
-
-        # PREVIOUS TO KEEP
-        # p_m = torch.clamp(p_m, min=-1000, max=1000)
-
-        # p_v = torch.clamp(p_v, min=-17.0, max=10)
         p_v = torch.clamp(p_v, min=-17.0, max=8)
-
-        # p_v = torch.clamp(p_v, min=-17.0, max=14.0)
-        # p_v = 16. * self.tanh(p_v)
         return p_m, p_v.exp()
 
 
@@ -413,8 +378,6 @@ class EncoderH(nn.Module):
         self,
         n_in,
         n_out,
-        # n_cat_list,
-        # n_layers,
         n_hidden,
         do_h,
         dropout_rate,
@@ -440,8 +403,6 @@ class EncoderH(nn.Module):
             dropout_rate=dropout_rate,
             use_batch_norm=use_batch_norm,
         )
-        # with torch.no_grad():
-        #     encoder0 =
         self.mu = nn.Linear(n_hidden, n_out)
         self.sigma = nn.Linear(n_hidden, n_out)
         if do_sigmoid:
@@ -466,7 +427,6 @@ class EncoderH(nn.Module):
         if self.do_sigmoid:
             sigma = self.activation(sigma)
         else:
-            # sigma = nn.ReLU()(sigma)
             sigma = sigma.exp()
         if (sigma.min() == 0).item():
             print("tada")
@@ -558,8 +518,6 @@ class EncoderIAF(nn.Module):
             mu, sigma = self.encoders[0](x, *cat_list)
             h = None
 
-        # Big issue when x is 3d !!!
-        # Should stay 2d!!
         sampler = self.dist0.rsample if reparam else self.dist0.sample
         if n_samples == 1:
             eps = sampler((len(x),))
@@ -572,7 +530,6 @@ class EncoderIAF(nn.Module):
         qz_x = sigma.log() + 0.5 * (eps ** 2) + 0.5 * np.log(2.0 * np.pi)
         qz_x = -qz_x.sum(dim=-1)
 
-        # z shape (n_samples, n_batch, n_latent)
         if (z.dim() == 3) & (h.dim() == 2):
             n_batches, n_hdim = h.shape
             h_it = h.reshape(1, n_batches, n_hdim).expand(n_samples, n_batches, n_hdim)

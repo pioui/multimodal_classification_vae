@@ -183,7 +183,6 @@ class MVAE_M1M2_Trainer:
                     optim.zero_grad()
                     loss.backward()
                     optim.step()
-                    # torch.cuda.synchronize()
 
                     if self.iterate % 100 == 0:
                         self.metrics["train_loss"].append(loss.item())
@@ -204,7 +203,6 @@ class MVAE_M1M2_Trainer:
                     optim_gen.zero_grad()
                     theta_loss.backward()
                     optim_gen.step()
-                    # torch.cuda.synchronize()
 
                     if self.iterate % 100 == 0:
                         self.metrics["train_theta_wake"].append(theta_loss.item())
@@ -228,7 +226,6 @@ class MVAE_M1M2_Trainer:
                     optim_var_wake.zero_grad()
                     psi_loss.backward()
                     optim_var_wake.step()
-                    # torch.cuda.synchronize()
                     if self.iterate % 100 == 0:
                         self.metrics["train_phi_wake"].append(psi_loss.item())
                         if self.debug_gradients:
@@ -274,7 +271,6 @@ class MVAE_M1M2_Trainer:
                             mode=update_mode,
                         )
                         running_loss +=loss.item()/len(x_u1)
-                        # torch.cuda.synchronize()
 
                     else:
                         # Wake theta
@@ -407,7 +403,6 @@ class MVAE_M1M2_Trainer:
                     psi_loss.backward()
                     optim_vars[key].step()
                     running_loss +=psi_loss.item()/len(x_u1)
-                    # torch.cuda.synchronize()
                     self.iterate += 1
             self.train_loss.append(running_loss/ len(self.train_loader))
             logger.info(f"Train Loss: {running_loss/ len(self.train_loss)}")
@@ -452,7 +447,6 @@ class MVAE_M1M2_Trainer:
                             classification_ratio=classification_ratio,
                         )
                         running_loss +=psi_loss.item()/len(x_u1)
-                        # torch.cuda.synchronize()
             self.test_loss.append(running_loss/ len(self.test_loader))
             logger.info(f"Test Loss: {running_loss/ len(self.test_loss)}")
 
@@ -537,9 +531,6 @@ class MVAE_M1M2_Trainer:
                 theta_loss.backward()
                 optim_gen.step()
 
-                # if self.iterate % 100 == 0:
-                #     self.metrics["train_theta_wake"].append(theta_loss.item())
-
                 for key in encoder_keys:
                     do_reparam = reparams_info[key]
                     var_loss = self.loss(
@@ -593,10 +584,6 @@ class MVAE_M1M2_Trainer:
                         counts=counts,
                     )
                     running_loss +=theta_loss.item()/len(x_u1)
-
-
-                    # if self.iterate % 100 == 0:
-                    #     self.metrics["train_theta_wake"].append(theta_loss.item())
 
                     for key in encoder_keys:
                         do_reparam = reparams_info[key]
@@ -661,7 +648,6 @@ class MVAE_M1M2_Trainer:
                 encoder_key=encoder_key,
                 counts=counts,
             )
-            # torch.cuda.synchronize()
             l_s = labelled_fraction * l_s
             j = l_u.mean() + l_s.mean()
         elif mode == "alternate":
@@ -697,15 +683,8 @@ class MVAE_M1M2_Trainer:
             raise ValueError("Mode {} not recognized".format(mode))
 
         if encoder_key == "defensive":
-            # Classifiers' gradients are null wrt theta
             l_class = 0.0
         else:
-            # y_pred = self.model.classify(
-            #     x_s,
-            #     encoder_key=encoder_key,
-            #     mode=self.classify_mode,
-            #     n_samples=n_samples,
-            # )
             if self.classify_mode != "vanilla":
                 y_pred = self.model.classify(
                     x_s1,
@@ -757,16 +736,6 @@ class MVAE_M1M2_Trainer:
                 )
             else:
                 raise ValueError("Not sure")
-                res = self.model.inference(
-                    x1,
-                    x2,
-                    y=y,
-                    n_samples=n_samples,
-                    encoder_key=encoder_key,
-                    counts=counts,
-                    temperature=0.5,
-                    reparam=False,
-                )
             res["y"] = y
             if keys is not None:
                 filtered_res = {key: val for (key, val) in res.items() if key in keys}
@@ -816,10 +785,6 @@ class MVAE_M1M2_Trainer:
                     log_ratios=log_ratios, is_labelled=is_labelled, evaluate=True, **res
                 )
             if "log_ratios" in keys:
-                # n_labels, n_samples, n_batch = log_ratios.shape
-                # log_ratios = log_ratios.view(-1, n_batch)
-                # samp = np.random.choice(n_labels * n_samples, size=n_samples)
-                # log_ratios = log_ratios[samp, :]
                 filtered_res["log_ratios"] = log_ratios
 
             all_res = dic_update(all_res, filtered_res)

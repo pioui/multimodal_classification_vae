@@ -23,7 +23,6 @@ class houstonDataset(Dataset):
         samples_per_class=200,
         train_size=0.5,
         do_preprocess=True,
-        # **kwargs
     ) -> None:
         super().__init__()
 
@@ -75,33 +74,34 @@ class houstonDataset(Dataset):
         self.full_dataset = TensorDataset(x_all, y_all) # 0 to 20
         log_train_test_split([y_all, y_train, y_train_labelled, y_test, y_test_labelled])
 
+if __name__ == "__main__":
 
-# DATASET = houstonDataset(
-#     data_dir = "/Users/plo026/data/houston/",
-# )
+    DATASET = houstonDataset(
+        data_dir = "/Users/plo026/data/houston/",
+    )
 
-# x,y = DATASET.full_dataset.tensors # [5731136] 0 to 20
-# print(x.shape, y.shape, torch.unique(y))
-# for l in torch.unique(y):
-#     print(f'Label {l}: {torch.sum(y==l)}')
+    x,y = DATASET.full_dataset.tensors # [5731136] 0 to 20
+    print(x.shape, y.shape, torch.unique(y))
+    for l in torch.unique(y):
+        print(f'Label {l}: {torch.sum(y==l)}')
 
-# x,y = DATASET.train_dataset.tensors # [1719340] -1 to 19
-# print(x.shape, y.shape, torch.unique(y)) 
-# for l in torch.unique(y):
-#     print(f'Label {l}: {torch.sum(y==l)}')
+    x,y = DATASET.train_dataset.tensors # [1719340] -1 to 19
+    print(x.shape, y.shape, torch.unique(y)) 
+    for l in torch.unique(y):
+        print(f'Label {l}: {torch.sum(y==l)}')
 
-# x,y = DATASET.train_dataset_labelled.tensors # [605673] 0 to 19
-# print(x.shape, y.shape, torch.unique(y))
-# for l in torch.unique(y):
-#     print(f'Label {l}: {torch.sum(y==l)}')
+    x,y = DATASET.train_dataset_labelled.tensors # [605673] 0 to 19
+    print(x.shape, y.shape, torch.unique(y))
+    for l in torch.unique(y):
+        print(f'Label {l}: {torch.sum(y==l)}')
 
-# x,y = DATASET.test_dataset.tensors # [4011796] -1 to 19
-# print(x.shape, y.shape, torch.unique(y))
-# for l in torch.unique(y):
-#     print(f'Label {l}: {torch.sum(y==l)}')
+    x,y = DATASET.test_dataset.tensors # [4011796] -1 to 19
+    print(x.shape, y.shape, torch.unique(y))
+    for l in torch.unique(y):
+        print(f'Label {l}: {torch.sum(y==l)}')
 
-# x,y = DATASET.test_dataset_labelled.tensors # [1413237] 0 to 19
-# print(x.shape, y.shape, torch.unique(y))
-# for l in torch.unique(y):
-#     print(f'Label {l}: {torch.sum(y==l)}')
+    x,y = DATASET.test_dataset_labelled.tensors # [1413237] 0 to 19
+    print(x.shape, y.shape, torch.unique(y))
+    for l in torch.unique(y):
+        print(f'Label {l}: {torch.sum(y==l)}')
 

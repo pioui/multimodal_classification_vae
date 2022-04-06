@@ -32,17 +32,13 @@ N_EXPERIMENTS = 1
 NUM = 300
 N_INPUT = 65
 N_LABELS = 6
+SHAPE = (166,600)
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 512
 PROJECT_NAME = "trento"
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
-
-print(data_dir)
-DATASET = trentoDataset(
-    data_dir = data_dir,
-)
 
 SCENARIOS = [  # WAKE updates
     # dict(

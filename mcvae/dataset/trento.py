@@ -9,10 +9,12 @@ import numpy as np
 import logging
 import random
 import matplotlib.pyplot as plt
+
+from mcvae.utils import normalize, log_train_test_split
+
 random.seed(42)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-
 
 class trentoDataset(Dataset):
     def __init__(
@@ -20,7 +22,6 @@ class trentoDataset(Dataset):
         data_dir,
         unlabelled_size=1000,
         do_preprocess=True,
-        # **kwargs
     ) -> None:
         super().__init__()
 
@@ -32,13 +33,8 @@ class trentoDataset(Dataset):
         x_all = torch.transpose(x_all, 1,0) # [99600,65]
         
         #Normalize to [0,1]
-        if do_preprocess: # TODO: Something more sophisticated?
-            logger.info("Normalize to 0,1")
-            x_min = x_all.min(dim=0)[0] # [65]
-            x_max = x_all.max(dim=0)[0] # [65]
-            x_all = (x_all- x_min)/(x_max-x_min)
-            assert torch.unique(x_all.min(dim=0)[0] == 0.)
-            assert torch.unique(x_all.max(dim=0)[0] == 1.)
+        if do_preprocess: 
+            x_all = normalize(x_all).float()
 
         y = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"], dtype = torch.int64) # [166,600] 0 to 6
         y_train_labelled = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Train.mat")["TNsecSUBS_Train"], dtype = torch.int64) # [166,600] 0 to 6
@@ -65,30 +61,30 @@ class trentoDataset(Dataset):
         x_test = x_all[test_indeces] # [29595, 65]
         y_test = y_all[test_indeces]  # [29595]
 
-        plt.figure(dpi=1000)
-        plt.suptitle('Distribution HSI and Lidar pixel values')
-        for channel in range(x_all.shape[-1]):
-            plt.subplot(10,7,channel+1)
-            for label,name in zip([1,5],["A. Trees", "Vineyards"]):
-                plt.axis("off")
-                label_ind = np.where(y == label)[0]
-                hist_values = x_all[label_ind, channel]
-                histogram, bin_edges = np.histogram(hist_values, bins=100, range=(0, 1))
-                plt.plot(bin_edges[:-1], histogram, label = name, linewidth = 0.5, alpha = 0.6)
+        # plt.figure(dpi=1000)
+        # plt.suptitle('Distribution HSI and Lidar pixel values')
+        # for channel in range(x_all.shape[-1]):
+        #     plt.subplot(10,7,channel+1)
+        #     for label,name in zip([1,5],["A. Trees", "Vineyards"]):
+        #         plt.axis("off")
+        #         label_ind = np.where(y == label)[0]
+        #         hist_values = x_all[label_ind, channel]
+        #         histogram, bin_edges = np.histogram(hist_values, bins=100, range=(0, 1))
+        #         plt.plot(bin_edges[:-1], histogram, label = name, linewidth = 0.5, alpha = 0.6)
 
-        plt.savefig("images/trento_apples_vines_distribution.png")
+        # plt.savefig("images/trento_apples_vines_distribution.png")
         
         label_ind = np.where(y == 1)[0]
         one_apple = x_all[label_ind][50]
         label_ind = np.where(y == 5)[0]
         one_vine = x_all[label_ind][76]
 
-        plt.figure()
-        plt.grid(which='both')
-        plt.scatter(np.arange(0,65),one_apple, label = "A. Trees")
-        plt.scatter(np.arange(0,65),one_vine, label = "Vineyards")
-        plt.legend()
-        plt.savefig("images/trento_apples_vines_channels.png")
+        # plt.figure()
+        # plt.grid(which='both')
+        # plt.scatter(np.arange(0,65),one_apple, label = "A. Trees")
+        # plt.scatter(np.arange(0,65),one_vine, label = "Vineyards")
+        # plt.legend()
+        # plt.savefig("images/trento_apples_vines_channels.png")
 
 
         x_test_labelled, _, y_test_labelled, _ = train_test_split(x_test, y_test, train_size= 0.9, stratify = y_test)
@@ -99,22 +95,24 @@ class trentoDataset(Dataset):
         self.test_dataset = TensorDataset(x_test, y_test-1) # 0 to 5
         self.test_dataset_labelled = TensorDataset(x_test_labelled, y_test_labelled-1) # 0 to 5
         self.full_dataset = TensorDataset(x_all, y_all) # 0 to 6
+        log_train_test_split([y_all, y_train, y_train_labelled, y_test, y_test_labelled])
 
+if __name__ == "__main__":
 
-# DATASET = trentoDataset(
-#     data_dir = "/Users/plo026/data/trento/",
-# )
-# x,y = DATASET.train_dataset.tensors # 819
-# print(x.shape, y.shape, torch.unique(y))
+    DATASET = trentoDataset(
+        data_dir = "/Users/plo026/data/trento/",
+    )
+    x,y = DATASET.train_dataset.tensors # 819
+    print(x.shape, y.shape, torch.unique(y))
 
-# x,y = DATASET.train_dataset_labelled.tensors # 409 
-# print(x.shape, y.shape, torch.unique(y))
+    x,y = DATASET.train_dataset_labelled.tensors # 409 
+    print(x.shape, y.shape, torch.unique(y))
 
-# x,y = DATASET.test_dataset.tensors # 15107
-# print(x.shape, y.shape, torch.unique(y))
+    x,y = DATASET.test_dataset.tensors # 15107
+    print(x.shape, y.shape, torch.unique(y))
 
-# x,y = DATASET.test_dataset_labelled.tensors # 15107
-# print(x.shape, y.shape, torch.unique(y))
+    x,y = DATASET.test_dataset_labelled.tensors # 15107
+    print(x.shape, y.shape, torch.unique(y))
 
-# x,y = DATASET.full_dataset.tensors # 15107
-# print(x.shape, y.shape, torch.unique(y))
+    x,y = DATASET.full_dataset.tensors # 15107
+    print(x.shape, y.shape, torch.unique(y))

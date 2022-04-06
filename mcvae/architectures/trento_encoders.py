@@ -47,7 +47,6 @@ class EncoderB0(nn.Module):
     def forward(self, x, n_samples=1, squeeze=True, reparam=True):
         n_batch = len(x)
 
-
         # FOR TRENTO
         x = x.view(n_batch, self.n_input)
         x = self.fc_layer(x)
@@ -307,7 +306,6 @@ if __name__ == "__main__":
 
     layer = EncoderB3(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
     summary(layer, (1,65))
-
 
     layer = EncoderB4(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
     summary(layer, (1,65))

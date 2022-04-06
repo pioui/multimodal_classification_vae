@@ -59,7 +59,6 @@ class MVAE_M1M2(nn.Module):
 
         self.n_labels = n_labels
         self.n_latent = n_latent
-        # Classifier takes n_latent as input
         self.classifier = nn.ModuleDict(
             {
                 key: ClassifierA(
@@ -76,8 +75,6 @@ class MVAE_M1M2(nn.Module):
             z1_map = dict(gaussian=EncoderB, student=EncoderBStudent,)
             self.encoder_z1 = nn.ModuleDict(
                 {
-                    # key: EncoderA(
-                    # key: EncoderB(
                     key: z1_map[vdist_map[key]](
                         n_input=n1_input,
                         n_output=n_latent,
@@ -95,8 +92,6 @@ class MVAE_M1M2(nn.Module):
             z2_map = dict(gaussian=EncoderB, student=EncoderBStudent,)
             self.encoder_z2 = nn.ModuleDict(
                 {
-                    # key: EncoderA(
-                    # key: EncoderB(
                     key: z2_map[vdist_map[key]](
                         n_input=n2_input,
                         n_output=n_latent,
@@ -110,12 +105,10 @@ class MVAE_M1M2(nn.Module):
         else:
             self.encoder_z2 = encoder_z2
 
-        # q(z_2 \mid z_1, c)
         if encoder_u is None:
             u_map = dict(gaussian=EncoderA, student=EncoderAStudent,)
             self.encoder_u = nn.ModuleDict(
                 {
-                    # key: EncoderA(
                     key: u_map[vdist_map[key]](
                         n_input=n_latent*2 + n_labels,
                         n_output=n_latent,
@@ -177,15 +170,6 @@ class MVAE_M1M2(nn.Module):
         encoder_key="default",
         outs=None,
     ):
-        # if outs is None:
-        # Temperature not used here
-        # outs = self.inference(
-        #     x,
-        #     n_samples=n_samples,
-        #     encoder_key=encoder_key,
-        #     counts=counts,
-        #     temperature=0.5,
-        # )
         n_batch, _ = x1.shape
         inference_kwargs = dict(
             n_samples=n_samples,
@@ -196,8 +180,7 @@ class MVAE_M1M2(nn.Module):
         if mode == "plugin":
             outs = self.inference(x1,x2, **inference_kwargs)
             w_y = outs["qc_z1z2_all_probas"].mean(0)
-        # if mode == "plugin":
-        # w_y = outs["log_qc_z1"].exp().mean(1).transpose(-1, -2)
+
         elif mode == "is":
             pc_x1x2 = torch.zeros(n_batch, self.n_labels, device=x1.device)
             for c_val in np.arange(self.n_labels):
@@ -218,27 +201,16 @@ class MVAE_M1M2(nn.Module):
                     )
                     log_w = log_generative - log_predictive
                 else:
-                    # log_qc_z1z2 = outs["log_qc_z1z2"]
                     log_w = outs["log_ratio"]
-                    # log_w = log_w - log_qc_z
-                # n_samples, n_batch
+
                 log_p_c_i = torch.logsumexp(log_w, dim=0)
                 pc_x1x2[:, c_val] = log_p_c_i.exp()
             pc_x1x2 = pc_x1x2 / pc_x1x2.sum(-1, keepdim=True)
             w_y = pc_x1x2
-            #     log_wtilde = nn.LogSoftmax(0)(log_w)
-            #     log_pc1_x = log_qc_z + log_wtilde
-            #     log_pc1_x = torch.logsumexp(log_pc1_x, 0)
-            #     all_log_pc_x.append(log_pc1_x.unsqueeze(-1))
-            # all_log_pc_x = torch.cat(all_log_pc_x, -1)
-            # w_y = nn.Softmax(dim=-1)(all_log_pc_x)
 
         else:
             raise ValueError("Mode {} not recognize".format(mode))
-        # inp = x
-        # q_z1 = self.encoder_z1(inp, n_samples=n_samples)
-        # z = q_z1["latent"]
-        # w_y = self.classifier(z)
+
         return w_y
 
     def update_q(
@@ -401,7 +373,6 @@ class MVAE_M1M2(nn.Module):
         z2s = z2
 
         #  C | Z1, Z2
-        # Broadcast labels if necessary
         z1_z2 = torch.cat([z1,z2], dim=-1)
         qc_z1z2 = self.classifier[encoder_key](z1_z2)
         log_qc_z1z2 = qc_z1z2.log()
@@ -492,7 +463,6 @@ class MVAE_M1M2(nn.Module):
             qc_z1z2_all_probas=qc_z1z2_all_probas,
             df=dfs,
         )
-        # torch.cuda.synchronize()
         return variables
 
     def inference_defensive_sampling(self, x1, x2, y, temperature, counts: pd.Series):
@@ -502,7 +472,6 @@ class MVAE_M1M2(nn.Module):
         n_labels = self.n_labels
         sum_key = "sum_supervised" if y is not None else "sum_unsupervised"
 
-        # z sampling
         encoder_keys = counts.keys()
         z1_all = []
         z2_all = []
@@ -636,71 +605,9 @@ class MVAE_M1M2(nn.Module):
 
         if loss_type == "ELBO":
             loss = self.elbo(log_ratio, is_labelled=is_labelled, **vars)
-        # elif loss_type == "CUBO":
-        #     loss = self.cubo(log_ratio, is_labelled=is_labelled, **vars)
-        # elif loss_type == "CUBOB":
-        #     loss = self.cubob(log_ratio, is_labelled=is_labelled, **vars)
-        # elif loss_type == "REVKL":
-        #     loss = self.forward_kl(log_ratio, is_labelled=is_labelled, **vars)
-        # elif loss_type == "IWELBO":
-        #     loss = self.iwelbo(log_ratio, is_labelled=is_labelled, **vars)
-        # else:
-        #     raise ValueError("Mode {} not recognized".format(loss_type))
-        # if torch.isnan(loss).any() or not torch.isfinite(loss).any():
-        #     print("NaN loss")
-        #     diagnostic = {
-        #         "z1": (vars["z1"].min().item(), vars["z1"].max().item()),
-        #         "z2": (vars["z2"].min().item(), vars["z2"].max().item()),
-        #         "qz1_m": (vars["qz1_m"].min().item(), vars["qz1_m"].max().item()),
-        #         "qz1_v": (vars["qz1_v"].min().item(), vars["qz1_v"].max().item()),
-        #         "qz2_z1_m": (
-        #             vars["qz2_z1_m"].min().item(),
-        #             vars["qz2_z1_m"].max().item(),
-        #         ),
-        #         "qz2_z1_v": (
-        #             vars["qz2_z1_v"].min().item(),
-        #             vars["qz2_z1_v"].max().item(),
-        #         ),
-        #         "pz1_z2m": (vars["pz1_z2m"].min().item(), vars["pz1_z2m"].max().item()),
-        #         "pz1_z2_v": (
-        #             vars["pz1_z2_v"].min().item(),
-        #             vars["pz1_z2_v"].max().item(),
-        #         ),
-        #         "px_z_m": (vars["px_z_m"].min().item(), vars["px_z_m"].max().item()),
-        #         "log_qz1_x": (
-        #             vars["log_qz1_x"].min().item(),
-        #             vars["log_qz1_x"].max().item(),
-        #         ),
-        #         "qc_z1": (vars["qc_z1"].min().item(), vars["qc_z1"].max().item()),
-        #         "log_qc_z1": (
-        #             vars["log_qc_z1"].min().item(),
-        #             vars["log_qc_z1"].max().item(),
-        #         ),
-        #         "log_qz2_z1": (
-        #             vars["log_qz2_z1"].min().item(),
-        #             vars["log_qz2_z1"].max().item(),
-        #         ),
-        #         "log_pz2": (vars["log_pz2"].min().item(), vars["log_pz2"].max().item()),
-        #         "log_pc": (vars["log_pc"].min().item(), vars["log_pc"].max().item()),
-        #         "log_pz1_z2": (
-        #             vars["log_pz1_z2"].min().item(),
-        #             vars["log_pz1_z2"].max().item(),
-        #         ),
-        #         "log_px_z": (
-        #             vars["log_px_z"].min().item(),
-        #             vars["log_px_z"].max().item(),
-        #         ),
-        #         "log_ratio": (
-        #             vars["log_ratio"].min().item(),
-        #             vars["log_ratio"].max().item(),
-        #         ),
-        #     }
-        #     if vars["df"] is not None:
-        #         diagnostic["df"] = (
-        #             vars["df"].min().item(),
-        #             vars["df"].max().item(),
-        #         )
-        #     raise ValueError(diagnostic)
+        else:
+            raise ValueError("Mode {} not recognized".format(loss_type))
+            
         if return_outs:
             return loss, vars
         return loss
@@ -722,7 +629,6 @@ class MVAE_M1M2(nn.Module):
                 - log q(z_i \mid x) q(u_i \mid z_i, c) q(c \mid z_i)
                 ==> shape (C, K, N)
         """
-        # (n_samples, n_batch)
         assert not evaluate
         ws = torch.softmax(log_ratios, dim=0)
         loss = -(ws.detach() * log_ratios).sum(dim=0)
@@ -746,8 +652,6 @@ class MVAE_M1M2(nn.Module):
 
     @staticmethod
     def cubo(log_ratios, is_labelled, evaluate=False, **kwargs):
-        # if is_labelled:
-        # assert not evaluate
         ws = torch.softmax(2 * log_ratios, dim=0)  # Corresponds to squaring
         cubo_loss = ws.detach() * (-1) * log_ratios
         return cubo_loss.mean()

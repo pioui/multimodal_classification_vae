@@ -9,6 +9,9 @@ import numpy as np
 import logging
 import random
 import matplotlib.pyplot as plt
+
+from mcvae.utils import normalize, log_train_test_split
+
 random.seed(42)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -20,7 +23,6 @@ class trentoMultimodalDataset(Dataset):
         data_dir,
         unlabelled_size=1000,
         do_preprocess=True,
-        # **kwargs
     ) -> None:
         super().__init__()
 
@@ -33,12 +35,7 @@ class trentoMultimodalDataset(Dataset):
         
         #Normalize to [0,1]
         if do_preprocess: # TODO: Something more sophisticated?
-            logger.info("Normalize to 0,1")
-            x_min = x_all.min(dim=0)[0] # [65]
-            x_max = x_all.max(dim=0)[0] # [65]
-            x_all = (x_all- x_min)/(x_max-x_min)
-            assert torch.unique(x_all.min(dim=0)[0] == 0.)
-            assert torch.unique(x_all.max(dim=0)[0] == 1.)
+            x_all = normalize(x_all).float()
 
         y = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"], dtype = torch.int64) # [166,600] 0 to 6
         y_train_labelled = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Train.mat")["TNsecSUBS_Train"], dtype = torch.int64) # [166,600] 0 to 6
@@ -99,22 +96,24 @@ class trentoMultimodalDataset(Dataset):
         self.test_dataset = TensorDataset(x_test[:,:63],x_test[:,63:], y_test-1) # 0 to 5
         self.test_dataset_labelled = TensorDataset(x_test_labelled[:,:63],x_test_labelled[:,63:], y_test_labelled-1) # 0 to 5
         self.full_dataset = TensorDataset(x_all[:,:63],x_all[:,63:], y_all) # 0 to 6
+        log_train_test_split([y_all, y_train, y_train_labelled, y_test, y_test_labelled])
 
+if __name__ == "__main__":
 
-# DATASET = trentoMultimodalDataset(
-#     data_dir = "/Users/plo026/data/trento/",
-# )
-# x1,x2,y = DATASET.train_dataset.tensors # 1819, -1 to 5
-# print(x1.shape, x2.shape, y.shape, torch.unique(y))
+    DATASET = trentoMultimodalDataset(
+        data_dir = "/Users/plo026/data/trento/",
+    )
+    x1,x2,y = DATASET.train_dataset.tensors # 1819, -1 to 5
+    print(x1.shape, x2.shape, y.shape, torch.unique(y))
 
-# x1,x2,y = DATASET.train_dataset_labelled.tensors # 819 0 to 5
-# print(x1.shape, x2.shape, y.shape, torch.unique(y))
+    x1,x2,y = DATASET.train_dataset_labelled.tensors # 819 0 to 5
+    print(x1.shape, x2.shape, y.shape, torch.unique(y))
 
-# x1,x2,y = DATASET.test_dataset.tensors # 29395, 0 to 5
-# print(x1.shape, x2.shape, y.shape, torch.unique(y))
+    x1,x2,y = DATASET.test_dataset.tensors # 29395, 0 to 5
+    print(x1.shape, x2.shape, y.shape, torch.unique(y))
 
-# x1,x2,y = DATASET.test_dataset_labelled.tensors # 26455, 0 to 5
-# print(x1.shape, x2.shape, y.shape, torch.unique(y))
+    x1,x2,y = DATASET.test_dataset_labelled.tensors # 26455, 0 to 5
+    print(x1.shape, x2.shape, y.shape, torch.unique(y))
 
-# x1,x2,y = DATASET.full_dataset.tensors # 99600, 0 to 6
-# print(x1.shape, x2.shape, y.shape, torch.unique(y))
+    x1,x2,y = DATASET.full_dataset.tensors # 99600, 0 to 6
+    print(x1.shape, x2.shape, y.shape, torch.unique(y))

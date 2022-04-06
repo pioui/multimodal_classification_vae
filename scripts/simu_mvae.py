@@ -73,7 +73,6 @@ if dataset=="trento":
 #         N1_INPUT,
 #         N2_INPUT,
 #         N_LABELS,
-#         DATASET,
 #         PROJECT_NAME,
 #         SCENARIOS,
 #     )

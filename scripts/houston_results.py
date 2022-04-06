@@ -37,6 +37,7 @@ for i in range(len(data_dict['LR'])):
     train_loss = data_dict["train_LOSS"][i]
     test_loss = data_dict["test_LOSS"][i]
 
+
     plt.figure(dpi=1000)
     plt.plot(train_loss, color="red", label = 'Train Loss')
     plt.plot(test_loss, color="blue", label='Test Loss')
@@ -60,6 +61,7 @@ for i in range(len(data_dict['LR'])):
     plt.title("Test Confusion Matrix")
 
     plt.savefig(f"{images_dir}{model_name}_{encoder_type}_test_confusion_matrix.png", bbox_inches='tight', dpi=1000)
+    np.savetxt(f"{outputs_dir}{model_name}_{encoder_type}_test_consusion_matrix.csv", m_confusion_matrix.astype(int), delimiter=',')
 
 y = np.array(tifffile.imread(data_dir+"houston_gt.tif"), dtype = np.int64) # [1202,4768]
 y_true = y.reshape(-1)
@@ -115,7 +117,7 @@ for subdir, dir, files in os.walk(outputs_dir):
             cbar.ax.tick_params(labelsize =2 )
             plt.savefig(f"{images_dir}{model_name}_classification_matrix.png",bbox_inches='tight', dpi=1000)
 
-            m_confusion_matrix = confusion_matrix(y_true, y_pred)
+            m_confusion_matrix = confusion_matrix(y_true, y_pred, normalize='true')
             m_confusion_matrix = m_confusion_matrix[1:,1:]
             plt.figure(dpi=2000)
             plt.matshow(m_confusion_matrix, cmap="YlGn")
@@ -128,8 +130,9 @@ for subdir, dir, files in os.walk(outputs_dir):
                     plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center')
             plt.title("Total Confusion Matrix")
             plt.savefig(f"{images_dir}{model_name}_total_confusion_matrix.png",bbox_inches='tight', dpi=1000)
+            np.savetxt(f"{outputs_dir}{model_name}_total_confusion_matrix.csv", m_confusion_matrix.astype(int), delimiter=',')
 
-            m_confusion_matrix = confusion_matrix(y_true, y_pred_reject)
+            m_confusion_matrix = confusion_matrix(y_true, y_pred_reject, normalize='true')
             m_confusion_matrix = m_confusion_matrix[1:,1:]
             plt.figure(dpi=2000)
             plt.matshow(m_confusion_matrix, cmap="YlGn")
@@ -142,7 +145,8 @@ for subdir, dir, files in os.walk(outputs_dir):
                     plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center')
             plt.title("Total Confusion Matrix")
             plt.savefig(f"{images_dir}{model_name}_reject_total_confusion_matrix.png",bbox_inches='tight', dpi=1000)
-            
+            np.savetxt(f"{outputs_dir}{model_name}_reject_total_confusion_matrix.csv", m_confusion_matrix.astype(int), delimiter=',')
+
             
 
 

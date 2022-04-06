@@ -27,6 +27,7 @@ from trento_multimodal_config import (
     images_dir,
     outputs_dir,
     PROJECT_NAME
+    N_LABELS,
 )
 
 if not os.path.exists(images_dir):
@@ -59,9 +60,9 @@ for i in range(len(data_dict['LR'])):
     plt.figure()
     plt.matshow(m_confusion_matrix, cmap="YlGn")
     plt.xlabel("True Labels")
-    plt.xticks(np.arange(0,6,1), labels[1:])
+    plt.xticks(np.arange(0,N_LABELS,1), labels[1:])
     plt.ylabel("Predicted Labels")
-    plt.yticks(np.arange(0,6,1), labels[1:])
+    plt.yticks(np.arange(0,N_LABELS,1), labels[1:])
 
     for k in range (len(m_confusion_matrix)):
         for l in range(len(m_confusion_matrix[k])):
@@ -129,9 +130,9 @@ for subdir, dir, files in os.walk(outputs_dir):
             plt.figure()
             plt.matshow(m_confusion_matrix, cmap="YlGn")
             plt.xlabel("True Labels")
-            plt.xticks(np.arange(0,6,1), labels[1:])
+            plt.xticks(np.arange(0,N_LABELS,1), labels[1:])
             plt.ylabel("Predicted Labels")
-            plt.yticks(np.arange(0,6,1), labels[1:])
+            plt.yticks(np.arange(0,N_LABELS,1), labels[1:])
             for k in range (len(m_confusion_matrix)):
                 for l in range(len(m_confusion_matrix[k])):
                     plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center')
@@ -143,9 +144,9 @@ for subdir, dir, files in os.walk(outputs_dir):
             plt.figure()
             plt.matshow(m_confusion_matrix, cmap="YlGn")
             plt.xlabel("True Labels")
-            plt.xticks(np.arange(0,6,1), labels[1:])
+            plt.xticks(np.arange(0,N_LABELS,1), labels[1:])
             plt.ylabel("Predicted Labels")
-            plt.yticks(np.arange(0,6,1), labels[1:])
+            plt.yticks(np.arange(0,N_LABELS,1), labels[1:])
             for k in range (len(m_confusion_matrix)):
                 for l in range(len(m_confusion_matrix[k])):
                     plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center')

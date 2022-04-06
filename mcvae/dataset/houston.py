@@ -29,11 +29,6 @@ class HoustonDataset(Dataset):
 
         image_hyper = torch.tensor(tifffile.imread(data_dir+"houston_hyper.tif")) # [50,1202,4768]
         image_lidar = torch.tensor(tifffile.imread(data_dir+"houston_lidar.tif")) # [7,1202,4768]
-
-        plt.subplot(211)
-        plt.imshow(image_hyper[0])
-        plt.imshow(image_lidar[0])
-        plt.show()
         
         x = torch.cat((image_hyper,image_lidar), dim = 0) # [57,1202,4768]
         y = torch.tensor(tifffile.imread(data_dir+"houston_gt.tif"), dtype = torch.int64) # [1202,4768]

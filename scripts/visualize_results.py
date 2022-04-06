@@ -13,6 +13,7 @@ import tifffile
 
 from mcvae.utils.utility_functions import compute_reject_label
 
+print(os.listdir('outputs/'))
 
 for dataset in os.listdir('outputs/'):
     if dataset == 'trento':
@@ -27,6 +28,7 @@ for dataset in os.listdir('outputs/'):
             SHAPE
         )
     elif dataset == 'trento_multimodal':
+
         from trento_multimodal_config import (
             labels,
             color,
@@ -59,13 +61,16 @@ for dataset in os.listdir('outputs/'):
             N_LABELS,
             SHAPE,
         )
+
     else:
         continue
 
     # Accuracies
     print(dataset)
+
     with open(f"{outputs_dir}{PROJECT_NAME}.pkl", 'rb') as f:
         data = pickle.load(f)
+    print(dataset)
     print(data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]])
     data_csv = data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]]
     data_csv.to_csv(f'{outputs_dir}/{PROJECT_NAME}_accuracies.csv')

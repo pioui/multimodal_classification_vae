@@ -12,6 +12,7 @@ from mcvae.architectures.trento_encoders import (
 )
 
 data_dir = "/home/plo026/data/trento_multimodal/"
+
 outputs_dir = "outputs/trento_multimodal/"
 labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
@@ -22,7 +23,7 @@ if not os.path.exists(outputs_dir):
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
 
-N_EPOCHS = 200
+N_EPOCHS = 1
 LR = 1e-3
 N_PARTICULES = 30
 N_HIDDEN = 128

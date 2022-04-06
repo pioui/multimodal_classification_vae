@@ -1,9 +1,9 @@
-from .trento import TrentoDataset
-from .houston import HoustonDataset
-from .trento_multimodal import TrentoMultimodalDataset
+from .trento import trentoDataset
+from .houston import houstonDataset
+from .trento_multimodal import trentoMultimodalDataset
 
 __all__ = [
-    "TrentoDataset",
-    "HoustonDataset",
-    "TrentoMultimodalDataset",
+    "trentoDataset",
+    "houstonDataset",
+    "trentoMultimodalDataset",
 ]

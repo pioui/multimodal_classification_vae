@@ -1,7 +1,7 @@
 import numpy as np
 import logging
 import os
-from mcvae.dataset import TrentoMultimodalDataset
+from mcvae.dataset import trentoMultimodalDataset
 import torch.nn as nn
 from mcvae.architectures.trento_encoders import (
     EncoderB0,
@@ -11,11 +11,16 @@ from mcvae.architectures.trento_encoders import (
     EncoderB4
 )
 
-data_dir = "/home/plo026/data/Trento/"
-outputs_dir = "outputs/"
+data_dir = "/home/plo026/data/trento_multimodal/"
+outputs_dir = "outputs/trento_multimodal/"
 labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
-images_dir =  "images/"
+images_dir =  "outputs/trento_multimodal/images/"
+
+if not os.path.exists(outputs_dir):
+    os.makedirs(outputs_dir)
+if not os.path.exists(images_dir):
+    os.makedirs(images_dir)
 
 N_EPOCHS = 200
 LR = 1e-3
@@ -32,18 +37,11 @@ N_EVAL_SAMPLES = 25
 BATCH_SIZE = 512
 PROJECT_NAME = "trento_multimodal"
 
-print(data_dir)
-DATASET = TrentoMultimodalDataset(
+logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
+
+DATASET = trentoMultimodalDataset(
     data_dir = data_dir,
 )
-
-if not os.path.exists(outputs_dir):
-    os.makedirs(outputs_dir)
-
-if not os.path.exists(images_dir):
-    os.makedirs(images_dir)
-
-logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
 SCENARIOS = [  # WAKE updates
     # dict(

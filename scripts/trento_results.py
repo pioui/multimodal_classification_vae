@@ -7,9 +7,19 @@ from scipy import io
 from sklearn.metrics import confusion_matrix
 import os
 import numpy as np
-from mcvae.utils.utility_functions import compute_reject_label
 import torch
 import tifffile
+
+from mcvae.utils.utility_functions import compute_reject_label
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--dataset", "-d",
+    help="name of dataset to use (trento, houston)",
+    )
+
+args = parser.parse_args()
+dataset = args.dataset
 
 # from trento_config import (
 #     labels,
@@ -29,6 +39,7 @@ from trento_multimodal_config import (
     PROJECT_NAME,
     N_LABELS,
 )
+
 
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)

@@ -1,7 +1,7 @@
 import numpy as np
 import logging
 import os
-from mcvae.dataset import HoustonDataset
+from mcvae.dataset import houstonDataset
 import torch.nn as nn
 from mcvae.architectures.trento_encoders import (
     EncoderB0,
@@ -11,8 +11,8 @@ from mcvae.architectures.trento_encoders import (
     EncoderB4,
 )
 
-data_dir = "/Users/plo026/data/Houston/"
-outputs_dir = "outputs/"
+data_dir = "/Users/plo026/data/houston/"
+outputs_dir = "outputs/houston/"
 labels = [
     "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 
     "Deciduous Trees", "Bare Earth", "Water", "Residential buildings",
@@ -27,14 +27,13 @@ color = [
     "firebrick", "darkred", "peru", "yellow", "orange",
     "magenta", "blue", "skyblue"
     ]
-images_dir =  "images/"
+images_dir =  "outputs/houston/images/"
 
 if not os.path.exists(outputs_dir):
     os.makedirs(outputs_dir)
 
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
-
 
 N_EPOCHS = 300
 LR = 1e-3
@@ -52,7 +51,7 @@ PROJECT_NAME = "houston"
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
-DATASET = HoustonDataset(
+DATASET = houstonDataset(
     data_dir = data_dir,
     samples_per_class=200,
 )

@@ -27,13 +27,13 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--dataset", "-d",
-    help="name of dataset to use (Trento, Houston)",
+    help="name of dataset to use (trento, houston)",
     )
 
 args = parser.parse_args()
 dataset = args.dataset
 
-if dataset=="Trento":
+if dataset=="trento":
     from trento_config import (
         outputs_dir,
         N_PARTICULES,
@@ -51,7 +51,7 @@ if dataset=="Trento":
         PROJECT_NAME,
         SCENARIOS,
     )
-if dataset=="Houston":
+if dataset=="houston":
     from houston_config import (
         outputs_dir,
         N_PARTICULES,
@@ -89,7 +89,7 @@ Z1_MAP = dict(gaussian=EncoderB, student=EncoderBStudent,)
 Z2_MAP = dict(gaussian=EncoderA, student=EncoderAStudent,)
 
 FILENAME = f"{outputs_dir}/{PROJECT_NAME}.pkl"
-MDL_DIR = f"models/{PROJECT_NAME}"
+MDL_DIR = f"{outputs_dir}/models"
 DEBUG = False
 
 if not os.path.exists(MDL_DIR):
@@ -142,7 +142,6 @@ for scenario in SCENARIOS:
     do_defensive = type(loss_wvar) == list
     multi_encoder_keys = loss_wvar if do_defensive else ["default"]
     for t in range(N_EXPERIMENTS):
-        # t = t + 4
         loop_setup_dict = {
             "BATCH_SIZE": BATCH_SIZE,
             "ITER": t,

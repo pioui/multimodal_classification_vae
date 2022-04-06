@@ -16,7 +16,7 @@ random.seed(42)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-class HoustonDataset(Dataset):
+class houstonDataset(Dataset):
     def __init__(
         self,
         data_dir,
@@ -76,8 +76,8 @@ class HoustonDataset(Dataset):
         log_train_test_split([y_all, y_train, y_train_labelled, y_test, y_test_labelled])
 
 
-# DATASET = HoustonDataset(
-#     data_dir = "/Users/plo026/data/Houston/",
+# DATASET = houstonDataset(
+#     data_dir = "/Users/plo026/data/houston/",
 # )
 
 # x,y = DATASET.full_dataset.tensors # [5731136] 0 to 20

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class TrentoDataset(Dataset):
+class trentoDataset(Dataset):
     def __init__(
         self,
         data_dir,
@@ -101,8 +101,8 @@ class TrentoDataset(Dataset):
         self.full_dataset = TensorDataset(x_all, y_all) # 0 to 6
 
 
-# DATASET = TrentoDataset(
-#     data_dir = "/Users/plo026/data/Trento/",
+# DATASET = trentoDataset(
+#     data_dir = "/Users/plo026/data/trento/",
 # )
 # x,y = DATASET.train_dataset.tensors # 819
 # print(x.shape, y.shape, torch.unique(y))

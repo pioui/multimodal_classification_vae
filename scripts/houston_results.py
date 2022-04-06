@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 import matplotlib.patches as mpatches
 from scipy import io
+from scripts.houston_config import N_LABELS
 from sklearn.metrics import confusion_matrix
 import os
 import numpy as np
@@ -16,7 +17,8 @@ from houston_config import (
     data_dir,
     images_dir,
     outputs_dir,
-    PROJECT_NAME
+    PROJECT_NAME,
+    N_LABELS
 )
 
 if not os.path.exists(images_dir):

@@ -118,7 +118,7 @@ class MVAE_M1M2(nn.Module):
                     # key: EncoderA(
                     key: u_map[vdist_map[key]](
                         n_input=n_latent*2 + n_labels,
-                        n_output=n_latent*2,
+                        n_output=n_latent,
                         n_hidden=n_hidden,
                         dropout_rate=dropout_rate,
                         do_batch_norm=do_batch_norm,
@@ -130,7 +130,7 @@ class MVAE_M1M2(nn.Module):
             self.encoder_u = encoder_u
 
         self.decoder_z1z2 = DecoderA(
-            n_input=n_latent*2 + n_labels, n_output=n_latent*2, n_hidden=n_hidden
+            n_input=n_latent + n_labels, n_output=n_latent*2, n_hidden=n_hidden
         )
 
         self.decoder_x1 = BernoulliDecoderA(

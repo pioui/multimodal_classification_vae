@@ -4,12 +4,7 @@
 
 import os
 import logging
-from math import ceil
-import matplotlib.pyplot as plt
-from matplotlib import colors
-import matplotlib.patches as mpatches
 
-from sklearn.metrics import confusion_matrix
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
@@ -17,9 +12,6 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from arviz.stats import psislw
-from sklearn.metrics import accuracy_score, precision_score, recall_score
-from tqdm.auto import tqdm
 
 
 from mcvae.architectures import MVAE_M1M2
@@ -32,42 +24,55 @@ from mcvae.architectures.regular_modules import (
     EncoderBStudent,
 )
 
-# from houston_config import (
-#     outputs_dir,
-#     N_PARTICULES,
-#     N_LATENT,
-#     N_EPOCHS,
-#     N_HIDDEN,
-#     LR,
-#     N_EXPERIMENTS,
-#     BATCH_SIZE,
-#     CLASSIFICATION_RATIO,
-#     N_EVAL_SAMPLES,
-#     N_INPUT,
-#     N_LABELS,
-#     DATASET,
-#     PROJECT_NAME,
-#     SCENARIOS,
-# )
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--dataset", "-d",
+    help="name of dataset to use (Trento, Houston)",
+    )
 
-from trento_multimodal_config import (
-    outputs_dir,
-    N_PARTICULES,
-    N_LATENT,
-    N_EPOCHS,
-    N_HIDDEN,
-    LR,
-    N_EXPERIMENTS,
-    BATCH_SIZE,
-    CLASSIFICATION_RATIO,
-    N_EVAL_SAMPLES,
-    N1_INPUT,
-    N2_INPUT,
-    N_LABELS,
-    DATASET,
-    PROJECT_NAME,
-    SCENARIOS,
-)
+args = parser.parse_args()
+dataset = args.dataset
+
+if dataset=="Trento":
+    from trento_multimodal_config import (
+        outputs_dir,
+        N_PARTICULES,
+        N_LATENT,
+        N_EPOCHS,
+        N_HIDDEN,
+        LR,
+        N_EXPERIMENTS,
+        BATCH_SIZE,
+        CLASSIFICATION_RATIO,
+        N_EVAL_SAMPLES,
+        N1_INPUT,
+        N2_INPUT,
+        N_LABELS,
+        DATASET,
+        PROJECT_NAME,
+        SCENARIOS,
+    )
+
+if dataset=="Houston":
+    from trento_multimodal_config import (
+        outputs_dir,
+        N_PARTICULES,
+        N_LATENT,
+        N_EPOCHS,
+        N_HIDDEN,
+        LR,
+        N_EXPERIMENTS,
+        BATCH_SIZE,
+        CLASSIFICATION_RATIO,
+        N_EVAL_SAMPLES,
+        N1_INPUT,
+        N2_INPUT,
+        N_LABELS,
+        DATASET,
+        PROJECT_NAME,
+        SCENARIOS,
+    )
+
 from mcvae.utils.utility_functions import (
     model_evaluation,
 )
@@ -105,11 +110,12 @@ logger.setLevel(logging.DEBUG)
 
 logger.info("train all examples {}".format(len(DATASET.train_dataset.tensors[0])))
 logger.info("train labelled examples {}".format(len(DATASET.train_dataset_labelled.tensors[0])))
-logger.info("test labelled examples {}".format(len(DATASET.test_dataset.tensors[0])))
+logger.info("test all examples {}".format(len(DATASET.test_dataset.tensors[0])))
+logger.info("test labelled examples {}".format(len(DATASET.test_dataset_labelled.tensors[0])))
 
 EVAL_ENCODERS = [
     dict(encoder_type="train", eval_encoder_name="train"),  # MUST BE ON TOP!!!
-    dict(encoder_type="ELBO", reparam=True, eval_encoder_name="VAE"),
+    # dict(encoder_type="ELBO", reparam=True, eval_encoder_name="VAE"),
 ]
 
 
@@ -404,5 +410,4 @@ for scenario in SCENARIOS:
             DF = pd.DataFrame(DF_LI)
             DF.to_pickle(FILENAME)
 
-# DF = pd.DataFrame(DF_LI)
-# DF.to_pickle(FILENAME)
+

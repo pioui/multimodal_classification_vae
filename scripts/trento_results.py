@@ -22,11 +22,11 @@ import tifffile
 
 from trento_multimodal_config import (
     labels,
-    color,git 
+    color,
     data_dir,
     images_dir,
     outputs_dir,
-    PROJECT_NAME
+    PROJECT_NAME,
     N_LABELS,
 )
 

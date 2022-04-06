@@ -36,6 +36,7 @@ dataset = args.dataset
 if dataset=="trento":
     from trento_config import (
         outputs_dir,
+        data_dir,
         N_PARTICULES,
         N_LATENT,
         N_EPOCHS,
@@ -47,13 +48,17 @@ if dataset=="trento":
         N_EVAL_SAMPLES,
         N_INPUT,
         N_LABELS,
-        DATASET,
         PROJECT_NAME,
         SCENARIOS,
+    )
+    from mcvae.dataset import trentoDataset
+    DATASET = trentoDataset(
+        data_dir = data_dir,
     )
 if dataset=="houston":
     from houston_config import (
         outputs_dir,
+        data_dir,
         N_PARTICULES,
         N_LATENT,
         N_EPOCHS,
@@ -68,6 +73,12 @@ if dataset=="houston":
         DATASET,
         PROJECT_NAME,
         SCENARIOS,
+        SAMPLES_PER_CLASS,
+    )
+    from mcvae.dataset import houstonDataset
+    DATASET = houstonDataset(
+        data_dir = data_dir,
+        samples_per_class=SAMPLES_PER_CLASS,
     )
 
 from mcvae.utils.utility_functions import (
@@ -244,7 +255,7 @@ for scenario in SCENARIOS:
             )
         y_pred = train_res["preds_plugin"].numpy()
         y_pred = y_pred / y_pred.sum(1, keepdims=True)
-        np.save(f"{outputs_dir}{model_name}.npy", y_pred)
+        np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}.npy", y_pred)
 
 
 
@@ -382,7 +393,7 @@ for scenario in SCENARIOS:
                 )
             y_pred = train_res["preds_plugin"].numpy()
             y_pred = y_pred / y_pred.sum(1, keepdims=True)
-            np.save(f"{outputs_dir}{model_name}_ELBO.npy", y_pred)
+            np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}_ELBO.npy", y_pred)
 
             logger.info(trainer.model.encoder_z2_z1.keys())
             loop_results_dict = model_evaluation(

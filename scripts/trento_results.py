@@ -49,7 +49,7 @@ with open(f"{outputs_dir}{PROJECT_NAME}.pkl", 'rb') as f:
 
 print(data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]])
 data_csv = data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]]
-data_csv.to_csv(f'{outputs_dir}/accuracies.csv')
+data_csv.to_csv(f'{outputs_dir}/{PROJECT_NAME}_accuracies.csv')
 data_dict = data.to_dict()
 
 for i in range(len(data_dict['LR'])):

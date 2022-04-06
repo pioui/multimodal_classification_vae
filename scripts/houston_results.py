@@ -42,7 +42,7 @@ with open(f"{outputs_dir}{PROJECT_NAME}.pkl", 'rb') as f:
 
 print(data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]])
 data_csv = data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]]
-data_csv.to_csv(f'{outputs_dir}/accuracies.csv')
+data_csv.to_csv(f'{outputs_dir}/{PROJECT_NAME}_accuracies.csv')
 data_dict = data.to_dict()
 
 for i in range(len(data_dict['LR'])):
@@ -76,11 +76,10 @@ for i in range(len(data_dict['LR'])):
     plt.title("Test Confusion Matrix")
 
     plt.savefig(f"{images_dir}{model_name}_{encoder_type}_test_confusion_matrix.png", bbox_inches='tight', dpi=1000)
-    np.savetxt(f"{outputs_dir}{model_name}_{encoder_type}_test_consusion_matrix.csv", m_confusion_matrix.astype(int), delimiter=',')
+    np.savetxt(f"{outputs_dir}{model_name}_{encoder_type}_test_confusion_matrix.csv", m_confusion_matrix.astype(int), delimiter=',')
 
 y = np.array(tifffile.imread(data_dir+"houston_gt.tif"), dtype = np.int64) # [1202,4768]
 y_true = y.reshape(-1)
-
 image_hyper = torch.tensor(tifffile.imread(data_dir+"houston_hyper.tif")) # [50,1202,4768]
 x_all = image_hyper.reshape(len(image_hyper),-1)
 x_all = torch.transpose(x_all, 1,0)

@@ -62,30 +62,30 @@ class trentoMultimodalDataset(Dataset):
         x_test = x_all[test_indeces] # [29595, 65]
         y_test = y_all[test_indeces]  # [29595]
 
-        plt.figure(dpi=1000)
-        plt.suptitle('Distribution HSI and Lidar pixel values')
-        for channel in range(x_all.shape[-1]):
-            plt.subplot(10,7,channel+1)
-            for label,name in zip([1,5],["A. Trees", "Vineyards"]):
-                plt.axis("off")
-                label_ind = np.where(y == label)[0]
-                hist_values = x_all[label_ind, channel]
-                histogram, bin_edges = np.histogram(hist_values, bins=100, range=(0, 1))
-                plt.plot(bin_edges[:-1], histogram, label = name, linewidth = 0.5, alpha = 0.6)
+        # plt.figure(dpi=1000)
+        # plt.suptitle('Distribution HSI and Lidar pixel values')
+        # for channel in range(x_all.shape[-1]):
+        #     plt.subplot(10,7,channel+1)
+        #     for label,name in zip([1,5],["A. Trees", "Vineyards"]):
+        #         plt.axis("off")
+        #         label_ind = np.where(y == label)[0]
+        #         hist_values = x_all[label_ind, channel]
+        #         histogram, bin_edges = np.histogram(hist_values, bins=100, range=(0, 1))
+        #         plt.plot(bin_edges[:-1], histogram, label = name, linewidth = 0.5, alpha = 0.6)
 
-        plt.savefig("images/trento_apples_vines_distribution.png")
+        # plt.savefig("images/trento_apples_vines_distribution.png")
         
-        label_ind = np.where(y == 1)[0]
-        one_apple = x_all[label_ind][50]
-        label_ind = np.where(y == 5)[0]
-        one_vine = x_all[label_ind][76]
+        # label_ind = np.where(y == 1)[0]
+        # one_apple = x_all[label_ind][50]
+        # label_ind = np.where(y == 5)[0]
+        # one_vine = x_all[label_ind][76]
 
-        plt.figure()
-        plt.grid(which='both')
-        plt.scatter(np.arange(0,65),one_apple, label = "A. Trees")
-        plt.scatter(np.arange(0,65),one_vine, label = "Vineyards")
-        plt.legend()
-        plt.savefig("images/trento_apples_vines_channels.png")
+        # plt.figure()
+        # plt.grid(which='both')
+        # plt.scatter(np.arange(0,65),one_apple, label = "A. Trees")
+        # plt.scatter(np.arange(0,65),one_vine, label = "Vineyards")
+        # plt.legend()
+        # plt.savefig("images/trento_apples_vines_channels.png")
 
 
         x_test_labelled, _, y_test_labelled, _ = train_test_split(x_test, y_test, train_size= 0.9, stratify = y_test)

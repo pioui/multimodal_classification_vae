@@ -38,7 +38,6 @@ if dataset=="trento":
         outputs_dir,
         data_dir,
         N_PARTICULES,
-        N_LATENT,
         N_EPOCHS,
         N_HIDDEN,
         LR,
@@ -58,25 +57,24 @@ if dataset=="trento":
     )
 
 
-# if dataset=="houston":
-#     from trento_multimodal_config import (
-#         outputs_dir,
-#         N_PARTICULES,
-#         N_LATENT,
-#         N_EPOCHS,
-#         N_HIDDEN,
-#         LR,
-#         N_EXPERIMENTS,
-#         BATCH_SIZE,
-#         CLASSIFICATION_RATIO,
-#         N_EVAL_SAMPLES,
-#         N1_INPUT,
-#         N2_INPUT,
-#         N_LABELS,
-#         DATASET,
-#         PROJECT_NAME,
-#         SCENARIOS,
-#     )
+if dataset=="houston":
+    from trento_multimodal_config import (
+        outputs_dir,
+        N_PARTICULES,
+        N_EPOCHS,
+        N_HIDDEN,
+        LR,
+        N_EXPERIMENTS,
+        BATCH_SIZE,
+        CLASSIFICATION_RATIO,
+        N_EVAL_SAMPLES,
+        N1_INPUT,
+        N2_INPUT,
+        N_LABELS,
+        DATASET,
+        PROJECT_NAME,
+        SCENARIOS,
+    )
 
 from mcvae.utils.utility_functions import (
     model_evaluation,
@@ -136,7 +134,7 @@ for scenario in SCENARIOS:
     n_samples_wphi = scenario.get("n_samples_wphi", N_PARTICULES)
     reparam_latent = scenario.get("reparam_latent", None)
     n_epochs = scenario.get("n_epochs", N_EPOCHS)
-    n_latent = scenario.get("n_latent", N_LATENT)
+    n_latent = scenario.get("n_latent", None)
     n_hidden = scenario.get("n_hidden", N_HIDDEN)
     vdist_map_train = scenario.get("vdist_map", None)
     classify_mode = scenario.get("classify_mode", "vanilla")

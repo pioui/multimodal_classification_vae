@@ -26,10 +26,8 @@ if not os.path.exists(images_dir):
 N_EPOCHS = 200
 LR = 1e-3
 N_PARTICULES = 30
-N_LATENT = 10
 N_HIDDEN = 128
 N_EXPERIMENTS = 1
-NUM = 300
 N_INPUT = 65
 N_LABELS = 6
 SHAPE = (166,600)

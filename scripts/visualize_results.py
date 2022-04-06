@@ -15,9 +15,7 @@ from mcvae.utils.utility_functions import compute_reject_label
 
 
 for dataset in os.listdir('outputs/'):
-    print("we are at ", dataset)
     if dataset == 'trento':
-        print("here")
         from trento_config import (
             labels,
             color,
@@ -50,12 +48,22 @@ for dataset in os.listdir('outputs/'):
             N_LABELS,
             SHAPE,
         )
+    elif dataset == 'houston_multimodal':
+        from houston_multimodal_config import (
+            labels,
+            color,
+            data_dir,
+            images_dir,
+            outputs_dir,
+            PROJECT_NAME,
+            N_LABELS,
+            SHAPE,
+        )
     else:
-        print(dataset, 'here')
         continue
 
     # Accuracies
-    print(f"{outputs_dir}{PROJECT_NAME}.pkl")
+    print(dataset)
     with open(f"{outputs_dir}{PROJECT_NAME}.pkl", 'rb') as f:
         data = pickle.load(f)
     print(data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]])

@@ -11,8 +11,8 @@ from mcvae.architectures.trento_encoders import (
     EncoderB4,
 )
 
-data_dir = "/home/plo026/data/houston/"
-outputs_dir = "outputs/houston/"
+data_dir = "/Users/plo026/data/houston/"
+outputs_dir = "outputs/houston_multimodal/"
 labels = [
     "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 
     "Deciduous Trees", "Bare Earth", "Water", "Residential buildings",
@@ -27,7 +27,7 @@ color = [
     "firebrick", "darkred", "peru", "yellow", "orange",
     "magenta", "blue", "skyblue"
     ]
-images_dir =  "outputs/houston/images/"
+images_dir =  "outputs/houston_multimodal/images/"
 
 if not os.path.exists(outputs_dir):
     os.makedirs(outputs_dir)
@@ -40,7 +40,8 @@ LR = 1e-4
 N_PARTICULES = 60
 N_HIDDEN = 128
 N_EXPERIMENTS = 1
-N_INPUT = 57
+N1_INPUT = 50
+N2_INPUT = 7
 N_LABELS = 20
 SHAPE = (1202,4768)
 CLASSIFICATION_RATIO = 50.0
@@ -52,18 +53,26 @@ SAMPLES_PER_CLASS = 500
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
 
-
-SCENARIOS = [  
+SCENARIOS = [  # WAKE updates
     dict(
         loss_gen="ELBO",
         loss_wvar="ELBO",
         reparam_latent=True,
         counts=None,
         n_latent=30,
-        model_name="EncoderB1_L30_VAE",
+        model_name="EncoderB1_L10_VAE",
         encoder_z1=nn.ModuleDict(
             {"default": EncoderB1( 
-                n_input=N_INPUT,
+                n_input=N1_INPUT,
+                n_output=30,
+                n_hidden=128,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+        encoder_z2=nn.ModuleDict(
+            {"default": EncoderB1( 
+                n_input=N2_INPUT,
                 n_output=30,
                 n_hidden=128,
                 dropout_rate=0,
@@ -71,24 +80,4 @@ SCENARIOS = [
             )}
         ),
     ),
-   
-    dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        n_latent=30,
-        model_name="EncoderB3_L30_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB3( 
-                n_input=N_INPUT,
-                n_output=30,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-                kernel_size = 7,
-            )}
-        ),
-    ),
-    
 ]

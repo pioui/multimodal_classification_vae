@@ -38,7 +38,6 @@ if dataset=="trento":
         outputs_dir,
         data_dir,
         N_PARTICULES,
-        N_LATENT,
         N_EPOCHS,
         N_HIDDEN,
         LR,

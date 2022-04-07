@@ -60,6 +60,7 @@ if dataset=="trento":
 if dataset=="houston":
     from houston_multimodal_config import (
         outputs_dir,
+        data_dir,
         N_PARTICULES,
         N_EPOCHS,
         N_HIDDEN,

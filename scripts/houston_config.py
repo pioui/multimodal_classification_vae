@@ -3,7 +3,7 @@ import logging
 import os
 from mcvae.dataset import houstonDataset
 import torch.nn as nn
-from mcvae.architectures.trento_encoders import (
+from mcvae.architectures.encoders import (
     EncoderB0,
     EncoderB1,
     EncoderB2,
@@ -60,35 +60,15 @@ SCENARIOS = [
         reparam_latent=True,
         counts=None,
         n_latent=30,
-        model_name="EncoderB1_L30_VAE",
+        model_name="EncoderB2_L30_VAE",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB1( 
+            {"default": EncoderB2( 
                 n_input=N_INPUT,
                 n_output=30,
-                n_hidden=128,
+                n_hidden=256,
                 dropout_rate=0,
                 do_batch_norm=False,
             )}
         ),
-    ),
-   
-    dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        n_latent=30,
-        model_name="EncoderB3_L30_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB3( 
-                n_input=N_INPUT,
-                n_output=30,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-                kernel_size = 7,
-            )}
-        ),
-    ),
-    
+    ), 
 ]

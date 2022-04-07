@@ -11,7 +11,7 @@ from mcvae.architectures.trento_encoders import (
     EncoderB4,
 )
 
-data_dir = "/Users/plo026/data/houston/"
+data_dir = "/home/plo026/data/houston/"
 outputs_dir = "outputs/houston_multimodal/"
 labels = [
     "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 
@@ -47,7 +47,7 @@ SHAPE = (1202,4768)
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 512
-PROJECT_NAME = "houston"
+PROJECT_NAME = "houston_multimodal"
 SAMPLES_PER_CLASS = 500
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')

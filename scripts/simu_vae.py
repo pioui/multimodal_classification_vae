@@ -132,7 +132,7 @@ for scenario in SCENARIOS:
     n_samples_wphi = scenario.get("n_samples_wphi", N_PARTICULES)
     reparam_latent = scenario.get("reparam_latent", None)
     n_epochs = scenario.get("n_epochs", N_EPOCHS)
-    n_latent = scenario.get("n_latent", N_LATENT)
+    n_latent = scenario.get("n_latent", None)
     n_hidden = scenario.get("n_hidden", N_HIDDEN)
     vdist_map_train = scenario.get("vdist_map", None)
     classify_mode = scenario.get("classify_mode", "vanilla")

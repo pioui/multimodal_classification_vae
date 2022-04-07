@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 import matplotlib.patches as mpatches
 from scipy import io
-from scripts.houston_config import N_LABELS
 from sklearn.metrics import confusion_matrix
 import os
 import numpy as np

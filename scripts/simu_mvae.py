@@ -58,7 +58,7 @@ if dataset=="trento":
 
 
 if dataset=="houston":
-    from trento_multimodal_config import (
+    from houston_multimodal_config import (
         outputs_dir,
         N_PARTICULES,
         N_EPOCHS,
@@ -71,9 +71,14 @@ if dataset=="houston":
         N1_INPUT,
         N2_INPUT,
         N_LABELS,
-        DATASET,
         PROJECT_NAME,
         SCENARIOS,
+        SAMPLES_PER_CLASS
+    )
+    from mcvae.dataset import houstonMultimodalDataset
+    DATASET = houstonMultimodalDataset(
+    data_dir = data_dir,
+    samples_per_class=SAMPLES_PER_CLASS,
     )
 
 

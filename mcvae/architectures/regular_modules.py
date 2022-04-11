@@ -69,7 +69,7 @@ class EncoderA(nn.Module):
         self.var_encoder = nn.Linear(n_hidden, n_output)
         self.tanh = nn.Tanh()
 
-    def forward(self, x, n_samples=10, squeeze=True, reparam=True):
+    def forward(self, x, n_samples=1, squeeze=True, reparam=True):
         q = self.encoder(x)
         q_m = self.mean_encoder(q)
         q_v = self.var_encoder(q)
@@ -125,7 +125,7 @@ class EncoderB(nn.Module):
         self.var_encoder = nn.Linear(n_hidden, n_output)
         self.tanh = nn.Tanh()
 
-    def forward(self, x, n_samples=10, squeeze=True, reparam=True):
+    def forward(self, x, n_samples=1, squeeze=True, reparam=True):
         n_batch = len(x)
         x_reshape = x.view(n_batch, 1, 28, 28)
 
@@ -165,7 +165,7 @@ class EncoderBStudent(EncoderB):
         )
         self.df_fn = nn.Linear(n_hidden, 1)
 
-    def forward(self, x, n_samples=10, squeeze=True, reparam=True):
+    def forward(self, x, n_samples=1, squeeze=True, reparam=True):
         n_batch = len(x)
         x_reshape = x.view(n_batch, 1, 28, 28)
 
@@ -243,7 +243,7 @@ class EncoderAStudent(nn.Module):
             latent = dist.sample(sample_shape=sample_shape)
         return latent
 
-    def forward(self, x, n_samples=10, squeeze=True, reparam=True):
+    def forward(self, x, n_samples=1, squeeze=True, reparam=True):
         q = self.encoder(x)
         q_m = self.mean_encoder(q)
         q_v = self.var_encoder(q)
@@ -285,7 +285,7 @@ class LinearEncoder(nn.Module):
         l_mat = self.l_mat_encoder
         return l_mat.matmul(l_mat.T)
 
-    def forward(self, x, n_samples=10, reparam=True, squeeze=True):
+    def forward(self, x, n_samples=1, reparam=True, squeeze=True):
         q_m = self.mean_encoder(x)
         l_mat = self.var_encoder
         q_v = l_mat.matmul(l_mat.T)
@@ -506,7 +506,7 @@ class EncoderIAF(nn.Module):
             scale=torch.ones(n_latent, device=device),
         )
 
-    def forward(self, x, *cat_list: int, n_samples=10, reparam=True):
+    def forward(self, x, *cat_list: int, n_samples=1, reparam=True):
         """
         :param x:
         :param cat_list:

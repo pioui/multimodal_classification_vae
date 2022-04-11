@@ -164,7 +164,7 @@ class MVAE_M1M2(nn.Module):
         self,
         x1,
         x2,
-        n_samples=1,
+        n_samples=10,
         mode="plugin",
         counts: pd.Series = None,
         encoder_key="default",
@@ -269,14 +269,14 @@ class MVAE_M1M2(nn.Module):
     def variational_log_proba(self, z1, z2, u, y, x1, x2, encoder_key):
         n_samples, n_batch, n_latent = z2.shape
         # Z1
-        post_z1 = self.encoder_z1[encoder_key](x1, n_samples=1)
+        post_z1 = self.encoder_z1[encoder_key](x1, n_samples=10)
         z1_dist = post_z1["dist"]
         log_qz1 = z1_dist.log_prob(z1)
         if post_z1["sum_last"]:
             log_qz1 = log_qz1.sum(-1)
 
         # Z2
-        post_z2 = self.encoder_z2[encoder_key](x2, n_samples=1)
+        post_z2 = self.encoder_z2[encoder_key](x2, n_samples=10)
         z2_dist = post_z2["dist"]
         log_qz2 = z2_dist.log_prob(z2)
         if post_z2["sum_last"]:
@@ -291,7 +291,7 @@ class MVAE_M1M2(nn.Module):
 
         # U
         z1_z2_y = torch.cat([z1,z2, y], dim=-1)
-        post_u = self.encoder_u[encoder_key](z1_z2_y, n_samples=1)
+        post_u = self.encoder_u[encoder_key](z1_z2_y, n_samples=10)
         u_dist = post_u["dist"]
         log_qu = u_dist.log_prob(u)
         if post_u["sum_last"]:
@@ -319,7 +319,7 @@ class MVAE_M1M2(nn.Module):
         x2,
         y=None,
         temperature=None,
-        n_samples=1,
+        n_samples=10,
         reparam=True,
         encoder_key="default",
         counts=None,
@@ -407,7 +407,7 @@ class MVAE_M1M2(nn.Module):
 
         # U | Z1,Z2, C
         z1_z2_y = torch.cat([z1s, z2s, ys], dim=-1)
-        qu_z1z2c = self.encoder_u[encoder_key](z1_z2_y, n_samples=1, reparam=reparam)
+        qu_z1z2c = self.encoder_u[encoder_key](z1_z2_y, n_samples=10, reparam=reparam)
         u = qu_z1z2c["latent"]
         qu_z1z2c_m = qu_z1z2c["q_m"]
         qu_z1z2c_v = qu_z1z2c["q_v"]
@@ -572,7 +572,7 @@ class MVAE_M1M2(nn.Module):
         temperature=0.5,
         loss_type="ELBO",
         y=None,
-        n_samples=1,
+        n_samples=10,
         reparam=True,
         encoder_key="default",
         counts=torch.tensor([8, 8, 2]),

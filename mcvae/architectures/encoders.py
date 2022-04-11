@@ -44,7 +44,7 @@ class EncoderB0(nn.Module):
         self.var_encoder = nn.Linear(n_hidden, n_output)
         self.tanh = nn.Tanh()
 
-    def forward(self, x, n_samples=1, squeeze=True, reparam=True):
+    def forward(self, x, n_samples=10, squeeze=True, reparam=True):
         n_batch = len(x)
 
         # FOR TRENTO
@@ -100,7 +100,7 @@ class EncoderB1(nn.Module):
         self.var_encoder = nn.Linear(n_hidden, n_output)
         self.tanh = nn.Tanh()
 
-    def forward(self, x, n_samples=1, squeeze=True, reparam=True):
+    def forward(self, x, n_samples=10, squeeze=True, reparam=True):
         n_batch = len(x)
 
         x_reshape = x.view(n_batch, -1)
@@ -151,7 +151,7 @@ class EncoderB2(nn.Module):
         self.var_encoder = nn.Linear(n_hidden, n_output)
         self.tanh = nn.Tanh()
 
-    def forward(self, x, n_samples=1, squeeze=True, reparam=True):
+    def forward(self, x, n_samples=10, squeeze=True, reparam=True):
         n_batch = len(x)
 
         x_reshape = x.view(n_batch, -1)
@@ -207,7 +207,7 @@ class EncoderB3(nn.Module):
         self.var_encoder = nn.Linear(n_hidden, n_output)
         self.tanh = nn.Tanh()
 
-    def forward(self, x, n_samples=1, squeeze=True, reparam=True):
+    def forward(self, x, n_samples=10, squeeze=True, reparam=True):
         n_batch = len(x)
 
         x_reshape = x.view(n_batch, 1, -1)
@@ -262,7 +262,7 @@ class EncoderB4(nn.Module):
         self.var_encoder = nn.Linear(n_hidden, n_output)
         self.tanh = nn.Tanh()
 
-    def forward(self, x, n_samples=1, squeeze=True, reparam=True):
+    def forward(self, x, n_samples=10, squeeze=True, reparam=True):
         n_batch = len(x)
 
         x_reshape = x.view(n_batch, 1, -1)

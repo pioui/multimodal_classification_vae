@@ -137,7 +137,7 @@ class VAE_M1M2(nn.Module):
     def classify(
         self,
         x,
-        n_samples=1,
+        n_samples=10,
         mode="plugin",
         counts: pd.Series = None,
         encoder_key="default",
@@ -235,7 +235,7 @@ class VAE_M1M2(nn.Module):
     def variational_log_proba(self, z1, z2, y, x, encoder_key):
         n_samples, n_batch, n_latent = z2.shape
         # Z
-        post_z = self.encoder_z1[encoder_key](x, n_samples=1)
+        post_z = self.encoder_z1[encoder_key](x, n_samples=10)
         z_dist = post_z["dist"]
         log_qz = z_dist.log_prob(z1)
         if post_z["sum_last"]:
@@ -247,7 +247,7 @@ class VAE_M1M2(nn.Module):
         log_qc = torch.gather(log_qc_z1, dim=-1, index=y_int.unsqueeze(-1)).squeeze(-1)
         # U
         z1_y = torch.cat([z1, y], dim=-1)
-        post_u = self.encoder_z2_z1[encoder_key](z1_y, n_samples=1)
+        post_u = self.encoder_z2_z1[encoder_key](z1_y, n_samples=10)
         u_dist = post_u["dist"]
         log_qu = u_dist.log_prob(z2)
         if post_u["sum_last"]:
@@ -272,7 +272,7 @@ class VAE_M1M2(nn.Module):
         x,
         y=None,
         temperature=None,
-        n_samples=1,
+        n_samples=10,
         reparam=True,
         encoder_key="default",
         counts=None,
@@ -343,7 +343,7 @@ class VAE_M1M2(nn.Module):
 
         # U | Z1, C
         z1_y = torch.cat([z1s, ys], dim=-1)
-        q_z2_z1 = self.encoder_z2_z1[encoder_key](z1_y, n_samples=1, reparam=reparam)
+        q_z2_z1 = self.encoder_z2_z1[encoder_key](z1_y, n_samples=10, reparam=reparam)
         z2 = q_z2_z1["latent"]
         qz2_z1_m = q_z2_z1["q_m"]
         qz2_z1_v = q_z2_z1["q_v"]
@@ -487,7 +487,7 @@ class VAE_M1M2(nn.Module):
         temperature=0.5,
         loss_type="ELBO",
         y=None,
-        n_samples=1,
+        n_samples=10,
         reparam=True,
         encoder_key="default",
         counts=torch.tensor([8, 8, 2]),

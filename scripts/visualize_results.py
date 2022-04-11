@@ -14,8 +14,9 @@ from mcvae.utils.utility_functions import compute_reject_label
 
 print(os.listdir('outputs/'))
 
-for dataset in os.listdir('outputs/'):
-    if dataset == 'trento':
+for project_name in os.listdir('outputs/'):
+    if project_name == 'trento':
+        dataset = 'trento'
         from trento_config import (
             labels,
             color,
@@ -26,19 +27,8 @@ for dataset in os.listdir('outputs/'):
             N_LABELS,
             SHAPE
         )
-    elif dataset == 'trento_multimodal':
-
-        from trento_multimodal_config import (
-            labels,
-            color,
-            data_dir,
-            images_dir,
-            outputs_dir,
-            PROJECT_NAME,
-            N_LABELS,
-            SHAPE
-        )
-    elif dataset == 'houston':
+    elif project_name == 'houston':
+        dataset = 'houston'
         from houston_config import (
             labels,
             color,
@@ -49,7 +39,20 @@ for dataset in os.listdir('outputs/'):
             N_LABELS,
             SHAPE,
         )
-    elif dataset == 'houston_multimodal':
+    elif project_name == 'trento_multimodal':
+        dataset = 'trento'
+        from trento_multimodal_config import (
+            labels,
+            color,
+            data_dir,
+            images_dir,
+            outputs_dir,
+            PROJECT_NAME,
+            N_LABELS,
+            SHAPE
+        )
+    elif project_name == 'houston_multimodal':
+        dataset = 'houston'
         from houston_multimodal_config import (
             labels,
             color,
@@ -65,12 +68,11 @@ for dataset in os.listdir('outputs/'):
         continue
 
     # Accuracies
-    print(dataset)
+    print(project_name, dataset)
 
     with open(f"{outputs_dir}{PROJECT_NAME}.pkl", 'rb') as f:
         data = pickle.load(f)
-    print(dataset)
-    print(data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]])
+    print(data[['MODEL_NAME','N_LATENT', 'encoder_type','LR','N_EPOCHS', 'M_ACCURACY',]])
     data_csv = data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]]
     data_csv.to_csv(f'{outputs_dir}/{PROJECT_NAME}_accuracies.csv')
     data_dict = data.to_dict()        
@@ -90,7 +92,7 @@ for dataset in os.listdir('outputs/'):
         plt.xlabel("Epochs")
         plt.grid()
         plt.legend()
-        plt.savefig(f"{images_dir}{dataset}_{model_name}_{encoder_type}_test_loss.png")
+        plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_test_loss.png")
 
         # Test Confusion Matrix
         plt.figure(dpi=2000)
@@ -103,8 +105,8 @@ for dataset in os.listdir('outputs/'):
             for l in range(len(m_confusion_matrix[k])):
                 plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center')
         plt.title("Test Confusion Matrix")
-        plt.savefig(f"{images_dir}{dataset}_{model_name}_{encoder_type}_test_confusion_matrix.png", bbox_inches='tight', dpi=1000)
-        np.savetxt(f"{outputs_dir}{dataset}_{model_name}_{encoder_type}_test_confusion_matrix.csv", m_confusion_matrix.astype(int), delimiter=',')
+        plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_test_confusion_matrix.png", bbox_inches='tight', dpi=1000)
+        np.savetxt(f"{outputs_dir}{project_name}_{model_name}_{encoder_type}_test_confusion_matrix.csv", m_confusion_matrix.astype(int), delimiter=',')
         
     if dataset == "trento":
         y = np.array(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"]) # [166,600] 0 to 6

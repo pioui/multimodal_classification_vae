@@ -136,7 +136,7 @@ for subdir, dir, files in os.walk(outputs_dir):
             cbar.ax.tick_params(labelsize =2 )
             plt.savefig(f"{images_dir}{model_name}_classification_matrix.png",bbox_inches='tight')
 
-            m_confusion_matrix = confusion_matrix(y_true, y_pred)
+            m_confusion_matrix = confusion_matrix(y_true, y_pred, normalize='true')
             m_confusion_matrix = m_confusion_matrix[1:,1:]
             plt.figure()
             plt.matshow(m_confusion_matrix, cmap="YlGn")
@@ -150,7 +150,7 @@ for subdir, dir, files in os.walk(outputs_dir):
             plt.title("Total Confusion Matrix")
             plt.savefig(f"{images_dir}{model_name}_total_confusion_matrix.png",bbox_inches='tight')
 
-            m_confusion_matrix = confusion_matrix(y_true, y_pred_reject)
+            m_confusion_matrix = confusion_matrix(y_true, y_pred_reject, normalize='true')
             m_confusion_matrix = m_confusion_matrix[1:,1:]
             plt.figure()
             plt.matshow(m_confusion_matrix, cmap="YlGn")

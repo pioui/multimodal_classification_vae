@@ -177,7 +177,7 @@ for project_name in os.listdir('outputs/'):
             plt.savefig(f"{images_dir}{model_name}_classification_matrix.png",bbox_inches='tight', dpi=1000)
 
             # Total Confusion matrix
-            m_confusion_matrix = confusion_matrix(y_true, y_pred)
+            m_confusion_matrix = confusion_matrix(y_true, y_pred, normalize='true')
             m_confusion_matrix = m_confusion_matrix[1:,1:]
             plt.figure(dpi=2000)
             plt.matshow(m_confusion_matrix, cmap="YlGn")
@@ -193,7 +193,7 @@ for project_name in os.listdir('outputs/'):
             np.savetxt(f"{outputs_dir}{model_name}_total_confusion_matrix.csv", m_confusion_matrix.astype(int), delimiter=',')
 
             # Reject Confusion matrix
-            m_confusion_matrix = confusion_matrix(y_true, y_pred_reject)
+            m_confusion_matrix = confusion_matrix(y_true, y_pred_reject, normalize='true')
             m_confusion_matrix = m_confusion_matrix[1:,1:]
             plt.figure(dpi=2000)
             plt.matshow(m_confusion_matrix, cmap="YlGn")

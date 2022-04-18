@@ -74,7 +74,7 @@ def model_evaluation(
     m_precision = precision_score(y_true, y_pred.argmax(1), average = None, zero_division =0)
     m_recall = recall_score(y_true, y_pred.argmax(1), average = None, zero_division =0)
     m_accuracy = accuracy_score(y_true, y_pred.argmax(1))
-    m_confusion_matrix = confusion_matrix(y_true+1, y_pred.argmax(1)+1)
+    m_confusion_matrix = confusion_matrix(y_true+1, y_pred.argmax(1)+1, normalize='true')
     
     res = {
         "M_ACCURACY": m_accuracy,

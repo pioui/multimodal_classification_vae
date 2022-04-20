@@ -47,45 +47,6 @@ class EllipticalStudent(db.Distribution):
         return eye * (scales ** 2.0).unsqueeze(-1)
 
     def sample(self, sample_shape=torch.Size()):
-        # # Step 1: get spherical sample u
-        # zeros = torch.zeros_like(self.loc)
-        # ones = torch.ones_like(self.loc)
-        # sphere_samp = db.Normal(zeros, ones).sample(sample_shape)
-        # norm_r = (sphere_samp ** 2.0).sum(-1, keepdim=True).sqrt()
-
-        # sphere_samp = sphere_samp / norm_r
-        # local_loc, local_scale, sphere_samp = torch.broadcast_tensors(
-        #     self.loc, self.scale, sphere_samp
-        # )
-        # local_cov = self.scale_to_cov(local_scale)
-        # scale_mat = torch.cholesky(local_cov)
-
-        # # Step 2: sample radius
-        # batch_shape = self.loc.shape[:-1]
-
-        # t2_dist = db.Chi2(
-        #     df=torch.tensor(self.d, device=self.loc.device).expand(batch_shape)
-        # )
-        # t_samp = t2_dist.sample(sample_shape)
-        # t_samp = t_samp.sqrt()
-        # s2_dist = db.Chi2(df=self.df.expand(batch_shape))
-        # s_samp = s2_dist.rsample(sample_shape)
-        # s_samp = s_samp.sqrt()
-        # radius = self.df.sqrt() * t_samp / s_samp
-        # radius = radius.unsqueeze(-1)
-
-        # u = torch.matmul(scale_mat, sphere_samp.unsqueeze(-1)).squeeze(-1)
-
-        # assert radius.shape[:-1] == u.shape[:-1]
-        # samp = local_loc + (radius * u)
-        # if self.verbose:
-        #     print(
-        #         "z range: {0:.2f} / {1:.2f}".format(
-        #             samp.min().item(), samp.max().item(),
-        #         )
-        #     )
-        # return samp
-
         # Step 1: get spherical sample u
         zeros = torch.zeros_like(self.loc)
         ones = torch.ones_like(self.loc)
@@ -135,24 +96,6 @@ class EllipticalStudent(db.Distribution):
         local_loc, local_scale, value = torch.broadcast_tensors(
             self.loc, self.scale, value
         )
-        # local_cov = self.scale_to_cov(local_scale)
-        # logdet = torch.logdet(local_cov)
-        # diff = (value - local_loc).unsqueeze(-1)
-        # isoval = torch.matmul(local_cov.inverse(), diff)
-        # isoval = torch.matmul(diff.transpose(-1, -2), isoval)
-        # isoval = isoval.squeeze(-1)
-        # isoval = isoval.squeeze(-1)
-
-        # central_term = (
-        #     -0.5 * (self.d + self.df) * (1.0 + (1.0 / self.df * isoval)).log()
-        # )
-        # res = (
-        #     torch.lgamma(0.5 * (self.df + self.d))
-        #     - torch.lgamma(0.5 * self.df)
-        #     - 0.5 * self.d * (self.df.log() + np.log(np.pi))
-        #     - 0.5 * logdet
-        #     + central_term
-        # )
 
         local_cov = (local_scale ** 2.0).unsqueeze(-1)
         logdet = local_scale.log().sum(-1, keepdims=True)
@@ -161,7 +104,6 @@ class EllipticalStudent(db.Distribution):
         isoval = (1.0 / local_cov) * diff
         isoval = torch.matmul(diff.transpose(-1, -2), isoval)
         isoval = isoval.squeeze(-1)
-        # isoval = isoval.squeeze(-1)
 
         central_term = (
             -0.5 * (self.d + self.df) * (1.0 + (1.0 / self.df * isoval)).log()

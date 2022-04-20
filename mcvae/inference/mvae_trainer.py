@@ -11,17 +11,17 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
-from mcvae.dataset import TrentoDataset
+from mcvae.dataset import trentoDataset
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-class TrentoRTrainer:
+class MVAE_M1M2_Trainer:
     def __init__(
         self,
-        dataset: TrentoDataset,
+        dataset: trentoDataset,
         model,
         batch_size: int = 128,
         classify_mode: str = "vanilla",
@@ -102,7 +102,7 @@ class TrentoRTrainer:
         classification_ratio: float = 50.0,
         update_mode: str = "all",
         reparam_wphi: bool = True,
-        z2_with_elbo: bool = False,
+        u_with_elbo: bool = False,
     ):
         assert update_mode in ["all", "alternate"]
         assert (n_samples_phi is None) == (n_samples_theta is None)
@@ -126,8 +126,9 @@ class TrentoRTrainer:
         else:
             params_gen = filter(
                 lambda p: p.requires_grad,
-                list(self.model.decoder_z1_z2.parameters())
-                + list(self.model.x_decoder.parameters()),
+                list(self.model.decoder_z1z2.parameters())
+                + list(self.model.decoder_x1.parameters())
+                + list(self.model.decoder_x2.parameters()),
             )
             optim_gen = Adam(params_gen, lr=lr)
 
@@ -135,7 +136,9 @@ class TrentoRTrainer:
                 lambda p: p.requires_grad,
                 list(self.model.classifier.parameters())
                 + list(self.model.encoder_z1.parameters())
-                + list(self.model.encoder_z2_z1.parameters()),
+                + list(self.model.encoder_z2.parameters())
+                + list(self.model.encoder_u.parameters()),
+
             )
 
             optim_var_wake = Adam(params_var, lr=lr)
@@ -152,17 +155,23 @@ class TrentoRTrainer:
             ):
                 self.it += 1
 
-                x_u, _ = tensor_all
-                x_s, y_s = tensor_superv
+                x_u1, x_u2, _ = tensor_all
+                x_s1, x_s2, y_s = tensor_superv
 
-                x_u = x_u.to(device)
-                x_s = x_s.to(device)
+                x_u1 = x_u1.to(device)
+                x_u2 = x_u2.to(device)
+
+                x_s1 = x_s1.to(device)
+                x_s2 = x_s2.to(device)
+
                 y_s = y_s.to(device)
 
                 if overall_loss is not None:
                     loss = self.loss(
-                        x_u=x_u,
-                        x_s=x_s,
+                        x_u1=x_u1,
+                        x_u2=x_u2,
+                        x_s1=x_s1,
+                        x_s2=x_s2,
                         y_s=y_s,
                         loss_type=overall_loss,
                         n_samples=n_samples,
@@ -170,19 +179,20 @@ class TrentoRTrainer:
                         classification_ratio=classification_ratio,
                         mode=update_mode,
                     )
-                    running_loss +=loss.item()/len(x_u)
+                    running_loss +=loss.item()/len(x_u1)
                     optim.zero_grad()
                     loss.backward()
                     optim.step()
-                    # torch.cuda.synchronize()
 
                     if self.iterate % 100 == 0:
                         self.metrics["train_loss"].append(loss.item())
                 else:
                     # Wake theta
                     theta_loss = self.loss(
-                        x_u=x_u,
-                        x_s=x_s,
+                        x_u1=x_u1,
+                        x_u2=x_u2,
+                        x_s1=x_s1,
+                        x_s2=x_s2,
                         y_s=y_s,
                         loss_type=wake_theta,
                         n_samples=n_samples_theta,
@@ -193,7 +203,6 @@ class TrentoRTrainer:
                     optim_gen.zero_grad()
                     theta_loss.backward()
                     optim_gen.step()
-                    # torch.cuda.synchronize()
 
                     if self.iterate % 100 == 0:
                         self.metrics["train_theta_wake"].append(theta_loss.item())
@@ -202,8 +211,10 @@ class TrentoRTrainer:
                     wake_psi_epoch = wake_psi
 
                     psi_loss = self.loss(
-                        x_u=x_u,
-                        x_s=x_s,
+                        x_u1=x_u1,
+                        x_u2=x_u2,
+                        x_s1=x_s1,
+                        x_s2=x_s2,
                         y_s=y_s,
                         loss_type=wake_psi_epoch,
                         n_samples=n_samples_phi,
@@ -211,11 +222,10 @@ class TrentoRTrainer:
                         classification_ratio=classification_ratio,
                         mode=update_mode,
                     )
-                    running_loss += psi_loss.item()/len(x_u)
+                    running_loss += psi_loss.item()/len(x_u1)
                     optim_var_wake.zero_grad()
                     psi_loss.backward()
                     optim_var_wake.step()
-                    # torch.cuda.synchronize()
                     if self.iterate % 100 == 0:
                         self.metrics["train_phi_wake"].append(psi_loss.item())
                         if self.debug_gradients:
@@ -236,17 +246,23 @@ class TrentoRTrainer:
                     self.test_loader, cycle(self.test_annotated_loader)):
                     self.it += 1
 
-                    x_u, _ = tensor_all
-                    x_s, y_s = tensor_superv
+                    x_u1, x_u2, _ = tensor_all
+                    x_s1, x_s2, y_s = tensor_superv
 
-                    x_u = x_u.to(device)
-                    x_s = x_s.to(device)
+                    x_u1 = x_u1.to(device)
+                    x_u2 = x_u2.to(device)
+
+                    x_s1 = x_s1.to(device)
+                    x_s2 = x_s2.to(device)
+
                     y_s = y_s.to(device)
 
                     if overall_loss is not None:
                         loss = self.loss(
-                            x_u=x_u,
-                            x_s=x_s,
+                            x_u1=x_u1,
+                            x_u2=x_u2,
+                            x_s1=x_s1,
+                            x_s2=x_s2,
                             y_s=y_s,
                             loss_type=overall_loss,
                             n_samples=n_samples,
@@ -254,14 +270,15 @@ class TrentoRTrainer:
                             classification_ratio=classification_ratio,
                             mode=update_mode,
                         )
-                        running_loss +=loss.item()/len(x_u)
-                        # torch.cuda.synchronize()
+                        running_loss +=loss.item()/len(x_u1)
 
                     else:
                         # Wake theta
                         theta_loss = self.loss(
-                            x_u=x_u,
-                            x_s=x_s,
+                            x_u1=x_u1,
+                            x_u2=x_u2,
+                            x_s1=x_s1,
+                            x_s2=x_s2,
                             y_s=y_s,
                             loss_type=wake_theta,
                             n_samples=n_samples_theta,
@@ -274,8 +291,10 @@ class TrentoRTrainer:
                         wake_psi_epoch = wake_psi
 
                         psi_loss = self.loss(
-                            x_u=x_u,
-                            x_s=x_s,
+                            x_u1=x_u1,
+                            x_u2=x_u2,
+                            x_s1=x_s1,
+                            x_s2=x_s2,
                             y_s=y_s,
                             loss_type=wake_psi_epoch,
                             n_samples=n_samples_phi,
@@ -283,7 +302,7 @@ class TrentoRTrainer:
                             classification_ratio=classification_ratio,
                             mode=update_mode,
                         )
-                        running_loss += psi_loss.item()/len(x_u)
+                        running_loss += psi_loss.item()/len(x_u1)
             self.test_loss.append(running_loss/ len(self.test_loader))
             logger.info(f"Test Loss: {running_loss/ len(self.test_loader)}")
 
@@ -315,18 +334,12 @@ class TrentoRTrainer:
         )
         classifier = encoders["classifier"]
         encoder_z1 = encoders["encoder_z1"]
-        encoder_z2_z1 = encoders["encoder_z2_z1"]
+        encoder_z2 = encoders["encoder_z2"]
+        encoder_u = encoders["encoder_u"]
         self.model.update_q(
-            classifier=classifier, encoder_z1=encoder_z1, encoder_z2_z1=encoder_z2_z1,
+            classifier=classifier, encoder_z1=encoder_z1, encoder_z2=encoder_z2,encoder_u=encoder_u,
         )
 
-        # params_var = filter(
-        #     lambda p: p.requires_grad,
-        #     list(classifier.parameters())
-        #     + list(encoder_z1.parameters())
-        #     + list(encoder_z2_z1.parameters()),
-        # )
-        # optim_var_wake = Adam(params_var, lr=lr)
 
         if type(wake_psi) == list:
             encoder_keys = wake_psi
@@ -338,7 +351,8 @@ class TrentoRTrainer:
                 lambda p: p.requires_grad,
                 list(classifier[key].parameters())
                 + list(encoder_z1[key].parameters())
-                + list(encoder_z2_z1[key].parameters()),
+                + list(encoder_z2[key].parameters())
+                + list(encoder_u[key].parameters()),
             )
 
         params_var = {key: get_params(key) for key in encoder_keys}
@@ -353,11 +367,15 @@ class TrentoRTrainer:
                 self.train_loader, cycle(self.train_annotated_loader)
             ):
 
-                x_u, _ = tensor_all
-                x_s, y_s = tensor_superv
+                x_u1, x_u2, _ = tensor_all
+                x_s1, x_s2, y_s = tensor_superv
 
-                x_u = x_u.to(device)
-                x_s = x_s.to(device)
+                x_u1 = x_u1.to(device)
+                x_u2 = x_u2.to(device)
+
+                x_s1 = x_s1.to(device)
+                x_s2 = x_s2.to(device)
+
                 y_s = y_s.to(device)
 
                 # Wake phi
@@ -370,8 +388,10 @@ class TrentoRTrainer:
                         wake_psi_epoch = key
 
                     psi_loss = self.loss(
-                        x_u=x_u,
-                        x_s=x_s,
+                        x_u1=x_u1,
+                        x_u2=x_u2,
+                        x_s1=x_s1,
+                        x_s2=x_s2,
                         y_s=y_s,
                         loss_type=wake_psi_epoch,
                         n_samples=n_samples_phi,
@@ -382,8 +402,7 @@ class TrentoRTrainer:
                     optim_vars[key].zero_grad()
                     psi_loss.backward()
                     optim_vars[key].step()
-                    running_loss +=psi_loss.item()/len(x_u)
-                    # torch.cuda.synchronize()
+                    running_loss +=psi_loss.item()/len(x_u1)
                     self.iterate += 1
             self.train_loss.append(running_loss/ len(self.train_loader))
             logger.info(f"Train Loss: {running_loss/ len(self.train_loss)}")
@@ -395,11 +414,15 @@ class TrentoRTrainer:
                     self.test_loader, cycle(self.test_annotated_loader)
                 ):
 
-                    x_u, _ = tensor_all
-                    x_s, y_s = tensor_superv
+                    x_u1, x_u2, _ = tensor_all
+                    x_s1, x_s2, y_s = tensor_superv
 
-                    x_u = x_u.to(device)
-                    x_s = x_s.to(device)
+                    x_u1 = x_u1.to(device)
+                    x_u2 = x_u2.to(device)
+
+                    x_s1 = x_s1.to(device)
+                    x_s2 = x_s2.to(device)
+
                     y_s = y_s.to(device)
 
                     # Wake phi
@@ -412,8 +435,10 @@ class TrentoRTrainer:
                             wake_psi_epoch = key
 
                         psi_loss = self.loss(
-                            x_u=x_u,
-                            x_s=x_s,
+                            x_u1=x_u1,
+                            x_u2=x_u2,
+                            x_s1=x_s1,
+                            x_s2=x_s2,
                             y_s=y_s,
                             loss_type=wake_psi_epoch,
                             n_samples=n_samples_phi,
@@ -421,8 +446,7 @@ class TrentoRTrainer:
                             encoder_key=key,
                             classification_ratio=classification_ratio,
                         )
-                        running_loss +=psi_loss.item()/len(x_u)
-                        # torch.cuda.synchronize()
+                        running_loss +=psi_loss.item()/len(x_u1)
             self.test_loss.append(running_loss/ len(self.test_loader))
             logger.info(f"Test Loss: {running_loss/ len(self.test_loss)}")
 
@@ -448,8 +472,10 @@ class TrentoRTrainer:
 
         params_gen = filter(
             lambda p: p.requires_grad,
-            list(self.model.decoder_z1_z2.parameters())
-            + list(self.model.x_decoder.parameters()),
+            list(self.model.decoder_z1z2.parameters())
+            + list(self.model.decoder_x1.parameters())
+            + list(self.model.decoder_x2.parameters()),
+
         )
         optim_gen = Adam(params_gen, lr=lr)
 
@@ -458,7 +484,8 @@ class TrentoRTrainer:
                 lambda p: p.requires_grad,
                 list(self.model.classifier[key].parameters())
                 + list(self.model.encoder_z1[key].parameters())
-                + list(self.model.encoder_z2_z1[key].parameters()),
+                + list(self.model.encoder_z2[key].parameters())
+                + list(self.model.encoder_u[key].parameters()),
             )
 
         encoder_keys = counts.loc[lambda x: x.index != "prior"].keys()
@@ -473,17 +500,23 @@ class TrentoRTrainer:
                 self.train_loader, cycle(self.train_annotated_loader)
             ):
 
-                x_u, _ = tensor_all
-                x_s, y_s = tensor_superv
+                x_u1, x_u2, _ = tensor_all
+                x_s1, x_s2, y_s = tensor_superv
 
-                x_u = x_u.to(device)
-                x_s = x_s.to(device)
+                x_u1 = x_u1.to(device)
+                x_u2 = x_u2.to(device)
+
+                x_s1 = x_s1.to(device)
+                x_s2 = x_s2.to(device)
+
                 y_s = y_s.to(device)
 
                 # Wake theta
                 theta_loss = self.loss(
-                    x_u=x_u,
-                    x_s=x_s,
+                    x_u1=x_u1,
+                    x_u2=x_u2,
+                    x_s1=x_s1,
+                    x_s2=x_s2,
                     y_s=y_s,
                     loss_type=wake_theta,
                     n_samples=n_samples_theta,
@@ -492,20 +525,19 @@ class TrentoRTrainer:
                     encoder_key="defensive",
                     counts=counts,
                 )
-                running_loss +=theta_loss.item()/len(x_u)
+                running_loss +=theta_loss.item()/len(x_u1)
 
                 optim_gen.zero_grad()
                 theta_loss.backward()
                 optim_gen.step()
 
-                # if self.iterate % 100 == 0:
-                #     self.metrics["train_theta_wake"].append(theta_loss.item())
-
                 for key in encoder_keys:
                     do_reparam = reparams_info[key]
                     var_loss = self.loss(
-                        x_u=x_u,
-                        x_s=x_s,
+                        x_u1=x_u1,
+                        x_u2=x_u2,
+                        x_s1=x_s1,
+                        x_s2=x_s2,
                         y_s=y_s,
                         loss_type=key,
                         n_samples=n_samples_phi,
@@ -513,7 +545,7 @@ class TrentoRTrainer:
                         classification_ratio=classification_ratio,
                         encoder_key=key,
                     )
-                    running_loss +=var_loss.item()/len(x_u)
+                    running_loss +=var_loss.item()/len(x_u1)
                     optim_vars[key].zero_grad()
                     var_loss.backward()
                     optim_vars[key].step()
@@ -526,17 +558,23 @@ class TrentoRTrainer:
                     self.test_loader, cycle(self.test_annotated_loader)
                 ):
 
-                    x_u, _ = tensor_all
-                    x_s, y_s = tensor_superv
+                    x_u1, x_u2, _ = tensor_all
+                    x_s1, x_s2, y_s = tensor_superv
 
-                    x_u = x_u.to(device)
-                    x_s = x_s.to(device)
+                    x_u1 = x_u1.to(device)
+                    x_u2 = x_u2.to(device)
+
+                    x_s1 = x_s1.to(device)
+                    x_s2 = x_s2.to(device)
+
                     y_s = y_s.to(device)
 
                     # Wake theta
                     theta_loss = self.loss(
-                        x_u=x_u,
-                        x_s=x_s,
+                        x_u1=x_u1,
+                        x_u2=x_u2,
+                        x_s1=x_s1,
+                        x_s2=x_s2,
                         y_s=y_s,
                         loss_type=wake_theta,
                         n_samples=n_samples_theta,
@@ -545,17 +583,15 @@ class TrentoRTrainer:
                         encoder_key="defensive",
                         counts=counts,
                     )
-                    running_loss +=theta_loss.item()/len(x_u)
-
-
-                    # if self.iterate % 100 == 0:
-                    #     self.metrics["train_theta_wake"].append(theta_loss.item())
+                    running_loss +=theta_loss.item()/len(x_u1)
 
                     for key in encoder_keys:
                         do_reparam = reparams_info[key]
                         var_loss = self.loss(
-                            x_u=x_u,
-                            x_s=x_s,
+                            x_u1=x_u1,
+                            x_u2=x_u2,
+                            x_s1=x_s1,
+                            x_s2=x_s2,
                             y_s=y_s,
                             loss_type=key,
                             n_samples=n_samples_phi,
@@ -563,15 +599,17 @@ class TrentoRTrainer:
                             classification_ratio=classification_ratio,
                             encoder_key=key,
                         )
-                        running_loss +=var_loss.item()/len(x_u)
+                        running_loss +=var_loss.item()/len(x_u1)
 
             self.test_loss.append(running_loss/ len(self.test_loader))
             logger.info(f"Test Loss: {running_loss/ len(self.test_loader)}")
 
     def loss(
         self,
-        x_u,
-        x_s,
+        x_u1,
+        x_u2,
+        x_s1,
+        x_s2,
         y_s,
         loss_type,
         n_samples=5,
@@ -587,10 +625,11 @@ class TrentoRTrainer:
 
         if mode == "all":
             outs_s = None
-            if x_u is None: l_u = torch.Tensor([0.0])
+            if x_u1 is None: l_u = torch.Tensor([0.0])
             else: 
                 l_u = self.model.forward(
-                x_u,
+                x_u1,
+                x_u2,
                 temperature=temp,
                 loss_type=loss_type,
                 n_samples=n_samples,
@@ -599,7 +638,8 @@ class TrentoRTrainer:
                 counts=counts,
             )
             l_s = self.model.forward(
-                x_s,
+                x_s1,
+                x_s2,
                 temperature=temp,
                 loss_type=loss_type,
                 y=y_s,
@@ -608,14 +648,14 @@ class TrentoRTrainer:
                 encoder_key=encoder_key,
                 counts=counts,
             )
-            # torch.cuda.synchronize()
             l_s = labelled_fraction * l_s
             j = l_u.mean() + l_s.mean()
         elif mode == "alternate":
             outs_s = None
             if self.iterate % s_every == 0:
                 l_s = self.model.forward(
-                    x_s,
+                    x_s1,
+                    x_s2,
                     temperature=temp,
                     loss_type=loss_type,
                     y=y_s,
@@ -626,10 +666,11 @@ class TrentoRTrainer:
                 )
                 j = l_s.mean()
             else:
-                if x_u is None: l_u = torch.Tensor([0.0])
+                if x_u1 is None: l_u = torch.Tensor([0.0])
                 else:
                     l_u = self.model.forward(
-                    x_u,
+                    x_u1,
+                    x_u2,
                     temperature=temp,
                     loss_type=loss_type,
                     n_samples=n_samples,
@@ -642,24 +683,18 @@ class TrentoRTrainer:
             raise ValueError("Mode {} not recognized".format(mode))
 
         if encoder_key == "defensive":
-            # Classifiers' gradients are null wrt theta
             l_class = 0.0
         else:
-            # y_pred = self.model.classify(
-            #     x_s,
-            #     encoder_key=encoder_key,
-            #     mode=self.classify_mode,
-            #     n_samples=n_samples,
-            # )
             if self.classify_mode != "vanilla":
                 y_pred = self.model.classify(
-                    x_s,
+                    x_s1,
+                    x_s2,
                     encoder_key=encoder_key,
                     mode=self.classify_mode,
                     n_samples=n_samples,
                 )
             else:
-                y_pred = self.model.classify(x_s, encoder_key=encoder_key)
+                y_pred = self.model.classify(x_s1, x_s2, encoder_key=encoder_key)
             l_class = self.cross_entropy_fn(y_pred, target=y_s)
         loss = j + classification_ratio * l_class
 
@@ -685,12 +720,14 @@ class TrentoRTrainer:
         else:
             self.model = self.model.train()
         for tensor_all in data_loader:
-            x, y = tensor_all
-            x = x.to(device)
+            x1, x2, y = tensor_all
+            x1 = x1.to(device)
+            x2 = x2.to(device)
             y = y.to(device)
             if not do_supervised:
                 res = self.model.inference(
-                    x,
+                    x1,
+                    x2,
                     n_samples=n_samples,
                     encoder_key=encoder_key,
                     counts=counts,
@@ -699,15 +736,6 @@ class TrentoRTrainer:
                 )
             else:
                 raise ValueError("Not sure")
-                res = self.model.inference(
-                    x,
-                    y=y,
-                    n_samples=n_samples,
-                    encoder_key=encoder_key,
-                    counts=counts,
-                    temperature=0.5,
-                    reparam=False,
-                )
             res["y"] = y
             if keys is not None:
                 filtered_res = {key: val for (key, val) in res.items() if key in keys}
@@ -715,7 +743,8 @@ class TrentoRTrainer:
                 filtered_res = res
             if "preds_is" in keys:
                 filtered_res["preds_is"] = self.model.classify(
-                    x,
+                    x1,
+                    x2,
                     n_samples=n_samples,
                     mode="is",
                     counts=counts,
@@ -723,7 +752,8 @@ class TrentoRTrainer:
                 )
             if "preds_plugin" in keys:
                 filtered_res["preds_plugin"] = self.model.classify(
-                    x,
+                    x1,
+                    x2,
                     n_samples=n_samples,
                     mode="plugin",
                     counts=counts,
@@ -733,13 +763,15 @@ class TrentoRTrainer:
             is_labelled = False
             if counts is None:
                 log_ratios = (
-                    res["log_pz2"]
+                    res["log_pu"]
                     + res["log_pc"]
-                    + res["log_pz1_z2"]
-                    + res["log_px_z"]
-                    - res["log_qz1_x"]
-                    - res["log_qz2_z1"]
-                    - res["log_qc_z1"]
+                    + res["log_pz1z2_uc"]
+                    + res["log_px1_z1"]
+                    + res["log_px2_z2"]
+                    - res["log_qz1_x1"]
+                    - res["log_qz2_x2"]
+                    - res["log_qu_z1z2c"]
+                    - res["log_qc_z1z2"]
                 )
             else:
                 log_ratios = res["log_ratio"]
@@ -753,10 +785,6 @@ class TrentoRTrainer:
                     log_ratios=log_ratios, is_labelled=is_labelled, evaluate=True, **res
                 )
             if "log_ratios" in keys:
-                # n_labels, n_samples, n_batch = log_ratios.shape
-                # log_ratios = log_ratios.view(-1, n_batch)
-                # samp = np.random.choice(n_labels * n_samples, size=n_samples)
-                # log_ratios = log_ratios[samp, :]
                 filtered_res["log_ratios"] = log_ratios
 
             all_res = dic_update(all_res, filtered_res)

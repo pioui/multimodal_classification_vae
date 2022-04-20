@@ -15,8 +15,8 @@ class EncoderB0(nn.Module):
         # TODO: describe architecture and choice for people 
         super().__init__()
         # FOR TRENTO
-        self.fc_layer = nn.Linear(in_features=65, out_features=28*28)
-        
+        self.fc_layer = nn.Linear(in_features=n_input, out_features=28*28)
+        self.n_input = n_input
         self.encoder_cv = nn.Sequential(
             nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3),
             nn.SELU(),
@@ -47,9 +47,8 @@ class EncoderB0(nn.Module):
     def forward(self, x, n_samples=1, squeeze=True, reparam=True):
         n_batch = len(x)
 
-
         # FOR TRENTO
-        x = x.view(n_batch, 65)
+        x = x.view(n_batch, self.n_input)
         x = self.fc_layer(x)
 
         x_reshape = x.view(n_batch, 1, 28, 28)
@@ -86,7 +85,7 @@ class EncoderB1(nn.Module):
         # TODO: describe architecture and choice for people 
         super().__init__()        
         self.encoder_cv = nn.Sequential(
-            nn.Linear(in_features=65, out_features=512),            
+            nn.Linear(in_features=n_input, out_features=512),            
             nn.SELU(),
             nn.Dropout(p=dropout_rate),
             nn.Linear(in_features=512, out_features=256),            
@@ -137,7 +136,7 @@ class EncoderB2(nn.Module):
         # TODO: describe architecture and choice for people 
         super().__init__()        
         self.encoder_cv = nn.Sequential(
-            nn.Linear(in_features=65, out_features=1024),            
+            nn.Linear(in_features=n_input, out_features=1024),            
             nn.SELU(),
             nn.Dropout(p=dropout_rate),
             nn.Linear(in_features=1024, out_features=512),            
@@ -180,23 +179,25 @@ class EncoderB2(nn.Module):
 
 class EncoderB3(nn.Module):
     def __init__(
-        self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
+        self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None, kernel_size = 9,
     ):
         """  
         65 - 3x Conv 1D 32-128 ->
+        trento: kernel_size = 9
+        houston: kernel_size = 7
         """
         # TODO: describe architecture and choice for people 
         super().__init__()        
         self.encoder_cv = nn.Sequential(
-            nn.Conv1d(in_channels=1, out_channels=32, kernel_size=9),
+            nn.Conv1d(in_channels=1, out_channels=32, kernel_size=kernel_size),
             nn.SELU(),
             nn.MaxPool1d(2),
             nn.Dropout(p=dropout_rate),
-            nn.Conv1d(in_channels=32, out_channels=64, kernel_size=9),
+            nn.Conv1d(in_channels=32, out_channels=64, kernel_size=kernel_size),
             nn.SELU(),
             nn.MaxPool1d(2),
             nn.Dropout(p=dropout_rate),
-            nn.Conv1d(in_channels=64, out_channels=n_hidden, kernel_size=9),
+            nn.Conv1d(in_channels=64, out_channels=n_hidden, kernel_size=kernel_size),
             nn.SELU(),
             nn.MaxPool1d(2),
             nn.Dropout(p=dropout_rate),
@@ -234,23 +235,23 @@ class EncoderB3(nn.Module):
 
 class EncoderB4(nn.Module):
     def __init__(
-        self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
+        self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None, kernel_size=9
     ):
         """  
-        65 - 5x Conv 1D 128-512 ->
+        65 - 3x Conv 1D 128-512 ->
         """
         # TODO: describe architecture and choice for people 
         super().__init__()        
         self.encoder_cv = nn.Sequential(
-            nn.Conv1d(in_channels=1, out_channels=128, kernel_size=9),
+            nn.Conv1d(in_channels=1, out_channels=128, kernel_size=kernel_size),
             nn.SELU(),
             nn.MaxPool1d(2),
             nn.Dropout(p=dropout_rate),
-            nn.Conv1d(in_channels=128, out_channels=256, kernel_size=9),
+            nn.Conv1d(in_channels=128, out_channels=256, kernel_size=kernel_size),
             nn.SELU(),
             nn.MaxPool1d(2),
             nn.Dropout(p=dropout_rate),
-            nn.Conv1d(in_channels=256, out_channels=n_hidden, kernel_size=9),
+            nn.Conv1d(in_channels=256, out_channels=n_hidden, kernel_size=kernel_size),
             nn.SELU(),
             nn.MaxPool1d(2),
             nn.Dropout(p=dropout_rate),
@@ -305,7 +306,6 @@ if __name__ == "__main__":
 
     layer = EncoderB3(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
     summary(layer, (1,65))
-
 
     layer = EncoderB4(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
     summary(layer, (1,65))

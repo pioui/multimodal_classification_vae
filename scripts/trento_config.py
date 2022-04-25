@@ -11,7 +11,7 @@ from mcvae.architectures.encoders import (
     EncoderB4
 )
 
-data_dir = "/home/plo026/data/trento/"
+data_dir = "/home/pigi/data/trento/"
 outputs_dir = "outputs/trento/"
 labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]

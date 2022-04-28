@@ -82,34 +82,6 @@ SCENARIOS = [  # WAKE updates
         ),
     ),
 
-
-        dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        n_latent=30,
-        model_name="EncoderB1_L30_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB1( 
-                n_input=N1_INPUT,
-                n_output=30,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-        encoder_z2=nn.ModuleDict(
-            {"default": EncoderB1( 
-                n_input=N2_INPUT,
-                n_output=30,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-    ),
-
         dict(
         loss_gen="ELBO",
         loss_wvar="ELBO",
@@ -142,39 +114,12 @@ SCENARIOS = [  # WAKE updates
         loss_wvar="ELBO",
         reparam_latent=True,
         counts=None,
-        n_latent=30,
-        model_name="EncoderB3_L30_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB3( 
-                n_input=N1_INPUT,
-                n_output=30,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-        encoder_z2=nn.ModuleDict(
-            {"default": EncoderB3( 
-                n_input=N2_INPUT,
-                n_output=30,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-    ),
-
-        dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        n_latent=30,
-        model_name="EncoderB4_L30_VAE",
+        n_latent=20,
+        model_name="EncoderB4_L20_VAE",
         encoder_z1=nn.ModuleDict(
             {"default": EncoderB4( 
                 n_input=N1_INPUT,
-                n_output=30,
+                n_output=20,
                 n_hidden=512,
                 dropout_rate=0,
                 do_batch_norm=False,
@@ -183,7 +128,7 @@ SCENARIOS = [  # WAKE updates
         encoder_z2=nn.ModuleDict(
             {"default": EncoderB4( 
                 n_input=N2_INPUT,
-                n_output=30,
+                n_output=20,
                 n_hidden=512,
                 dropout_rate=0,
                 do_batch_norm=False,

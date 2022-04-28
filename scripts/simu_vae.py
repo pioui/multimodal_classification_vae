@@ -54,6 +54,32 @@ if dataset=="trento":
     DATASET = trentoDataset(
         data_dir = data_dir,
     )
+
+if dataset=="trento-patch":
+    from trento_patch_config import (
+        outputs_dir,
+        data_dir,
+        N_PARTICULES,
+        N_EPOCHS,
+        N_HIDDEN,
+        LR,
+        N_EXPERIMENTS,
+        BATCH_SIZE,
+        CLASSIFICATION_RATIO,
+        N_EVAL_SAMPLES,
+        N_INPUT,
+        N_PATCH,
+        N_LABELS,
+        PROJECT_NAME,
+        SCENARIOS,
+    )
+    from mcvae.dataset import trentoPatchDataset
+    print("Train on trento with 2d Patching")
+    DATASET = trentoPatchDataset(
+        data_dir = data_dir,
+        patch_size=N_PATCH
+    )
+
 if dataset=="houston":
     from houston_config import (
         outputs_dir,
@@ -146,6 +172,7 @@ for scenario in SCENARIOS:
     batch_size = scenario.get("batch_size", BATCH_SIZE)
 
     encoder_z1=scenario.get("encoder_z1", None)
+    x_decoder=scenario.get("x_decoder", None)
 
     do_defensive = type(loss_wvar) == list
     multi_encoder_keys = loss_wvar if do_defensive else ["default"]
@@ -189,7 +216,8 @@ for scenario in SCENARIOS:
                     do_batch_norm=batch_norm,
                     multi_encoder_keys=multi_encoder_keys,
                     vdist_map=vdist_map_train,
-                    encoder_z1=encoder_z1
+                    encoder_z1=encoder_z1,
+                    x_decoder=x_decoder
                 )
                 if os.path.exists(mdl_name):
                     logger.info("model exists; loading from .pt")

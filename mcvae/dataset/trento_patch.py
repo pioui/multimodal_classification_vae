@@ -1,4 +1,3 @@
-from pyexpat import XML_PARAM_ENTITY_PARSING_ALWAYS
 import torch
 from torch.utils.data import Dataset
 from torch.utils.data import TensorDataset
@@ -17,13 +16,13 @@ random.seed(42)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-class trentoDataset(Dataset):
+class trentoPatchDataset(Dataset):
     def __init__(
         self,
         data_dir,
         unlabelled_size=1000,
         do_preprocess=True,
-        patch_size = 15 #odd number
+        patch_size = 13 #odd number
     ) -> None:
         super().__init__()
 
@@ -44,7 +43,6 @@ class trentoDataset(Dataset):
         x_patched = x_patched.unfold(dimension=2, size=patch_size, step=1) # [65,166,600,p,p]
         x_patched = x_patched.reshape(65,-1,patch_size,patch_size) # [65,99600,p,p]
         x_patched = x_patched.transpose(1,0) # [99600,65,p,p]
-        print(x_patched.shape)
 
         y = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"], dtype = torch.int64) # [166,600] 0 to 6
         y_train_labelled = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Train.mat")["TNsecSUBS_Train"], dtype = torch.int64) # [166,600] 0 to 6

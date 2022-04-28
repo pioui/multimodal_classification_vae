@@ -11,7 +11,7 @@ from mcvae.architectures.encoders import (
     EncoderB4
 )
 
-data_dir = "/home/plo026/data/trento/"
+data_dir = "/Users/plo026/data/trento/"
 outputs_dir = "outputs/trento/"
 labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
@@ -22,7 +22,7 @@ if not os.path.exists(outputs_dir):
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
 
-N_EPOCHS = 1000
+N_EPOCHS = 2
 LR = 1e-4
 N_PARTICULES = 30
 N_HIDDEN = 128

@@ -343,176 +343,64 @@ class BernoulliDecoderA5(nn.Module):
         self,
         n_input: int,
         n_output: int,
-        n_hidden: int,
         dropout_rate: float = 0.0,
         do_batch_norm: bool = True,
     ):
         super().__init__()
-        self.decoder_fc = nn.Linear(n_input, n_hidden)
         self.decoder_cv = nn.Sequential(
-            nn.ConvTranspose2d(in_channels=n_hidden, out_channels=128, kernel_size=3),
+            nn.ConvTranspose2d(in_channels=n_input, out_channels=128, kernel_size=5),
             nn.SELU(),
             nn.Dropout(p=dropout_rate),
-
-            nn.ConvTranspose2d(in_channels=128, out_channels=n_output, kernel_size=3),
+            nn.ConvTranspose2d(in_channels=128, out_channels=256, kernel_size=5),
+            nn.SELU(),
+            nn.Dropout(p=dropout_rate),
+            nn.ConvTranspose2d(in_channels=256, out_channels=n_output, kernel_size=5),
             nn.SELU(),
             nn.Dropout(p=dropout_rate),
         )
-        self.n_hidden = n_hidden
 
     def forward(self, x):
         n_samples, n_batch, n_latent = x.shape
-        x_1d = x.view(n_batch, n_samples*n_latent)
-        x_1d = self.decoder_fc(x_1d)
-        x_3d = x_1d.reshape(n_batch, self.n_hidden, 1, 1)
-        means = self.decoder_cv(x_3d)
-
+        x = x.reshape(-1,n_latent) # 25*512, 10
+        x = x.unsqueeze(-1)
+        x = x.unsqueeze(-1)
+        means = self.decoder_cv(x)
         means = nn.Sigmoid()(means)
+        _, channels, patch_size,_= means.shape
+        means = means.reshape(n_samples, n_batch, channels, patch_size, patch_size )
         return means
-
-
-class EncoderB9(nn.Module):
-    def __init__(
-        self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
-    ):
-        """  
-        p=23
-        65,p,p -FC-> 28x28 -2x2D Conv 128-512->
-        """
-        # TODO: describe architecture and choice for people 
-        super().__init__()        
-        self.encoder_cv = nn.Sequential(
-            nn.Conv2d(in_channels=n_input, out_channels=128, kernel_size=3),
-            nn.SELU(),
-            nn.MaxPool2d(2),
-            nn.Dropout(p=dropout_rate),
-            nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3),
-            nn.SELU(),
-            nn.MaxPool2d(2),
-            nn.Dropout(p=dropout_rate),
-            nn.Conv2d(in_channels=256, out_channels=n_hidden, kernel_size=3),
-            nn.SELU(),
-            nn.MaxPool2d(2),
-            nn.Dropout(p=dropout_rate),
-        )
-
-        self.mean_encoder = nn.Linear(n_hidden, n_output)
-        self.var_encoder = nn.Linear(n_hidden, n_output)
-        self.tanh = nn.Tanh()
-
-    def forward(self, x, n_samples=1, squeeze=True, reparam=True):
-        n_batch = len(x)
-
-        q = self.encoder_cv(x)
-        q = q.view(n_batch, -1)
-
-        q_m = self.mean_encoder(q)
-        q_v = self.var_encoder(q)
-        q_v = torch.clamp(q_v, min=-17.0, max=10.0)
-        q_v = q_v.exp()
-        variational_dist = db.Normal(loc=q_m, scale=q_v.sqrt())
-
-        if n_samples == 1 and squeeze:
-            sample_shape = []
-        else:
-            sample_shape = (n_samples,)
-        if reparam:
-            latent = variational_dist.rsample(sample_shape=sample_shape)
-        else:
-            latent = variational_dist.sample(sample_shape=sample_shape)
-        return dict(
-            q_m=q_m, q_v=q_v, latent=latent, dist=variational_dist, sum_last=True
-        )
-
-    
-class BernoulliDecoderA9(nn.Module):
-    def __init__(
-        self,
-        n_input: int,
-        n_output: int,
-        n_hidden: int,
-        dropout_rate: float = 0.0,
-        do_batch_norm: bool = True,
-    ):
-        super().__init__()
-        self.decoder_fc = nn.Linear(n_input, n_hidden)
-        self.decoder_cv = nn.Sequential(
-            nn.Upsample(scale_factor=5),
-            nn.Conv2d(in_channels=n_hidden, out_channels=256, kernel_size=3),
-            nn.SELU(),
-            nn.Dropout(p=dropout_rate),
-
-            nn.Upsample(scale_factor=5),
-            nn.Conv2d(in_channels=256, out_channels=128, kernel_size=7),
-            nn.SELU(),
-            nn.Dropout(p=dropout_rate),
-
-
-            nn.Upsample(scale_factor=3),
-            nn.Conv2d(in_channels=128, out_channels=n_output, kernel_size=5),
-            nn.SELU(),
-            nn.Dropout(p=dropout_rate),
-        )
-        self.n_hidden = n_hidden
-
-    def forward(self, x):
-        n_samples, n_batch, n_latent = x.shape
-        x_1d = x.view(n_batch, n_samples*n_latent)
-        x_1d = self.decoder_fc(x_1d)
-        x_3d = x_1d.reshape(n_batch, self.n_hidden, 1, 1)
-        means = self.decoder_cv(x_3d)
-
-        means = nn.Sigmoid()(means)
-        return means
-
-class ClassifierA0(nn.Module):
-    def __init__(self, n_input, n_hidden, n_output, dropout_rate=0.0, do_batch_norm=False):
-        super().__init__()
-        self.classifier = nn.Sequential(
-            nn.Linear(in_features=n_input,out_features=n_hidden),
-            nn.Dropout(p=dropout_rate),
-            nn.SELU(),
-            nn.Linear(in_features=n_hidden, out_features=int(n_hidden/2)),
-            nn.Dropout(p=dropout_rate),
-            nn.SELU(),
-            nn.Linear(in_features=int(n_hidden/2), out_features=n_output),
-            nn.Softmax(dim=-1),
-        )
-
-    def forward(self, x):
-        # n_samples, n_batch, n_latent = x.shape
-        # x_reshape=x.view(n_batch, n_samples*n_latent)
-        probas = self.classifier(x)
-        probas = probas + 1e-16
-        probas = probas / probas.sum(-1, keepdim=True)
-        return probas    
 
 if __name__ == "__main__":
     from torchsummary import summary
 
-    layer = EncoderB0(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
-    summary(layer, (1,65))
+    # layer = EncoderB0(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # summary(layer, (1,65))
 
-    layer = EncoderB1(n_input=65, n_output=10, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
-    summary(layer, (1,65))
+    # layer = EncoderB1(n_input=65, n_output=10, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
+    # summary(layer, (1,65))
 
-    layer = EncoderB2(n_input=65, n_output=10, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
-    summary(layer, (1,65))
+    # layer = EncoderB2(n_input=65, n_output=10, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
+    # summary(layer, (1,65))
 
-    layer = EncoderB2(n_input=65, n_output=20, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
-    summary(layer, (1,65))
+    # layer = EncoderB2(n_input=65, n_output=20, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
+    # summary(layer, (1,65))
 
-    layer = EncoderB3(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
-    summary(layer, (1,65))
+    # layer = EncoderB3(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # summary(layer, (1,65))
 
-    layer = EncoderB4(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
-    summary(layer, (1,65))
+    # layer = EncoderB4(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # summary(layer, (1,65))
 
-    layer = EncoderB5(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
-    summary(layer, (1,65))
+    # layer = EncoderB5(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # summary(layer, (65,13,13))
 
-    layer = EncoderB6(n_input=65, n_output=10, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
-    summary(layer, (1,65))
+    # layer = BernoulliDecoderA5(n_input=10, n_output=65, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # inx = torch.rand(25,5,10)
+    # outx = layer(inx)
+    # print(inx.shape, outx.shape)
 
-    layer = EncoderB7(n_input=65, n_output=20, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
-    summary(layer, (1,65))
+    # layer = EncoderB6(n_input=65, n_output=10, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
+    # summary(layer, (1,65))
+
+    # layer = EncoderB7(n_input=65, n_output=20, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
+    # summary(layer, (1,65))

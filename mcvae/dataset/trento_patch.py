@@ -66,6 +66,7 @@ class trentoPatchDataset(Dataset):
         y_train = torch.cat((y_train_labelled,y_train_unlabelled), dim=0)
 
         test_indeces = (y_test!=0)
+        test_indeces = np.random.coice(y_test)
         x_test = x_patched[test_indeces] # [29595, 65, p, p]
         y_test = y_all[test_indeces]  # [29595]
 

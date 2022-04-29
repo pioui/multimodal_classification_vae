@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 import matplotlib.patches as mpatches
 from scipy import io
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, accuracy_score
 import os
 import numpy as np
 import torch

@@ -33,7 +33,7 @@ SHAPE = (166,600)
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 16
-PROJECT_NAME = "trento"
+PROJECT_NAME = "trento_patch"
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 

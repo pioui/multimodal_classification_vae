@@ -9,6 +9,7 @@ import os
 import numpy as np
 import torch
 import tifffile
+import csv
 
 from mcvae.utils.utility_functions import compute_reject_label
 
@@ -18,6 +19,18 @@ for project_name in os.listdir('outputs/'):
     if project_name == 'trento':
         dataset = 'trento'
         from trento_config import (
+            labels,
+            color,
+            data_dir,
+            images_dir,
+            outputs_dir,
+            PROJECT_NAME,
+            N_LABELS,
+            SHAPE
+        )
+    if project_name == 'trento_patch':
+        dataset = 'trento'
+        from trento_patch_config import (
             labels,
             color,
             data_dir,
@@ -67,45 +80,45 @@ for project_name in os.listdir('outputs/'):
     else:
         continue
 
-    # Accuracies
-    print(project_name, dataset)
+    # # Accuracies
+    # print(project_name, dataset)
 
-    with open(f"{outputs_dir}{PROJECT_NAME}.pkl", 'rb') as f:
-        data = pickle.load(f)
-    print(data[['MODEL_NAME','N_LATENT', 'encoder_type','LR','N_EPOCHS', 'M_ACCURACY',]])
-    data_csv = data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]]
-    data_csv.to_csv(f'{outputs_dir}/{PROJECT_NAME}_accuracies.csv')
-    data_dict = data.to_dict()        
+    # with open(f"{outputs_dir}{PROJECT_NAME}.pkl", 'rb') as f:
+    #     data = pickle.load(f)
+    # print(data[['MODEL_NAME','N_LATENT', 'encoder_type','LR','N_EPOCHS', 'M_ACCURACY',]])
+    # data_csv = data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]]
+    # data_csv.to_csv(f'{outputs_dir}/{PROJECT_NAME}_accuracies.csv')
+    # data_dict = data.to_dict()        
         
-    for i in range(len(data_dict['LR'])):
-        encoder_type = data_dict["encoder_type"][i]
-        model_name =  data_dict["MODEL_NAME"][i]
-        m_confusion_matrix = data_dict["CONFUSION_MATRIX"][i]
-        m_confusion_matrix = np.around(m_confusion_matrix.astype('float') / m_confusion_matrix.sum(axis=1)[:, np.newaxis], decimals=2)
-        train_loss = data_dict["train_LOSS"][i]
-        test_loss = data_dict["test_LOSS"][i]
+    # for i in range(len(data_dict['LR'])):
+    #     encoder_type = data_dict["encoder_type"][i]
+    #     model_name =  data_dict["MODEL_NAME"][i]
+    #     m_confusion_matrix = data_dict["CONFUSION_MATRIX"][i]
+    #     m_confusion_matrix = np.around(m_confusion_matrix.astype('float') / m_confusion_matrix.sum(axis=1)[:, np.newaxis], decimals=2)
+    #     train_loss = data_dict["train_LOSS"][i]
+    #     test_loss = data_dict["test_LOSS"][i]
 
-        # Train-Test Loss
-        plt.figure(dpi=1000)
-        plt.plot(train_loss, color="red", label = 'Train Loss')
-        plt.plot(test_loss, color="blue", label='Test Loss')
-        plt.xlabel("Epochs")
-        plt.grid()
-        plt.legend()
-        plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_test_loss.png", pad_inches=0.2, bbox_inches='tight')
+    #     # Train-Test Loss
+    #     plt.figure(dpi=1000)
+    #     plt.plot(train_loss, color="red", label = 'Train Loss')
+    #     plt.plot(test_loss, color="blue", label='Test Loss')
+    #     plt.xlabel("Epochs")
+    #     plt.grid()
+    #     plt.legend()
+    #     plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_test_loss.png", pad_inches=0.2, bbox_inches='tight')
 
-        # Test Confusion Matrix
-        plt.figure(dpi=1000)
-        plt.matshow(m_confusion_matrix, cmap="YlGn")
-        plt.xlabel("True Labels")
-        plt.xticks(np.arange(0,N_LABELS,1), labels[1:])
-        plt.ylabel("Predicted Labels")
-        plt.yticks(np.arange(0,N_LABELS,1), labels[1:])
-        for k in range (len(m_confusion_matrix)):
-            for l in range(len(m_confusion_matrix[k])):
-                plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center')
-        plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_test_confusion_matrix.png",  pad_inches=0.2, bbox_inches='tight', dpi=1000)
-        np.savetxt(f"{outputs_dir}{project_name}_{model_name}_{encoder_type}_test_confusion_matrix.csv", m_confusion_matrix.astype(int), delimiter=',')
+    #     # Test Confusion Matrix
+    #     plt.figure(dpi=1000)
+    #     plt.matshow(m_confusion_matrix, cmap="YlGn")
+    #     plt.xlabel("True Labels")
+    #     plt.xticks(np.arange(0,N_LABELS,1), labels[1:])
+    #     plt.ylabel("Predicted Labels")
+    #     plt.yticks(np.arange(0,N_LABELS,1), labels[1:])
+    #     for k in range (len(m_confusion_matrix)):
+    #         for l in range(len(m_confusion_matrix[k])):
+    #             plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center')
+    #     plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_test_confusion_matrix.png",  pad_inches=0.2, bbox_inches='tight', dpi=1000)
+    #     np.savetxt(f"{outputs_dir}{project_name}_{model_name}_{encoder_type}_test_confusion_matrix.csv", m_confusion_matrix.astype(int), delimiter=',')
         
     if dataset == "trento":
         y = np.array(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"]) # [166,600] 0 to 6
@@ -135,7 +148,7 @@ for project_name in os.listdir('outputs/'):
         hyperrgb[:,:,1] = x_all[:,20].reshape(1202,4768)+0.1
         hyperrgb[:,:,2] = x_all[:,0].reshape(1202,4768)+0.2
 
-
+    acc_dict = []
     for file in os.listdir(os.path.join(outputs_dir)):
         if os.path.splitext(file)[-1].lower()=='.npy':
             model_name = file[:-4]
@@ -176,11 +189,21 @@ for project_name in os.listdir('outputs/'):
             plt.savefig(f"{images_dir}{model_name}_total_confusion_matrix.png",bbox_inches='tight', pad_inches=0.2, dpi=1000)
             np.savetxt(f"{outputs_dir}{model_name}_total_confusion_matrix.csv", m_confusion_matrix.astype(int), delimiter=',')
 
+            # Total Accuracy
+            indeces = (y_true!=0)
+            m_accuracy = accuracy_score(y_true[indeces],  y_pred[indeces])
+            acc_dict.append({'model_name':model_name, 'accuracy':m_accuracy})
+            print(model_name, m_accuracy)
 
 
 
 
-        
+
+    with open(f'{outputs_dir}/{PROJECT_NAME}_total_accuracies.csv', 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames = ['model_name', 'accuracy'])
+        writer.writeheader()
+        writer.writerows(acc_dict)
+
 
         
 

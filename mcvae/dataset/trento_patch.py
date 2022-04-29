@@ -66,9 +66,10 @@ class trentoPatchDataset(Dataset):
         y_train = torch.cat((y_train_labelled,y_train_unlabelled), dim=0)
 
         test_indeces = (y_test!=0)
-        test_indeces = np.random.coice(y_test)
-        x_test = x_patched[test_indeces] # [29595, 65, p, p]
-        y_test = y_all[test_indeces]  # [29595]
+        x_test = x_patched[test_indeces] # [1000, 65, p, p]
+        y_test = y_all[test_indeces]  # [1000]
+        # Reduce test dataset for the pur GPU
+        x_test, _, y_test, _ = train_test_split(x_test, y_test, train_size= 0.2, stratify = y_test)
 
         # plt.figure(dpi=1000)
         # plt.suptitle('Distribution HSI and Lidar pixel values')
@@ -108,7 +109,7 @@ class trentoPatchDataset(Dataset):
 
 if __name__ == "__main__":
 
-    DATASET = trentoDataset(
+    DATASET = trentoPatchDataset(
         data_dir = "/Users/plo026/data/trento/",
     )
     x,y = DATASET.train_dataset.tensors # 819

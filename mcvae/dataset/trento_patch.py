@@ -102,7 +102,7 @@ class trentoPatchDataset(Dataset):
         self.train_dataset_labelled = TensorDataset(x_train_labelled, y_train_labelled-1) # 0 to 5
         self.test_dataset = TensorDataset(x_test, y_test-1) # 0 to 5
         self.test_dataset_labelled = TensorDataset(x_test_labelled, y_test_labelled-1) # 0 to 5
-        self.full_dataset = TensorDataset(x_all, y_all) # 0 to 6
+        self.full_dataset = TensorDataset(x_patched, y_all) # 0 to 6
         log_train_test_split([y_all, y_train, y_train_labelled, y_test, y_test_labelled])
 
 if __name__ == "__main__":

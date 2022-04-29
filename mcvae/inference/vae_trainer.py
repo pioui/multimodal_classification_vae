@@ -146,10 +146,12 @@ class VAE_M1M2_Trainer:
         self.test_loss = []
         pbar = tqdm(range(n_epochs))
         for epoch in pbar:
+            print(epoch)
             running_loss = 0.0 
             for (tensor_all, tensor_superv) in zip(
                 self.train_loader, cycle(self.train_annotated_loader)
             ):
+                print(self.it, running_loss)
                 self.it += 1
 
                 x_u, _ = tensor_all
@@ -223,6 +225,7 @@ class VAE_M1M2_Trainer:
                                 .classifier[0]
                                 .to_hidden.weight.grad.cpu()
                             )
+
                 self.iterate += 1
             logger.info(f"Train Loss: {running_loss/ len(self.train_loader)}")
             self.train_loss.append(running_loss/ len(self.train_loader))
@@ -230,10 +233,12 @@ class VAE_M1M2_Trainer:
             pbar.set_description("{0:.2f}".format(theta_loss.item()))
 
             with torch.no_grad():
+                print("validation")
                 running_loss = 0.0
                 for (tensor_all, tensor_superv) in zip(
                     self.test_loader, cycle(self.test_annotated_loader)):
                     self.it += 1
+                    print(self.it, running_loss)
 
                     x_u, _ = tensor_all
                     x_s, y_s = tensor_superv

@@ -483,13 +483,13 @@ if __name__ == "__main__":
     # print(inx.shape, outx.shape)
 
 
-    layer = EncoderB6(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
-    summary(layer, (65,5,5))
+    # layer = EncoderB6(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # summary(layer, (65,5,5))
 
-    layer = BernoulliDecoderA6(n_input=10, n_output=65, dropout_rate=0.1, do_batch_norm=False)
-    inx = torch.rand(25,5,10)
-    outx = layer(inx)
-    print(inx.shape, outx.shape)
+    # layer = BernoulliDecoderA6(n_input=10, n_output=65, dropout_rate=0.1, do_batch_norm=False)
+    # inx = torch.rand(25,5,10)
+    # outx = layer(inx)
+    # print(inx.shape, outx.shape)
 
     # layer = EncoderB6(n_input=65, n_output=10, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
     # summary(layer, (1,65))

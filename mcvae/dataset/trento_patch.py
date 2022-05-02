@@ -20,7 +20,8 @@ class trentoPatchDataset(Dataset):
     def __init__(
         self,
         data_dir,
-        unlabelled_size=1000,
+        samples_per_class=200,
+        train_size=0.5,
         do_preprocess=True,
         patch_size = 13 #odd number
     ) -> None:
@@ -33,6 +34,7 @@ class trentoPatchDataset(Dataset):
         x_all = x
         x_all = x_all.reshape(len(x_all),-1)
         x_all = torch.transpose(x_all, 1,0) # [99600,65]
+
         #Normalize to [0,1]
         if do_preprocess: 
             x_all = normalize(x_all).float()
@@ -53,51 +55,31 @@ class trentoPatchDataset(Dataset):
         y_train_labelled = y_train_labelled.reshape(-1) # [99600]
         y_test = y_test.reshape(-1) # [99600]
 
-        train_labelled_indeces = (y_train_labelled!=0)
-        x_train_labelled = x_patched[train_labelled_indeces] # [819, 65, p, p]
-        y_train_labelled = y_all[train_labelled_indeces]  # [819]
+        train_inds = []
+        for label in y_all.unique():
+            label_ind = np.where(y_all == label)[0]
+            if label == 0:
+                labelled_exs = np.random.choice(label_ind, size=(len(y_all.unique())-1)*samples_per_class)
+            else:
+                labelled_exs = np.random.choice(label_ind, size=samples_per_class)
+            train_inds.append(labelled_exs)
+        train_inds = np.concatenate(train_inds)
 
-        unlabelled_indeces = (y_all==0)
-        x_unlabelled = x_patched[unlabelled_indeces] # []
-        y_unlabelled = y_all[unlabelled_indeces] # []
-        x_train_unlabelled, _, y_train_unlabelled,_ = train_test_split(x_unlabelled,y_unlabelled,train_size = unlabelled_size)
-
-        x_train = torch.cat((x_train_labelled,x_train_unlabelled), dim=0)
-        y_train = torch.cat((y_train_labelled,y_train_unlabelled), dim=0)
-
-        test_indeces = (y_test!=0)
-        x_test = x_patched[test_indeces] # [1000, 65, p, p]
-        y_test = y_all[test_indeces]  # [1000]
-        # Reduce test dataset for the pur GPU
-        x_test, _, y_test, _ = train_test_split(x_test, y_test, train_size= 0.2, stratify = y_test)
-
-        # plt.figure(dpi=1000)
-        # plt.suptitle('Distribution HSI and Lidar pixel values')
-        # for channel in range(x_all.shape[-1]):
-        #     plt.subplot(10,7,channel+1)
-        #     for label,name in zip([1,5],["A. Trees", "Vineyards"]):
-        #         plt.axis("off")
-        #         label_ind = np.where(y == label)[0]
-        #         hist_values = x_all[label_ind, channel]
-        #         histogram, bin_edges = np.histogram(hist_values, bins=100, range=(0, 1))
-        #         plt.plot(bin_edges[:-1], histogram, label = name, linewidth = 0.5, alpha = 0.6)
-
-        # plt.savefig("images/trento_apples_vines_distribution.png")
+        x_all_train = x_patched[train_inds]
+        y_all_train = y_all[train_inds]
         
-        # label_ind = np.where(y == 1)[0]
-        # one_apple = x_all[label_ind][50]
-        # label_ind = np.where(y == 5)[0]
-        # one_vine = x_all[label_ind][76]
-
-        # plt.figure()
-        # plt.grid(which='both')
-        # plt.scatter(np.arange(0,65),one_apple, label = "A. Trees")
-        # plt.scatter(np.arange(0,65),one_vine, label = "Vineyards")
-        # plt.legend()
-        # plt.savefig("images/trento_apples_vines_channels.png")
+        x_train, x_test, y_train, y_test = train_test_split(
+            x_all_train, y_all_train, train_size = train_size, random_state = 42, stratify = y_all_train
+        ) # 0 to 20
 
 
-        x_test_labelled, _, y_test_labelled, _ = train_test_split(x_test, y_test, train_size= 0.9, stratify = y_test)
+        train_labelled_indeces = (y_train!=0)
+        x_train_labelled = x_train[train_labelled_indeces] # [787260,57]
+        y_train_labelled = y_train[train_labelled_indeces] # [787260] 1 to 20, 255
+
+        test_labelled_indeces = (y_test!=0)
+        x_test_labelled = x_test[test_labelled_indeces] # [787260,57]
+        y_test_labelled = y_test[test_labelled_indeces] # [787260] 1 to 20, 255
 
         self.labelled_fraction = len(y_train_labelled)/len(y_train)
         self.train_dataset = TensorDataset(x_train, y_train-1) # 0 to 5

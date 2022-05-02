@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 
 
-data_dir = "/Users/plo026/data/trento/"
+data_dir = "/home/plo026/data/trento/"
 SHAPE = (166,600)
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
 
@@ -27,16 +27,16 @@ hyperrgb[:,:,2] = x_all[:,0].reshape(166,600)+0.2
 plt.figure(dpi=1000)
 plt.imshow(hyperrgb)
 plt.axis('off')
-plt.savefig("/Users/plo026/Documents/rgb_trento.png",bbox_inches='tight', dpi=1000, pad_inches=0.0)
+plt.savefig("/home/plo026/Documents/rgb_trento.png",bbox_inches='tight', dpi=1000, pad_inches=0.0)
 
 plt.figure(dpi=1000)
 plt.imshow(y_true.reshape(SHAPE), interpolation='nearest', cmap = colors.ListedColormap(color))
 plt.axis('off')
-plt.savefig("/Users/plo026/Documents/gt_trento.png",bbox_inches='tight', dpi=1000, pad_inches=0.0)
+plt.savefig("/home/plo026/Documents/gt_trento.png",bbox_inches='tight', dpi=1000, pad_inches=0.0)
 
 
 
-data_dir = "/Users/plo026/data/houston/"
+data_dir = "/home/plo026/data/houston/"
 color = [
     "black", "limegreen", "lime", "forestgreen", "green", 
     "darkgreen", "saddlebrown", "aqua", "white", 
@@ -62,9 +62,9 @@ hyperrgb[:,:,2] = x_all[:,0].reshape(1202,4768)+0.2
 plt.figure(dpi=1000)
 plt.imshow(hyperrgb)
 plt.axis('off')
-plt.savefig("/Users/plo026/Documents/rgb_houston.png",bbox_inches='tight', dpi=1000, pad_inches=0.0)
+plt.savefig("/home/plo026/Documents/rgb_houston.png",bbox_inches='tight', dpi=1000, pad_inches=0.0)
 
 plt.figure(dpi=1000)
 plt.imshow(y_true.reshape(SHAPE), interpolation='nearest', cmap = colors.ListedColormap(color))
 plt.axis('off')
-plt.savefig("/Users/plo026/Documents/gt_houston.png",bbox_inches='tight', dpi=1000, pad_inches=0.0)
+plt.savefig("/home/plo026/Documents/gt_houston.png",bbox_inches='tight', dpi=1000, pad_inches=0.0)

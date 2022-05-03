@@ -41,8 +41,6 @@ class trentoMultimodalDataset(Dataset):
         y = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"], dtype = torch.int64) # [166,600] 0 to 6
         y_all = y
         y_all = y_all.reshape(-1) # [99600]
-        y_train_labelled = y_train_labelled.reshape(-1) # [99600]
-        y_test = y_test.reshape(-1) # [99600]
 
         train_inds = []
         for label in y_all.unique():
@@ -81,7 +79,7 @@ class trentoMultimodalDataset(Dataset):
 if __name__ == "__main__":
 
     DATASET = trentoMultimodalDataset(
-        data_dir = "/home/plo026/data/trento/",
+        data_dir = "/Users/plo026/data/trento/",
     )
     x1,x2,y = DATASET.train_dataset.tensors # 1819, -1 to 5
     print(x1.shape, x2.shape, y.shape, torch.unique(y))

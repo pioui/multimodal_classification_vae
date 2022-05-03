@@ -83,7 +83,7 @@ class trentoDataset(Dataset):
 if __name__ == "__main__":
 
     DATASET = trentoDataset(
-        data_dir = "/home/plo026/data/trento/",
+        data_dir = "/Users/plo026/data/trento/",
     )
     x,y = DATASET.train_dataset.tensors # 819
     print(x.shape, y.shape, torch.unique(y))

@@ -4,7 +4,7 @@ import torch
 from torch.distributions import Categorical
 import numpy as np
 from arviz.stats import psislw
-from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
+from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix, balanced_accuracy_score
 from tqdm.auto import tqdm
 import random
 random.seed(42)
@@ -74,10 +74,12 @@ def model_evaluation(
     m_precision = precision_score(y_true, y_pred.argmax(1), average = None, zero_division =0)
     m_recall = recall_score(y_true, y_pred.argmax(1), average = None, zero_division =0)
     m_accuracy = accuracy_score(y_true, y_pred.argmax(1))
+    m_accuracy_balanced = balanced_accuracy_score(y_true, y_pred.argmax(1))
     m_confusion_matrix = confusion_matrix(y_true+1, y_pred.argmax(1)+1, normalize='true')
     
     res = {
         "M_ACCURACY": m_accuracy,
+        "M_BALANCED_ACCURACY": m_accuracy_balanced,
         "MEAN_PRECISION": m_precision,
         "MEAN_RECALL": m_recall,
         "CONFUSION_MATRIX": m_confusion_matrix,

@@ -17,6 +17,8 @@ print(os.listdir('outputs/'))
 
 for project_name in os.listdir('outputs/'):
     if project_name == 'trento':
+        print(project_name)
+        print("here1")
         dataset = 'trento'
         from trento_config import (
             labels,
@@ -28,7 +30,7 @@ for project_name in os.listdir('outputs/'):
             N_LABELS,
             SHAPE
         )
-    if project_name == 'trento_patch':
+    elif project_name == 'trento_patch':
         dataset = 'trento'
         from trento_patch_config import (
             labels,
@@ -78,6 +80,8 @@ for project_name in os.listdir('outputs/'):
         )
 
     else:
+        print(project_name)
+        print("here2")
         continue
 
     # Accuracies
@@ -85,8 +89,8 @@ for project_name in os.listdir('outputs/'):
 
     with open(f"{outputs_dir}{PROJECT_NAME}.pkl", 'rb') as f:
         data = pickle.load(f)
-    print(data[['MODEL_NAME','N_LATENT', 'encoder_type','LR','N_EPOCHS', 'M_ACCURACY',]])
-    data_csv = data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY',]]
+    print(data[['MODEL_NAME','N_LATENT', 'encoder_type','LR','N_EPOCHS', 'M_ACCURACY','M_BALANCED_ACCURACY']])
+    data_csv = data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY','M_BALANCED_ACCURACY']]
     data_csv.to_csv(f'{outputs_dir}/{PROJECT_NAME}_test_accuracies.csv')
     data_dict = data.to_dict()        
         
@@ -107,6 +111,18 @@ for project_name in os.listdir('outputs/'):
         plt.legend()
         plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_LOSS.png", pad_inches=0.2, bbox_inches='tight')
         
+        plt.figure(dpi=500)
+        plt.matshow(m_confusion_matrix, cmap="YlGn")
+        plt.xlabel("True Labels")
+        plt.xticks(np.arange(0,N_LABELS,1), range(1,len(labels)))
+        plt.ylabel("Predicted Labels")
+        plt.yticks(np.arange(0,N_LABELS,1), range(1,len(labels)))
+        for k in range (len(m_confusion_matrix)):
+            for l in range(len(m_confusion_matrix[k])):
+                plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small')
+        plt.savefig(f"{images_dir}{model_name}_test_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
+        np.savetxt(f"{outputs_dir}{model_name}_test_CONFUSION_MATRIX.csv", m_confusion_matrix.astype(int), delimiter=',')
+
     if dataset == "trento":
         y = np.array(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"]) # [166,600] 0 to 6
         y_true = y.reshape(-1)
@@ -166,14 +182,14 @@ for project_name in os.listdir('outputs/'):
             plt.figure(dpi=500)
             plt.matshow(m_confusion_matrix, cmap="YlGn")
             plt.xlabel("True Labels")
-            plt.xticks(np.arange(0,N_LABELS,1), labels[1:])
+            plt.xticks(np.arange(0,N_LABELS,1), range(1,len(labels)))
             plt.ylabel("Predicted Labels")
-            plt.yticks(np.arange(0,N_LABELS,1), labels[1:])
+            plt.yticks(np.arange(0,N_LABELS,1), range(1,len(labels)))
             for k in range (len(m_confusion_matrix)):
                 for l in range(len(m_confusion_matrix[k])):
                     plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small')
-            plt.savefig(f"{images_dir}{model_name}_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
-            np.savetxt(f"{outputs_dir}{model_name}_total_confusion_matrix.csv", m_confusion_matrix.astype(int), delimiter=',')
+            plt.savefig(f"{images_dir}{model_name}_total_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
+            np.savetxt(f"{outputs_dir}{model_name}_total_CONFUSION_MATRIX.csv", m_confusion_matrix.astype(int), delimiter=',')
 
             # Total Accuracy
             indeces = (y_true!=0)

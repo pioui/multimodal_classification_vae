@@ -11,7 +11,7 @@ from mcvae.architectures.encoders import (
     EncoderB4,
 )
 
-data_dir = "/home/plo026/data/houston/"
+data_dir = "/Users/plo026/data/houston/"
 outputs_dir = "outputs/houston/"
 labels = [
     "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 
@@ -280,7 +280,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=128,
                 dropout_rate=0,
                 do_batch_norm=False,
-                kernel_size=7
+                kernel_size=9
             )}
         ),
     ),
@@ -298,7 +298,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=128,
                 dropout_rate=0,
                 do_batch_norm=False,
-                kernel_size=7
+                kernel_size=9
             )}
         ),
     ),
@@ -316,7 +316,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=128,
                 dropout_rate=0,
                 do_batch_norm=False,
-                kernel_size=7
+                kernel_size=9
             )}
         ),
     ),
@@ -334,7 +334,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=128,
                 dropout_rate=0,
                 do_batch_norm=False,
-                kernel_size=7
+                kernel_size=9
             )}
         ),
     ),
@@ -354,7 +354,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=512,
                 dropout_rate=0,
                 do_batch_norm=False,
-                kernel_size=7
+                kernel_size=9
             )}
         ),
     ),
@@ -372,7 +372,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=512,
                 dropout_rate=0,
                 do_batch_norm=False,
-                kernel_size=7
+                kernel_size=9
             )}
         ),
     ),
@@ -390,7 +390,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=512,
                 dropout_rate=0,
                 do_batch_norm=False,
-                kernel_size=7
+                kernel_size=9
             )}
         ),
     ),
@@ -408,7 +408,7 @@ SCENARIOS = [  # WAKE updates
                 n_hidden=512,
                 dropout_rate=0,
                 do_batch_norm=False,
-                kernel_size=7
+                kernel_size=9
             )}
         ),
     ),

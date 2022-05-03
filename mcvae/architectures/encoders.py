@@ -187,7 +187,9 @@ class EncoderB3(nn.Module):
         houston: kernel_size = 7
         """
         # TODO: describe architecture and choice for people 
-        super().__init__()        
+        super().__init__() 
+        self.fc_layer = nn.Linear(in_features=n_input, out_features=64)
+       
         self.encoder_cv = nn.Sequential(
             nn.Conv1d(in_channels=1, out_channels=32, kernel_size=kernel_size),
             nn.SELU(),
@@ -209,6 +211,8 @@ class EncoderB3(nn.Module):
 
     def forward(self, x, n_samples=1, squeeze=True, reparam=True):
         n_batch = len(x)
+        
+        x = self.fc_layer(x) 
 
         x_reshape = x.view(n_batch, 1, -1)
 
@@ -242,6 +246,8 @@ class EncoderB4(nn.Module):
         """
         # TODO: describe architecture and choice for people 
         super().__init__()        
+        self.fc_layer = nn.Linear(in_features=n_input, out_features=64)
+
         self.encoder_cv = nn.Sequential(
             nn.Conv1d(in_channels=1, out_channels=128, kernel_size=kernel_size),
             nn.SELU(),
@@ -264,6 +270,8 @@ class EncoderB4(nn.Module):
 
     def forward(self, x, n_samples=1, squeeze=True, reparam=True):
         n_batch = len(x)
+
+        x = self.fc_layer(x) 
 
         x_reshape = x.view(n_batch, 1, -1)
 
@@ -456,8 +464,8 @@ class BernoulliDecoderA6(nn.Module):
 if __name__ == "__main__":
     from torchsummary import summary
 
-    layer = EncoderB0(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
-    summary(layer, (1,65))
+    # layer = EncoderB0(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # summary(layer, (1,65))
 
     # layer = EncoderB1(n_input=65, n_output=10, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
     # summary(layer, (1,65))
@@ -468,11 +476,11 @@ if __name__ == "__main__":
     # layer = EncoderB2(n_input=65, n_output=20, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
     # summary(layer, (1,65))
 
-    # layer = EncoderB3(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
-    # summary(layer, (1,65))
+    # layer = EncoderB3(n_input=55, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # summary(layer, (1,55))
 
-    # layer = EncoderB4(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
-    # summary(layer, (1,65))
+    # layer = EncoderB4(n_input=2, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # summary(layer, (1,2))
 
     # layer = EncoderB5(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
     # summary(layer, (65,13,13))

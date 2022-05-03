@@ -32,7 +32,7 @@ class trentoPatchDataset(Dataset):
         image_lidar = torch.tensor(tifffile.imread(data_dir+"LiDAR_Italy.tif")) # [2,166,600]
         x = torch.cat((image_hyper,image_lidar), dim = 0) # [65,166,600]
         x_all = x
-        x_all = x_all.reshape(len(x_all),-1)
+        x_all = x_all.reshape(len(x_all),-1) # [65,99600]
         x_all = torch.transpose(x_all, 1,0) # [99600,65]
 
         #Normalize to [0,1]
@@ -92,7 +92,7 @@ class trentoPatchDataset(Dataset):
 if __name__ == "__main__":
 
     DATASET = trentoPatchDataset(
-        data_dir = "/home/plo026/data/trento/",
+        data_dir = "/Users/plo026/data/trento/",
     )
     x,y = DATASET.train_dataset.tensors # 819
     print(x.shape, y.shape, torch.unique(y))

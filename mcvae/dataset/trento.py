@@ -1,3 +1,4 @@
+from dataclasses import replace
 import torch
 from torch.utils.data import Dataset
 from torch.utils.data import TensorDataset
@@ -44,10 +45,12 @@ class trentoDataset(Dataset):
         train_inds = []
         for label in y_all.unique():
             label_ind = np.where(y_all == label)[0]
+            samples = samples_per_class
             if label == 0:
-                labelled_exs = np.random.choice(label_ind, size=(len(y_all.unique())-1)*samples_per_class)
+                labelled_exs = np.random.choice(label_ind, size=(len(y_all.unique())-1)*samples, replace=False)
             else:
-                labelled_exs = np.random.choice(label_ind, size=samples_per_class)
+                while (len(label_ind)< samples) : samples = int(samples/2)
+                labelled_exs = np.random.choice(label_ind, size=samples_per_class, replace=False)
             train_inds.append(labelled_exs)
         train_inds = np.concatenate(train_inds)
 

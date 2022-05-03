@@ -80,7 +80,7 @@ class houstonMultimodalDataset(Dataset):
 if __name__ == "__main__":
 
     DATASET = houstonMultimodalDataset(
-        data_dir = "/Users/plo026/data/houston/",
+        data_dir = "/homw/plo026/data/houston/",
     )
 
     x,y = DATASET.full_dataset.tensors # [5731136] 0 to 20

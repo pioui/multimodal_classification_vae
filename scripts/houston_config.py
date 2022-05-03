@@ -11,7 +11,7 @@ from mcvae.architectures.encoders import (
     EncoderB4,
 )
 
-data_dir = "/Users/plo026/data/houston/"
+data_dir = "/homw/plo026/data/houston/"
 outputs_dir = "outputs/houston/"
 labels = [
     "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 

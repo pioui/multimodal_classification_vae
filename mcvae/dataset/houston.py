@@ -42,7 +42,6 @@ class houstonDataset(Dataset):
 
         train_inds = []
         for label in y_all.unique():
-            samples = samples_per_class
             label_ind = np.where(y_all == label)[0]
             samples = samples_per_class
             if label == 0:
@@ -80,7 +79,7 @@ class houstonDataset(Dataset):
 if __name__ == "__main__":
 
     DATASET = houstonDataset(
-        data_dir = "/home/plo026/data/houston/",
+        data_dir = "/Users/plo026/data/houston/",
     )
 
     x,y = DATASET.full_dataset.tensors # [5731136] 0 to 20

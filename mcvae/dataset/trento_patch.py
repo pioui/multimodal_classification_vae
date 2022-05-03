@@ -55,10 +55,12 @@ class trentoPatchDataset(Dataset):
         train_inds = []
         for label in y_all.unique():
             label_ind = np.where(y_all == label)[0]
+            samples = samples_per_class
             if label == 0:
-                labelled_exs = np.random.choice(label_ind, size=(len(y_all.unique())-1)*samples_per_class)
+                labelled_exs = np.random.choice(label_ind, size=(len(y_all.unique())-1)*samples, replace=False)
             else:
-                labelled_exs = np.random.choice(label_ind, size=samples_per_class)
+                while (len(label_ind)< samples) : samples = int(samples/2)
+                labelled_exs = np.random.choice(label_ind, size=samples, replace=False)
             train_inds.append(labelled_exs)
         train_inds = np.concatenate(train_inds)
 
@@ -89,7 +91,7 @@ class trentoPatchDataset(Dataset):
 if __name__ == "__main__":
 
     DATASET = trentoPatchDataset(
-        data_dir = "/home/plo026/data/trento/",
+        data_dir = "/Users/plo026/data/trento/",
     )
     x,y = DATASET.train_dataset.tensors # 819
     print(x.shape, y.shape, torch.unique(y))

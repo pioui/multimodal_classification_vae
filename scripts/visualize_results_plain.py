@@ -98,7 +98,7 @@ for project_name in os.listdir('outputs/'):
         encoder_type = data_dict["encoder_type"][i]
         model_name =  data_dict["MODEL_NAME"][i]
         m_confusion_matrix = data_dict["CONFUSION_MATRIX"][i]
-        m_confusion_matrix = np.around(m_confusion_matrix.astype('float') / m_confusion_matrix.sum(axis=1)[:, np.newaxis], decimals=2)
+        # m_confusion_matrix = np.around(m_confusion_matrix.astype('float') / m_confusion_matrix.sum(axis=1)[:, np.newaxis], decimals=2)
         train_loss = data_dict["train_LOSS"][i]
         test_loss = data_dict["test_LOSS"][i]
 
@@ -120,8 +120,8 @@ for project_name in os.listdir('outputs/'):
         for k in range (len(m_confusion_matrix)):
             for l in range(len(m_confusion_matrix[k])):
                 plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small')
-        plt.savefig(f"{images_dir}{model_name}_test_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
-        np.savetxt(f"{outputs_dir}{model_name}_test_CONFUSION_MATRIX.csv", m_confusion_matrix.astype(int), delimiter=',')
+        plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_test_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
+        np.savetxt(f"{outputs_dir}{project_name}_{model_name}_{encoder_type}_test_CONFUSION_MATRIX.csv", m_confusion_matrix.astype(int), delimiter=',')
 
     if dataset == "trento":
         y = np.array(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"]) # [166,600] 0 to 6

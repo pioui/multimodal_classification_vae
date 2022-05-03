@@ -47,9 +47,6 @@ class trentoPatchDataset(Dataset):
         x_patched = x_patched.transpose(1,0) # [99600,65,p,p]
 
         y = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"], dtype = torch.int64) # [166,600] 0 to 6
-        y_train_labelled = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Train.mat")["TNsecSUBS_Train"], dtype = torch.int64) # [166,600] 0 to 6
-        y_test = y-y_train_labelled
-
         y_all = y
         y_all = y_all.reshape(-1) # [99600]
         y_train_labelled = y_train_labelled.reshape(-1) # [99600]
@@ -92,7 +89,7 @@ class trentoPatchDataset(Dataset):
 if __name__ == "__main__":
 
     DATASET = trentoPatchDataset(
-        data_dir = "/home/plo026/data/trento/",
+        data_dir = "/Users/plo026/data/trento/",
     )
     x,y = DATASET.train_dataset.tensors # 819
     print(x.shape, y.shape, torch.unique(y))

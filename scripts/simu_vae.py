@@ -49,10 +49,13 @@ if dataset=="trento":
         N_LABELS,
         PROJECT_NAME,
         SCENARIOS,
+        SAMPLES_PER_CLASS,
     )
     from mcvae.dataset import trentoDataset
     DATASET = trentoDataset(
         data_dir = data_dir,
+        samples_per_class=SAMPLES_PER_CLASS,
+
     )
 
 if dataset=="trento-patch":
@@ -72,12 +75,15 @@ if dataset=="trento-patch":
         N_LABELS,
         PROJECT_NAME,
         SCENARIOS,
+        SAMPLES_PER_CLASS,
     )
     from mcvae.dataset import trentoPatchDataset
     print("Train on trento with 2d Patching")
     DATASET = trentoPatchDataset(
         data_dir = data_dir,
-        patch_size=N_PATCH
+        patch_size=N_PATCH,
+        samples_per_class=SAMPLES_PER_CLASS,
+
     )
 
 if dataset=="houston":

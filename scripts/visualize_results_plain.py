@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 import matplotlib.patches as mpatches
 from scipy import io
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import confusion_matrix, accuracy_score, balanced_accuracy_score
 import os
 import numpy as np
 import torch
@@ -192,15 +192,25 @@ for project_name in os.listdir('outputs/'):
             # Total Accuracy
             indeces = (y_true!=0)
             m_accuracy = accuracy_score(y_true[indeces],  y_pred[indeces])
-            acc_dict.append({'model_name':model_name, 'accuracy':m_accuracy})
-            print(model_name, m_accuracy)
+            b_accuracy = balanced_accuracy_score(y_true[indeces],  y_pred[indeces])
 
+            # Unknown label
 
-
+            y_pred[y_pred<0.5]=0
+            indeces = (y_true!=0)
+            um_accuracy = accuracy_score(y_true[indeces],  y_pred[indeces])
+            ub_accuracy = balanced_accuracy_score(y_true[indeces],  y_pred[indeces])
+            acc_dict.append({
+                'model_name':model_name, 
+                'accuracy':m_accuracy, 
+                'balanced accuracy': b_accuracy,
+                'unkown label accuracy': um_accuracy, 
+                'uknown label balanced accuracy': ub_accuracy,
+                })
 
 
     with open(f'{outputs_dir}/{PROJECT_NAME}_total_accuracies.csv', 'w') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames = ['model_name', 'accuracy'])
+        writer = csv.DictWriter(csvfile, fieldnames = ['model_name', 'accuracy', 'balanced accuracy'])
         writer.writeheader()
         writer.writerows(acc_dict)
 

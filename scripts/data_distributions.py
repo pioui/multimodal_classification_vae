@@ -11,7 +11,7 @@ import random
 import matplotlib.pyplot as plt
 from mcvae.utils import normalize, log_train_test_split
 
-data_dir = "/Users/plo026/data/houston/"
+data_dir = "/home/plo026/data/houston/"
 from houston_config import labels, color
 
 image_hyper = torch.tensor(tifffile.imread(data_dir+"houston_hyper.tif"))[:48] # [50,1202,4768]
@@ -133,7 +133,7 @@ plt.xlabel('LiDAR Channels')
 plt.ylabel('Normalized Mean Values')
 plt.savefig(f"outputs/houston_LiDAR_mix.png")
  
-data_dir = "/Users/plo026/data/trento/"
+data_dir = "/home/plo026/data/trento/"
 from trento_config import labels,color
 
 image_hyper = torch.tensor(tifffile.imread(data_dir+"hyper_Italy.tif")) # [63,166,600]

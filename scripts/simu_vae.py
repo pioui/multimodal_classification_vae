@@ -54,7 +54,6 @@ if dataset=="trento":
     from mcvae.dataset import trentoDataset
     DATASET = trentoDataset(
         data_dir = data_dir,
-        samples_per_class=SAMPLES_PER_CLASS,
 
     )
 
@@ -82,7 +81,6 @@ if dataset=="trento-patch":
     DATASET = trentoPatchDataset(
         data_dir = data_dir,
         patch_size=N_PATCH,
-        samples_per_class=SAMPLES_PER_CLASS,
 
     )
 

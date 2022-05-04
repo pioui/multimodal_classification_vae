@@ -21,8 +21,7 @@ class trentoMultimodalDataset(Dataset):
     def __init__(
         self,
         data_dir,
-        samples_per_class=200,
-        train_size=0.5,
+        unlabelled_size=1000,
         do_preprocess=True,
     ) -> None:
         super().__init__()
@@ -35,40 +34,61 @@ class trentoMultimodalDataset(Dataset):
         x_all = torch.transpose(x_all, 1,0) # [99600,65]
         
         #Normalize to [0,1]
-        if do_preprocess: 
+        if do_preprocess: # TODO: Something more sophisticated?
             x_all = normalize(x_all).float()
 
         y = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"], dtype = torch.int64) # [166,600] 0 to 6
+        y_train_labelled = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Train.mat")["TNsecSUBS_Train"], dtype = torch.int64) # [166,600] 0 to 6
+        y_test = y-y_train_labelled
+
         y_all = y
         y_all = y_all.reshape(-1) # [99600]
+        y_train_labelled = y_train_labelled.reshape(-1) # [99600]
+        y_test = y_test.reshape(-1) # [99600]
 
-        train_inds = []
-        for label in y_all.unique():
-            label_ind = np.where(y_all == label)[0]
-            samples = samples_per_class
-            if label == 0:
-                labelled_exs = np.random.choice(label_ind, size=(len(y_all.unique())-1)*samples, replace=False)
-            else:
-                while (len(label_ind)< samples) : samples = int(samples/2)
-                labelled_exs = np.random.choice(label_ind, size=samples, replace=False)
-            train_inds.append(labelled_exs)
-        train_inds = np.concatenate(train_inds)
+        train_labelled_indeces = (y_train_labelled!=0)
+        x_train_labelled = x_all[train_labelled_indeces] # [819, 65]
+        y_train_labelled = y_all[train_labelled_indeces]  # [819]
 
-        x_all_train = x_all[train_inds]
-        y_all_train = y_all[train_inds]
+        unlabelled_indeces = (y_all==0)
+        x_unlabelled = x_all[unlabelled_indeces] # []
+        y_unlabelled = y_all[unlabelled_indeces] # []
+        x_train_unlabelled, _, y_train_unlabelled,_ = train_test_split(x_unlabelled,y_unlabelled,train_size = unlabelled_size)
+
+        x_train = torch.cat((x_train_labelled,x_train_unlabelled), dim=0)
+        y_train = torch.cat((y_train_labelled,y_train_unlabelled), dim=0)
+
+        test_indeces = (y_test!=0)
+        x_test = x_all[test_indeces] # [29595, 65]
+        y_test = y_all[test_indeces]  # [29595]
+
+        # plt.figure(dpi=1000)
+        # plt.suptitle('Distribution HSI and Lidar pixel values')
+        # for channel in range(x_all.shape[-1]):
+        #     plt.subplot(10,7,channel+1)
+        #     for label,name in zip([1,5],["A. Trees", "Vineyards"]):
+        #         plt.axis("off")
+        #         label_ind = np.where(y == label)[0]
+        #         hist_values = x_all[label_ind, channel]
+        #         histogram, bin_edges = np.histogram(hist_values, bins=100, range=(0, 1))
+        #         plt.plot(bin_edges[:-1], histogram, label = name, linewidth = 0.5, alpha = 0.6)
+
+        # plt.savefig("images/trento_apples_vines_distribution.png")
         
-        x_train, x_test, y_train, y_test = train_test_split(
-            x_all_train, y_all_train, train_size = train_size, random_state = 42, stratify = y_all_train
-        ) # 0 to 20
+        # label_ind = np.where(y == 1)[0]
+        # one_apple = x_all[label_ind][50]
+        # label_ind = np.where(y == 5)[0]
+        # one_vine = x_all[label_ind][76]
+
+        # plt.figure()
+        # plt.grid(which='both')
+        # plt.scatter(np.arange(0,65),one_apple, label = "A. Trees")
+        # plt.scatter(np.arange(0,65),one_vine, label = "Vineyards")
+        # plt.legend()
+        # plt.savefig("images/trento_apples_vines_channels.png")
 
 
-        train_labelled_indeces = (y_train!=0)
-        x_train_labelled = x_train[train_labelled_indeces] # [787260,57]
-        y_train_labelled = y_train[train_labelled_indeces] # [787260] 1 to 20, 255
-
-        test_labelled_indeces = (y_test!=0)
-        x_test_labelled = x_test[test_labelled_indeces] # [787260,57]
-        y_test_labelled = y_test[test_labelled_indeces] # [787260] 1 to 20, 255
+        x_test_labelled, _, y_test_labelled, _ = train_test_split(x_test, y_test, train_size= 0.9, stratify = y_test)
 
         self.labelled_fraction = len(y_train_labelled)/len(y_train)
         self.train_dataset = TensorDataset(x_train[:,:63],x_train[:,63:], y_train-1) # 0 to 5
@@ -81,7 +101,7 @@ class trentoMultimodalDataset(Dataset):
 if __name__ == "__main__":
 
     DATASET = trentoMultimodalDataset(
-        data_dir = "/home/plo026/data/trento/",
+        data_dir = "/Users/plo026/data/trento/",
     )
     x1,x2,y = DATASET.train_dataset.tensors # 1819, -1 to 5
     print(x1.shape, x2.shape, y.shape, torch.unique(y))

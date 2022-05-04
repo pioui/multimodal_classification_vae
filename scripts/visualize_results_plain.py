@@ -168,7 +168,7 @@ for project_name in os.listdir('outputs/'):
             plt.savefig(f"{images_dir}{model_name}_PREDICTIONS.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
             plt.figure(dpi=500)
-            plt.imshow((1-y_pred_max_prob).reshape(SHAPE))
+            plt.imshow((1-y_pred_max_prob).reshape(SHAPE), cmap='cool')
             plt.axis('off')
             cbar = plt.colorbar(location='top')
             cbar.ax.tick_params(labelsize =8 )

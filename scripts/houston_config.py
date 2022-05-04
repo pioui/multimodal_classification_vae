@@ -11,7 +11,7 @@ from mcvae.architectures.encoders import (
     EncoderB4,
 )
 
-data_dir = "/home/plo026/data/houston/"
+data_dir = "/Users/plo026/data/houston/"
 outputs_dir = "outputs/houston/"
 labels = [
     "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 
@@ -45,7 +45,7 @@ N_LABELS = 20
 SHAPE = (1202,4768)
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
-BATCH_SIZE = 512
+BATCH_SIZE = 1024
 PROJECT_NAME = "houston"
 SAMPLES_PER_CLASS = 2000
 

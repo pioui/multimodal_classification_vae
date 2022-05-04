@@ -79,7 +79,7 @@ class houstonDataset(Dataset):
 if __name__ == "__main__":
 
     DATASET = houstonDataset(
-        data_dir = "/home/plo026/data/houston/",
+        data_dir = "/Users/plo026/data/houston/",
     )
 
     x,y = DATASET.full_dataset.tensors # [5731136] 0 to 20

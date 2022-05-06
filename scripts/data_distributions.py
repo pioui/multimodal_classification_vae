@@ -75,6 +75,29 @@ plt.xlabel('Wavelenghth (nm)')
 plt.ylabel('Normalized Mean Values')
 plt.savefig(f"outputs/houston_HSI_mix.png")
 
+fig, ax = plt.subplots(dpi=100)
+for label in y_all.unique():
+    samples = 300
+    label_ind = np.where(y_all == label)[0]
+    if label in [8,9]:
+        labelled_exs = np.random.choice(label_ind, size=samples, replace=False)
+    else: 
+        continue
+    x_label = x_all[labelled_exs] #[100,50]
+    x_mean = x_label.mean(dim=0) #[50]
+    x_var = x_label.std(dim=0) #[50]
+    y = np.linspace(380,1050,48)
+        
+    ax.plot(y, x_mean, '-', label = labels[label], color = color[label+1])
+    ax.fill_between(y, x_mean - x_var, x_mean + x_var, color = color[label+1], alpha=0.2)
+    # ax.plot(y, x_mean, 'o', color='tab:purple')
+    ax.set_ylim([0, 0.5])
+    # ax.grid(True,which='both')
+plt.legend(loc='upper left')
+plt.xlabel('Wavelenghth (nm)')
+plt.ylabel('Normalized Mean Values')
+plt.savefig(f"outputs/houston_HSI_buildings.png")
+
 
 x = image_lidar
 y = torch.tensor(tifffile.imread(data_dir+"houston_gt.tif"), dtype = torch.int64) # [1202,4768]
@@ -132,6 +155,29 @@ plt.legend(loc='upper left')
 plt.xlabel('LiDAR Channels')
 plt.ylabel('Normalized Mean Values')
 plt.savefig(f"outputs/houston_LiDAR_mix.png")
+
+fig, ax = plt.subplots(dpi=100)
+for label in y_all.unique():
+    samples = 300
+    label_ind = np.where(y_all == label)[0]
+    if label in [8,9]:
+        labelled_exs = np.random.choice(label_ind, size=samples, replace=False)
+    else: 
+        continue
+    x_label = x_all[labelled_exs] #[100,50]
+    x_mean = x_label.mean(dim=0) #[50]
+    x_var = x_label.std(dim=0) #[50]
+    y = np.linspace(0,6,7)
+        
+    ax.plot(y, x_mean, '-', label = labels[label], color = color[label+1])
+    ax.fill_between(y, x_mean - x_var, x_mean + x_var,color = color[label+1], alpha=0.2)
+    ax.plot(y, x_mean, 'o', color = color[label+1])
+    ax.set_ylim([-0.01, 1])
+    # ax.grid(True,which='both')
+plt.legend(loc='upper left')
+plt.xlabel('LiDAR Channels')
+plt.ylabel('Normalized Mean Values')
+plt.savefig(f"outputs/houston_LiDAR_buildings.png")
  
 data_dir = "/home/plo026/data/trento/"
 from trento_config import labels,color

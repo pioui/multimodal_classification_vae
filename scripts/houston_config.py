@@ -17,7 +17,7 @@ labels = [
     "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 
     "Deciduous Trees", "Bare Earth", "Water", "Residential buildings",
     "Non-residential buildings", "Roads", "Sidewalks", "Crosswalks",
-    "Major thoroughfaces", "Highways", "Railways", "Paved parking lots", "Unpaved parking lots",
+    "Major thoroughfares", "Highways", "Railways", "Paved parking lots", "Unpaved parking lots",
     "Cars", "Trains", "Stadium seats"
     ]
 color = [

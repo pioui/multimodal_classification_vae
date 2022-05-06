@@ -11,29 +11,30 @@ from mcvae.architectures.encoders import (
 )
 
 data_dir = "/home/plo026/data/trento/"
-outputs_dir = "outputs/trento_patch/"
+outputs_dir = "outputs/trento_multimodal_patch/"
 labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
-images_dir =  "outputs/trento_patch/images/"
+images_dir =  "outputs/trento_multimodal_patch/images/"
 
 if not os.path.exists(outputs_dir):
     os.makedirs(outputs_dir)
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
 
-N_EPOCHS = 10
+N_EPOCHS = 1
 LR = 1e-4
 N_PARTICULES = 30
 N_HIDDEN = 128
 N_EXPERIMENTS = 1
-N_INPUT = 65
+N1_INPUT = 63
+N2_INPUT = 2
 PATCH_SIZE = 5
 N_LABELS = 6
 SHAPE = (166,600)
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 16
-PROJECT_NAME = "trento_patch"
+PROJECT_NAME = "trento_multimodal_patch"
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
@@ -72,16 +73,32 @@ SCENARIOS = [  # WAKE updates
         encoder_z1=nn.ModuleDict(
             {
                 "default": EncoderB6( 
-                n_input=N_INPUT,
+                n_input=N1_INPUT,
                 n_output=15,
                 n_hidden=128,
                 dropout_rate=0,
                 do_batch_norm=False,
             )}
         ),
-        x_decoder=BernoulliDecoderA6( 
+        encoder_z2=nn.ModuleDict(
+            {
+                "default": EncoderB6( 
+                n_input=N2_INPUT,
+                n_output=15,
+                n_hidden=128,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+        decoder_x1=BernoulliDecoderA6( 
                 n_input=15,
-                n_output=N_INPUT,
+                n_output=N1_INPUT,
+                dropout_rate=0,
+                do_batch_norm=False,
+        ),
+        decoder_x2=BernoulliDecoderA6( 
+                n_input=15,
+                n_output=N2_INPUT,
                 dropout_rate=0,
                 do_batch_norm=False,
         ),

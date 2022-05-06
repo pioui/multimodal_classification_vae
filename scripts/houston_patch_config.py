@@ -10,30 +10,43 @@ from mcvae.architectures.encoders import (
     BernoulliDecoderA6
 )
 
-data_dir = "/home/plo026/data/trento/"
-outputs_dir = "outputs/trento_patch/"
-labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
-color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
-images_dir =  "outputs/trento_patch/images/"
+data_dir = "/home/plo026/data/houston/"
+outputs_dir = "outputs/houston_patch/"
+labels = [
+    "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 
+    "Deciduous Trees", "Bare Earth", "Water", "Residential buildings",
+    "Non-residential buildings", "Roads", "Sidewalks", "Crosswalks",
+    "Major thoroughfares", "Highways", "Railways", "Paved parking lots", "Unpaved parking lots",
+    "Cars", "Trains", "Stadium seats"
+    ]
+color = [
+    "black", "limegreen", "lime", "forestgreen", "green", 
+    "darkgreen", "saddlebrown", "aqua", "white", 
+    "plum",  "red", "darkgray", "dimgray",
+    "firebrick", "darkred", "peru", "yellow", "orange",
+    "magenta", "blue", "skyblue"
+    ]
+images_dir =  "outputs/houston_patch/images/"
 
 if not os.path.exists(outputs_dir):
     os.makedirs(outputs_dir)
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
 
-N_EPOCHS = 10
+N_EPOCHS = 1
 LR = 1e-4
 N_PARTICULES = 30
 N_HIDDEN = 128
 N_EXPERIMENTS = 1
-N_INPUT = 65
+N_INPUT = 57
 PATCH_SIZE = 5
-N_LABELS = 6
-SHAPE = (166,600)
+N_LABELS = 20
+SHAPE = (1202,4768)
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
-BATCH_SIZE = 16
-PROJECT_NAME = "trento_patch"
+BATCH_SIZE = 1024
+PROJECT_NAME = "houston_patch"
+SAMPLES_PER_CLASS = 10
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 

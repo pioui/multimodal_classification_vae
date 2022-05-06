@@ -16,27 +16,40 @@ random.seed(42)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-class houstonDataset(Dataset):
+class houstonPatchDataset(Dataset):
     def __init__(
         self,
         data_dir,
         samples_per_class=200,
         train_size=0.5,
         do_preprocess=True,
+        patch_size = 5 #odd number
     ) -> None:
         super().__init__()
 
+        assert patch_size % 2 == 1
         image_hyper = torch.tensor(tifffile.imread(data_dir+"houston_hyper.tif")) # [50,1202,4768]
         image_lidar = torch.tensor(tifffile.imread(data_dir+"houston_lidar.tif")) # [7,1202,4768]
         x = torch.cat((image_hyper,image_lidar), dim = 0) # [57,1202,4768]
-        
-        y = torch.tensor(tifffile.imread(data_dir+"houston_gt.tif"), dtype = torch.int64) # [1202,4768]
-
         x_all = x
         x_all = x_all.reshape(len(x_all),-1) # [57,5731136]
         x_all = torch.transpose(x_all, 1,0) # [5731136,57]
+
+        #Normalize to [0,1]
         if do_preprocess: 
             x_all = normalize(x_all).float()
+
+        x_all = torch.transpose(x_all,1,0)
+        x_all = x_all.reshape(-1,1202,4768) # [57,1202,4768]
+
+        # Patching
+        x_padded = torch.nn.ReflectionPad2d(int(patch_size/2))(x_all) # [57,166+p/2, 600+p/2]
+        x_patched = x_padded.unfold(dimension=1, size=patch_size, step=1)
+        x_patched = x_patched.unfold(dimension=2, size=patch_size, step=1) # [65,166,600,p,p]
+        x_patched = x_patched.reshape(57,-1,patch_size,patch_size) # [65,99600,p,p]
+        x_all = x_patched.transpose(1,0) # [5731136,57,p,p]
+
+        y = torch.tensor(tifffile.imread(data_dir+"houston_gt.tif"), dtype = torch.int64) # [1202,4768]
         y_all = y
         y_all = y_all.reshape(-1) # [5731136] 0 to 20
 
@@ -78,32 +91,23 @@ class houstonDataset(Dataset):
 
 if __name__ == "__main__":
 
-    DATASET = houstonDataset(
+    DATASET = houstonPatchDataset(
         data_dir = "/home/plo026/data/houston/",
     )
-
-    x,y = DATASET.full_dataset.tensors # [5731136] 0 to 20
+    x,y = DATASET.train_dataset.tensors # 819
     print(x.shape, y.shape, torch.unique(y))
-    for l in torch.unique(y):
-        print(f'Label {l}: {torch.sum(y==l)}')
+    plt.imshow(x[1000,9])
+    plt.show()
+    print(y[1000])
 
-    x,y = DATASET.train_dataset.tensors # [1719340] -1 to 19
-    print(x.shape, y.shape, torch.unique(y)) 
-    for l in torch.unique(y):
-        print(f'Label {l}: {torch.sum(y==l)}')
+    # x,y = DATASET.train_dataset_labelled.tensors # 409 
+    # print(x.shape, y.shape, torch.unique(y))
 
-    x,y = DATASET.train_dataset_labelled.tensors # [605673] 0 to 19
-    print(x.shape, y.shape, torch.unique(y))
-    for l in torch.unique(y):
-        print(f'Label {l}: {torch.sum(y==l)}')
+    # x,y = DATASET.test_dataset.tensors # 15107
+    # print(x.shape, y.shape, torch.unique(y))
 
-    x,y = DATASET.test_dataset.tensors # [4011796] -1 to 19
-    print(x.shape, y.shape, torch.unique(y))
-    for l in torch.unique(y):
-        print(f'Label {l}: {torch.sum(y==l)}')
+    # x,y = DATASET.test_dataset_labelled.tensors # 15107
+    # print(x.shape, y.shape, torch.unique(y))
 
-    x,y = DATASET.test_dataset_labelled.tensors # [1413237] 0 to 19
-    print(x.shape, y.shape, torch.unique(y))
-    for l in torch.unique(y):
-        print(f'Label {l}: {torch.sum(y==l)}')
-
+    # x,y = DATASET.full_dataset.tensors # 15107
+    # print(x.shape, y.shape, torch.unique(y))

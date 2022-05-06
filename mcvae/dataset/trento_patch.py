@@ -20,10 +20,9 @@ class trentoPatchDataset(Dataset):
     def __init__(
         self,
         data_dir,
-        samples_per_class=200,
-        train_size=0.5,
+        unlabelled_size=1000,
         do_preprocess=True,
-        patch_size = 13 #odd number
+        patch_size = 5 #odd number
     ) -> None:
         super().__init__()
 
@@ -35,57 +34,55 @@ class trentoPatchDataset(Dataset):
         x_all = x_all.reshape(len(x_all),-1) # [65,99600]
         x_all = torch.transpose(x_all, 1,0) # [99600,65]
 
+
         #Normalize to [0,1]
         if do_preprocess: 
             x_all = normalize(x_all).float()
-        
+
+        x_all = torch.transpose(x_all,1,0)
+        x_all = x_all.reshape(-1,166,600) # [65,166,600]
+
         # Patching
-        x_padded = torch.nn.ReflectionPad2d(int(patch_size/2))(x_all.reshape(x.shape)) # [65,166+p/2, 600+p/2]
+        x_padded = torch.nn.ReflectionPad2d(int(patch_size/2))(x_all) # [65,166+p/2, 600+p/2]
         x_patched = x_padded.unfold(dimension=1, size=patch_size, step=1)
         x_patched = x_patched.unfold(dimension=2, size=patch_size, step=1) # [65,166,600,p,p]
         x_patched = x_patched.reshape(65,-1,patch_size,patch_size) # [65,99600,p,p]
-        x_patched = x_patched.transpose(1,0) # [99600,65,p,p]
+        x_all = x_patched.transpose(1,0) # [99600,65,p,p]
+
 
         y = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"], dtype = torch.int64) # [166,600] 0 to 6
+        y_train_labelled = torch.tensor(io.loadmat(data_dir+"TNsecSUBS_Train.mat")["TNsecSUBS_Train"], dtype = torch.int64) # [166,600] 0 to 6
+        y_test = y-y_train_labelled
+
         y_all = y
         y_all = y_all.reshape(-1) # [99600]
         y_train_labelled = y_train_labelled.reshape(-1) # [99600]
         y_test = y_test.reshape(-1) # [99600]
 
-        train_inds = []
-        for label in y_all.unique():
-            label_ind = np.where(y_all == label)[0]
-            samples = samples_per_class
-            if label == 0:
-                labelled_exs = np.random.choice(label_ind, size=(len(y_all.unique())-1)*samples, replace=False)
-            else:
-                while (len(label_ind)< samples) : samples = int(samples/2)
-                labelled_exs = np.random.choice(label_ind, size=samples, replace=False)
-            train_inds.append(labelled_exs)
-        train_inds = np.concatenate(train_inds)
+        train_labelled_indeces = (y_train_labelled!=0)
+        x_train_labelled = x_all[train_labelled_indeces] # [819, 65]
+        y_train_labelled = y_all[train_labelled_indeces]  # [819]
 
-        x_all_train = x_patched[train_inds]
-        y_all_train = y_all[train_inds]
-        
-        x_train, x_test, y_train, y_test = train_test_split(
-            x_all_train, y_all_train, train_size = train_size, random_state = 42, stratify = y_all_train
-        ) # 0 to 20
+        unlabelled_indeces = (y_all==0)
+        x_unlabelled = x_all[unlabelled_indeces] # []
+        y_unlabelled = y_all[unlabelled_indeces] # []
+        x_train_unlabelled, _, y_train_unlabelled,_ = train_test_split(x_unlabelled,y_unlabelled,train_size = unlabelled_size)
 
+        x_train = torch.cat((x_train_labelled,x_train_unlabelled), dim=0)
+        y_train = torch.cat((y_train_labelled,y_train_unlabelled), dim=0)
 
-        train_labelled_indeces = (y_train!=0)
-        x_train_labelled = x_train[train_labelled_indeces] # [787260,57]
-        y_train_labelled = y_train[train_labelled_indeces] # [787260] 1 to 20, 255
+        test_indeces = (y_test!=0)
+        x_test = x_all[test_indeces] # [29595, 65]
+        y_test = y_all[test_indeces]  # [29595]
 
-        test_labelled_indeces = (y_test!=0)
-        x_test_labelled = x_test[test_labelled_indeces] # [787260,57]
-        y_test_labelled = y_test[test_labelled_indeces] # [787260] 1 to 20, 255
+        x_test_labelled, _, y_test_labelled, _ = train_test_split(x_test, y_test, train_size= 0.9, stratify = y_test)
 
         self.labelled_fraction = len(y_train_labelled)/len(y_train)
         self.train_dataset = TensorDataset(x_train, y_train-1) # 0 to 5
         self.train_dataset_labelled = TensorDataset(x_train_labelled, y_train_labelled-1) # 0 to 5
         self.test_dataset = TensorDataset(x_test, y_test-1) # 0 to 5
         self.test_dataset_labelled = TensorDataset(x_test_labelled, y_test_labelled-1) # 0 to 5
-        self.full_dataset = TensorDataset(x_patched, y_all) # 0 to 6
+        self.full_dataset = TensorDataset(x_all, y_all) # 0 to 6
         log_train_test_split([y_all, y_train, y_train_labelled, y_test, y_test_labelled])
 
 if __name__ == "__main__":
@@ -95,6 +92,9 @@ if __name__ == "__main__":
     )
     x,y = DATASET.train_dataset.tensors # 819
     print(x.shape, y.shape, torch.unique(y))
+    plt.imshow(x[1000,9])
+    plt.show()
+    print(y[1000])
 
     x,y = DATASET.train_dataset_labelled.tensors # 409 
     print(x.shape, y.shape, torch.unique(y))

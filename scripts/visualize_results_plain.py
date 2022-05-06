@@ -98,7 +98,7 @@ for project_name in os.listdir('outputs/'):
         encoder_type = data_dict["encoder_type"][i]
         model_name =  data_dict["MODEL_NAME"][i]
         m_confusion_matrix = data_dict["CONFUSION_MATRIX"][i]
-        # m_confusion_matrix = np.around(m_confusion_matrix.astype('float') / m_confusion_matrix.sum(axis=1)[:, np.newaxis], decimals=2)
+        m_confusion_matrix = np.around(m_confusion_matrix.astype('float') / m_confusion_matrix.sum(axis=1)[:, np.newaxis], decimals=2)
         train_loss = data_dict["train_LOSS"][i]
         test_loss = data_dict["test_LOSS"][i]
 
@@ -168,9 +168,9 @@ for project_name in os.listdir('outputs/'):
             plt.savefig(f"{images_dir}{model_name}_PREDICTIONS.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
             plt.figure(dpi=500)
-            plt.imshow((1-y_pred_max_prob).reshape(SHAPE), cmap='cool')
+            plt.imshow((1-y_pred_max_prob).reshape(SHAPE), cmap='cool', vmin=0, vmax=1)
             plt.axis('off')
-            cbar = plt.colorbar(location='top')
+            cbar = plt.colorbar(location='top', vmin=0, vmax=1)
             cbar.ax.tick_params(labelsize =8 )
             plt.savefig(f"{images_dir}{model_name}_UNCERTAINTY.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
 

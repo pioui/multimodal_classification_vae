@@ -49,15 +49,13 @@ if dataset=="trento":
         N_LABELS,
         PROJECT_NAME,
         SCENARIOS,
-        SAMPLES_PER_CLASS,
     )
     from mcvae.dataset import trentoDataset
     DATASET = trentoDataset(
         data_dir = data_dir,
 
     )
-
-if dataset=="trento-patch":
+elif dataset=="trento-patch":
     from trento_patch_config import (
         outputs_dir,
         data_dir,
@@ -70,21 +68,19 @@ if dataset=="trento-patch":
         CLASSIFICATION_RATIO,
         N_EVAL_SAMPLES,
         N_INPUT,
-        N_PATCH,
+        PATCH_SIZE,
         N_LABELS,
         PROJECT_NAME,
         SCENARIOS,
-        SAMPLES_PER_CLASS,
     )
     from mcvae.dataset import trentoPatchDataset
     print("Train on trento with 2d Patching")
     DATASET = trentoPatchDataset(
         data_dir = data_dir,
-        patch_size=N_PATCH,
+        patch_size=PATCH_SIZE,
 
     )
-
-if dataset=="houston":
+elif dataset=="houston":
     from houston_config import (
         outputs_dir,
         data_dir,
@@ -107,10 +103,36 @@ if dataset=="houston":
         data_dir = data_dir,
         samples_per_class=SAMPLES_PER_CLASS,
     )
+elif dataset=="houston-patch":
+    from houston_patch_config import (
+        outputs_dir,
+        data_dir,
+        N_PARTICULES,
+        N_EPOCHS,
+        N_HIDDEN,
+        LR,
+        N_EXPERIMENTS,
+        BATCH_SIZE,
+        CLASSIFICATION_RATIO,
+        N_EVAL_SAMPLES,
+        N_INPUT,
+        PATCH_SIZE,
+        N_LABELS,
+        PROJECT_NAME,
+        SCENARIOS,
+        SAMPLES_PER_CLASS,
+    )
+    from mcvae.dataset import houstonPatchDataset
+    DATASET = houstonPatchDataset(
+        data_dir = data_dir,
+        samples_per_class=SAMPLES_PER_CLASS,
+        patch_size = PATCH_SIZE,
+    )
 
 from mcvae.utils.utility_functions import (
     model_evaluation,
 )
+
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 

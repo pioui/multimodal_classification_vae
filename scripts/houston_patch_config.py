@@ -10,7 +10,7 @@ from mcvae.architectures.encoders import (
     BernoulliDecoderA6
 )
 
-data_dir = "/Users/plo026/data/houston/"
+data_dir = "/home/plo026/data/houston/"
 outputs_dir = "outputs/houston_patch/"
 labels = [
     "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 

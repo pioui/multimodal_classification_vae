@@ -42,6 +42,7 @@ for project_name in os.listdir('outputs/'):
             SHAPE
         )
     elif project_name == 'houston':
+        continue
         dataset = 'houston'
         from houston_config import (
             labels,

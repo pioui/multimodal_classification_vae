@@ -112,14 +112,14 @@ for project_name in os.listdir('outputs/'):
             plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_LOSS.png", pad_inches=0.2, bbox_inches='tight')
             
             plt.figure(dpi=500)
-            plt.matshow(m_confusion_matrix, cmap="YlGn")
+            plt.matshow(m_confusion_matrix, cmap="coolwarm")
             plt.xlabel("True Labels")
             plt.xticks(np.arange(0,N_LABELS,1), range(1,len(labels)))
             plt.ylabel("Predicted Labels")
             plt.yticks(np.arange(0,N_LABELS,1), range(1,len(labels)))
             for k in range (len(m_confusion_matrix)):
                 for l in range(len(m_confusion_matrix[k])):
-                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small')
+                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='small')
             plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_test_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
             np.savetxt(f"{outputs_dir}{project_name}_{model_name}_{encoder_type}_test_CONFUSION_MATRIX.csv", m_confusion_matrix.astype(int), delimiter=',')
     else:
@@ -151,7 +151,7 @@ for project_name in os.listdir('outputs/'):
             plt.savefig(f"{images_dir}{model_name}_PREDICTIONS.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
             plt.figure(dpi=500)
-            plt.imshow((1-y_pred_max_prob).reshape(SHAPE), cmap='cool', vmin=0, vmax=1)
+            plt.imshow((1-y_pred_max_prob).reshape(SHAPE), cmap='coolwarm', vmin=0, vmax=1)
             plt.axis('off')
             cbar = plt.colorbar(location='top')
             cbar.ax.tick_params(labelsize =8 )
@@ -163,14 +163,14 @@ for project_name in os.listdir('outputs/'):
             m_confusion_matrix = np.around(m_confusion_matrix.astype('float') / m_confusion_matrix.sum(axis=1)[:, np.newaxis], decimals=2)
 
             plt.figure(dpi=500)
-            plt.matshow(m_confusion_matrix, cmap="YlGn")
+            plt.matshow(m_confusion_matrix, cmap="coolwarm")
             plt.xlabel("True Labels")
             plt.xticks(np.arange(0,N_LABELS,1), range(1,len(labels)))
             plt.ylabel("Predicted Labels")
             plt.yticks(np.arange(0,N_LABELS,1), range(1,len(labels)))
             for k in range (len(m_confusion_matrix)):
                 for l in range(len(m_confusion_matrix[k])):
-                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small')
+                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='small')
             plt.savefig(f"{images_dir}{model_name}_total_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
             np.savetxt(f"{outputs_dir}{model_name}_total_CONFUSION_MATRIX.csv", m_confusion_matrix.astype(int), delimiter=',')
 

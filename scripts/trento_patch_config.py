@@ -21,7 +21,7 @@ if not os.path.exists(outputs_dir):
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
 
-N_EPOCHS = 10
+N_EPOCHS = 1000
 LR = 1e-4
 N_PARTICULES = 30
 N_HIDDEN = 128

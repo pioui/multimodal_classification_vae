@@ -289,7 +289,7 @@ for scenario in SCENARIOS:
                 logger.info(e)
                 continue
             break
-        # torch.save(mdl.state_dict(), mdl_name)
+        torch.save(mdl.state_dict(), mdl_name)
 
         # with torch.no_grad():
         #     train_res = trainer.inference(

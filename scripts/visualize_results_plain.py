@@ -107,6 +107,7 @@ for project_name in os.listdir('outputs/'):
             plt.plot(train_loss, color="red", label = 'Train Loss')
             plt.plot(test_loss, color="blue", label='Test Loss')
             plt.xlabel("Epochs")
+            plt.ylim(-0.2, 0.3)
             plt.grid()
             plt.legend()
             plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_LOSS.png", pad_inches=0.2, bbox_inches='tight')

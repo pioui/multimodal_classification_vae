@@ -17,6 +17,7 @@ print(os.listdir('outputs/'))
 
 for project_name in os.listdir('outputs/'):
     if project_name == 'trento':
+        continue
         print(project_name)
         dataset = 'trento'
         from trento_config import (
@@ -42,7 +43,7 @@ for project_name in os.listdir('outputs/'):
             SHAPE
         )
     elif project_name == 'houston':
-        continue
+        
         dataset = 'houston'
         from houston_config import (
             labels,
@@ -120,7 +121,7 @@ for project_name in os.listdir('outputs/'):
             plt.yticks(np.arange(0,N_LABELS,1), range(1,len(labels)))
             for k in range (len(m_confusion_matrix)):
                 for l in range(len(m_confusion_matrix[k])):
-                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='small')
+                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small')
             plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_test_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
             np.savetxt(f"{outputs_dir}{project_name}_{model_name}_{encoder_type}_test_CONFUSION_MATRIX.csv", m_confusion_matrix.astype(int), delimiter=',')
     else:
@@ -171,7 +172,7 @@ for project_name in os.listdir('outputs/'):
             plt.yticks(np.arange(0,N_LABELS,1), range(1,len(labels)))
             for k in range (len(m_confusion_matrix)):
                 for l in range(len(m_confusion_matrix[k])):
-                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='small')
+                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small')
             plt.savefig(f"{images_dir}{model_name}_total_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
             np.savetxt(f"{outputs_dir}{model_name}_total_CONFUSION_MATRIX.csv", m_confusion_matrix.astype(int), delimiter=',')
 

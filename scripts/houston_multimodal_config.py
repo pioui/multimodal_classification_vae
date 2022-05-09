@@ -11,7 +11,7 @@ from mcvae.architectures.encoders import (
     EncoderB4,
 )
 
-data_dir = "/home/plo026/data/houston/"
+data_dir = "/Users/plo026/data/houston/"
 outputs_dir = "outputs/houston_multimodal/"
 labels = [
     "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 
@@ -169,7 +169,7 @@ SCENARIOS = [  # WAKE updates
         loss_wvar="ELBO",
         reparam_latent=True,
         counts=None,
-        n_latent=30,
+        n_latent=20,
         model_name="EncoderB4_L20_VAE",
         encoder_z1=nn.ModuleDict(
             {"default": EncoderB4( 

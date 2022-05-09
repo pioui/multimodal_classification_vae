@@ -31,6 +31,7 @@ for project_name in os.listdir('outputs/'):
             SHAPE
         )
     elif project_name == 'trento_patch':
+        continue
         dataset = 'trento'
         from trento_patch_config import (
             labels,
@@ -90,8 +91,8 @@ for project_name in os.listdir('outputs/'):
 
         with open(f"{outputs_dir}{PROJECT_NAME}.pkl", 'rb') as f:
             data = pickle.load(f)
-        print(data[['MODEL_NAME','N_LATENT', 'encoder_type','LR','N_EPOCHS', 'M_ACCURACY','M_BALANCED_ACCURACY']])
-        data_csv = data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY','M_BALANCED_ACCURACY']]
+        print(data[['MODEL_NAME','N_LATENT', 'encoder_type','LR','N_EPOCHS', 'M_ACCURACY']])
+        data_csv = data[['MODEL_NAME','N_LATENT', 'encoder_type','M_ACCURACY']]
         data_csv.to_csv(f'{outputs_dir}/{PROJECT_NAME}_test_accuracies.csv')
         data_dict = data.to_dict()        
             

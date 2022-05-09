@@ -11,7 +11,7 @@ from mcvae.architectures.encoders import (
     EncoderB4
 )
 
-data_dir = "/home/plo026/data/trento/"
+data_dir = "/Users/plo026/data/trento/"
 outputs_dir = "outputs/trento_multimodal/"
 labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
@@ -100,7 +100,7 @@ SCENARIOS = [  # WAKE updates
         loss_wvar="ELBO",
         reparam_latent=True,
         counts=None,
-        n_latent=10,
+        n_latent=15,
         model_name="EncoderB2_L15_VAE",
         encoder_z1=nn.ModuleDict(
             {"default": EncoderB2( 
@@ -155,11 +155,11 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=10,
-        model_name="EncoderB4_L20_VAE",
+        model_name="EncoderB4_L10_VAE",
         encoder_z1=nn.ModuleDict(
             {"default": EncoderB4( 
                 n_input=N1_INPUT,
-                n_output=20,
+                n_output=10,
                 n_hidden=512,
                 dropout_rate=0,
                 do_batch_norm=False,
@@ -168,7 +168,7 @@ SCENARIOS = [  # WAKE updates
         encoder_z2=nn.ModuleDict(
             {"default": EncoderB4( 
                 n_input=N2_INPUT,
-                n_output=20,
+                n_output=10,
                 n_hidden=512,
                 dropout_rate=0,
                 do_batch_norm=False,

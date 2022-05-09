@@ -11,7 +11,7 @@ from mcvae.architectures.encoders import (
     EncoderB4,
 )
 
-data_dir = "/home/plo026/data/houston/"
+data_dir = "/Users/plo026/data/houston/"
 outputs_dir = "outputs/houston_multimodal/"
 labels = [
     "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 
@@ -110,32 +110,32 @@ SCENARIOS = [  # WAKE updates
     #     ),
     # ),
 
-        dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        n_latent=30,
-        model_name="EncoderB2_L30_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB2( 
-                n_input=N1_INPUT,
-                n_output=30,
-                n_hidden=256,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-        encoder_z2=nn.ModuleDict(
-            {"default": EncoderB2( 
-                n_input=N2_INPUT,
-                n_output=30,
-                n_hidden=256,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-    ),
+    #     dict(
+    #     loss_gen="ELBO",
+    #     loss_wvar="ELBO",
+    #     reparam_latent=True,
+    #     counts=None,
+    #     n_latent=30,
+    #     model_name="EncoderB2_L30_VAE",
+    #     encoder_z1=nn.ModuleDict(
+    #         {"default": EncoderB2( 
+    #             n_input=N1_INPUT,
+    #             n_output=30,
+    #             n_hidden=256,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #         )}
+    #     ),
+    #     encoder_z2=nn.ModuleDict(
+    #         {"default": EncoderB2( 
+    #             n_input=N2_INPUT,
+    #             n_output=30,
+    #             n_hidden=256,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #         )}
+    #     ),
+    # ),
 
     #     dict(
     #     loss_gen="ELBO",

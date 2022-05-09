@@ -88,7 +88,7 @@ class trentoMultimodalPatchDataset(Dataset):
 if __name__ == "__main__":
 
     DATASET = trentoMultimodalPatchDataset(
-        data_dir = "/home/plo026/data/trento/",
+        data_dir = "/Users/plo026/data/trento/",
     )
     x1,x2,y = DATASET.train_dataset.tensors # 1819, -1 to 5
     print(x1.shape, x2.shape, y.shape, torch.unique(y))

@@ -8,7 +8,6 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import logging
 import random
-import matplotlib.pyplot as plt
 
 from mcvae.utils import normalize, log_train_test_split
 
@@ -74,7 +73,7 @@ class trentoDataset(Dataset):
 if __name__ == "__main__":
 
     DATASET = trentoDataset(
-        data_dir = "/home/plo026/data/trento/",
+        data_dir = "/Users/plo026/data/trento/",
     )
     x,y = DATASET.train_dataset.tensors # 819
     print(x.shape, y.shape, torch.unique(y))

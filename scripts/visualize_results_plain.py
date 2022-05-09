@@ -17,7 +17,7 @@ print(os.listdir('outputs/'))
 
 for project_name in os.listdir('outputs/'):
     if project_name == 'trento':
-        continue
+        # continue
         print(project_name)
         dataset = 'trento'
         from trento_config import (
@@ -31,7 +31,7 @@ for project_name in os.listdir('outputs/'):
             SHAPE
         )
     elif project_name == 'trento_patch':
-        continue
+        # continue
         dataset = 'trento'
         from trento_patch_config import (
             labels,
@@ -99,7 +99,7 @@ for project_name in os.listdir('outputs/'):
         for i in range(len(data_dict['LR'])):
             encoder_type = data_dict["encoder_type"][i]
             model_name =  data_dict["MODEL_NAME"][i]
-            m_confusion_matrix = data_dict["CONFUSION_MATRIX"][i]
+            m_confusion_matrix = data_dict["CONFUSION_MATRIX"][i][1:,1:]
             m_confusion_matrix = np.around(m_confusion_matrix.astype('float') / m_confusion_matrix.sum(axis=1)[:, np.newaxis], decimals=2)
             train_loss = data_dict["train_LOSS"][i]
             test_loss = data_dict["test_LOSS"][i]
@@ -109,7 +109,8 @@ for project_name in os.listdir('outputs/'):
             plt.plot(train_loss, color="red", label = 'Train Loss')
             plt.plot(test_loss, color="blue", label='Test Loss')
             plt.xlabel("Epochs")
-            plt.ylim(-0.2, 0.3)
+            # plt.ylim(-0.55,0.9) #Trento
+            plt.ylim(-0.05,0.5) # Houston
             plt.grid()
             plt.legend()
             plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_LOSS.png", pad_inches=0.2, bbox_inches='tight')
@@ -122,7 +123,8 @@ for project_name in os.listdir('outputs/'):
             plt.yticks(np.arange(0,N_LABELS,1), range(1,len(labels)))
             for k in range (len(m_confusion_matrix)):
                 for l in range(len(m_confusion_matrix[k])):
-                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small')
+                    # plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='small') #trento
+                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small') #houston
             plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_test_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
             np.savetxt(f"{outputs_dir}{project_name}_{model_name}_{encoder_type}_test_CONFUSION_MATRIX.csv", m_confusion_matrix.astype(int), delimiter=',')
     else:
@@ -173,7 +175,8 @@ for project_name in os.listdir('outputs/'):
             plt.yticks(np.arange(0,N_LABELS,1), range(1,len(labels)))
             for k in range (len(m_confusion_matrix)):
                 for l in range(len(m_confusion_matrix[k])):
-                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small')
+                    # plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='small') # trento
+                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small') # houston
             plt.savefig(f"{images_dir}{model_name}_total_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
             np.savetxt(f"{outputs_dir}{model_name}_total_CONFUSION_MATRIX.csv", m_confusion_matrix.astype(int), delimiter=',')
 

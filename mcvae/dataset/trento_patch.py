@@ -72,6 +72,7 @@ class trentoPatchDataset(Dataset):
         y_train = torch.cat((y_train_labelled,y_train_unlabelled), dim=0)
 
         test_indeces = (y_test!=0)
+        test_indeces = train_test_split(test_indeces,train_size = 0.2)
         x_test = x_all[test_indeces] # [29595, 65]
         y_test = y_all[test_indeces]  # [29595]
 

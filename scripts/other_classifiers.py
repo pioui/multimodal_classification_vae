@@ -103,14 +103,14 @@ for k in range (len(m_confusion_matrix)):
 plt.savefig(f"{images_dir}{dataset}_SVM_test_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
             
 
-# y_pred = clf_svm.predict(X.numpy())
-# plt.figure(dpi=500)
-# plt.imshow(y_pred.reshape(SHAPE), interpolation='nearest', cmap = colors.ListedColormap(color[1:]))
-# plt.axis('off')
-# plt.savefig(f"{images_dir}{dataset}_SVM_PREDICTIONS.png",bbox_inches='tight', pad_inches=0, dpi=500)
+y_pred = clf_svm.predict(X.numpy())
+plt.figure(dpi=500)
+plt.imshow(y_pred.reshape(SHAPE), interpolation='nearest', cmap = colors.ListedColormap(color[1:]))
+plt.axis('off')
+plt.savefig(f"{images_dir}{dataset}_SVM_PREDICTIONS.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
 
-# np.save(f"{outputs_dir}{PROJECT_NAME}_SVM.npy", y_pred)
+np.save(f"{outputs_dir}{PROJECT_NAME}_SVM.npy", y_pred)
 
 
 # # ----- RF -----#
@@ -151,11 +151,11 @@ for k in range (len(m_confusion_matrix)):
 plt.savefig(f"{images_dir}{dataset}_RF_test_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
             
 
-# y_pred = clf_rf.predict(X.numpy())
-# plt.figure(dpi=500)
-# plt.imshow(y_pred.reshape(SHAPE), interpolation='nearest', cmap = colors.ListedColormap(color[1:]))
-# plt.axis('off')
-# plt.savefig(f"{images_dir}{dataset}_RF_PREDICTIONS.png",bbox_inches='tight', pad_inches=0, dpi=500)
+y_pred = clf_rf.predict(X.numpy())
+plt.figure(dpi=500)
+plt.imshow(y_pred.reshape(SHAPE), interpolation='nearest', cmap = colors.ListedColormap(color[1:]))
+plt.axis('off')
+plt.savefig(f"{images_dir}{dataset}_RF_PREDICTIONS.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
 
-# np.save(f"{outputs_dir}{PROJECT_NAME}_RF.npy", y_pred)
+np.save(f"{outputs_dir}{PROJECT_NAME}_RF.npy", y_pred)

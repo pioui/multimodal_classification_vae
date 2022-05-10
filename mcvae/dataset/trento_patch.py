@@ -72,10 +72,10 @@ class trentoPatchDataset(Dataset):
         y_train = torch.cat((y_train_labelled,y_train_unlabelled), dim=0)
 
         test_indeces = (y_test!=0)
-        test_indeces = list(np.random.choice(test_indeces, size=3000, replace=False))
         x_test = x_all[test_indeces] # [29595, 65]
         y_test = y_all[test_indeces]  # [29595]
 
+        x_test, _, y_test, _ = train_test_split(x_test, y_test, train_size= 0.1, stratify = y_test) # pour CPU
         x_test_labelled, _, y_test_labelled, _ = train_test_split(x_test, y_test, train_size= 0.9, stratify = y_test)
 
         self.labelled_fraction = len(y_train_labelled)/len(y_train)

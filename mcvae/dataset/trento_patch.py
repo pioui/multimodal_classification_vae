@@ -62,14 +62,14 @@ class trentoPatchDataset(Dataset):
         train_labelled_indeces = (y_train_labelled!=0)
         x_train_labelled = x_all[train_labelled_indeces] # [819, 65]
         y_train_labelled = y_all[train_labelled_indeces]  # [819]
-        x_train_labelled, _, y_train_labelled, _ = train_test_split(x_train_labelled, y_train_labelled, train_size= 0.1, stratify = y_train_labelled) # pour CPU
+        x_train_labelled, _, y_train_labelled, _ = train_test_split(x_train_labelled, y_train_labelled, train_size= 0.5, stratify = y_train_labelled) # pour CPU
 
 
         unlabelled_indeces = (y_all==0)
         x_unlabelled = x_all[unlabelled_indeces] # []
         y_unlabelled = y_all[unlabelled_indeces] # []
         x_train_unlabelled, _, y_train_unlabelled,_ = train_test_split(x_unlabelled,y_unlabelled,train_size = unlabelled_size)
-        x_train_unlabelled, _, y_train_unlabelled, _ = train_test_split(x_train_unlabelled, y_train_unlabelled, train_size= 0.1, stratify = y_train_unlabelled) # pour CPU
+        x_train_unlabelled, _, y_train_unlabelled, _ = train_test_split(x_train_unlabelled, y_train_unlabelled, train_size= 0.5, stratify = y_train_unlabelled) # pour CPU
 
         x_train = torch.cat((x_train_labelled,x_train_unlabelled), dim=0)
         y_train = torch.cat((y_train_labelled,y_train_unlabelled), dim=0)
@@ -78,7 +78,7 @@ class trentoPatchDataset(Dataset):
         x_test = x_all[test_indeces] # [29595, 65]
         y_test = y_all[test_indeces]  # [29595]
 
-        x_test, _, y_test, _ = train_test_split(x_test, y_test, train_size= 0.1, stratify = y_test) # pour CPU
+        x_test, _, y_test, _ = train_test_split(x_test, y_test, train_size= 0.05, stratify = y_test) # pour CPU
         x_test_labelled, _, y_test_labelled, _ = train_test_split(x_test, y_test, train_size= 0.9, stratify = y_test)
 
         self.labelled_fraction = len(y_train_labelled)/len(y_train)

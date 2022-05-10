@@ -46,6 +46,8 @@ class houstonDataset(Dataset):
             samples = samples_per_class
             if label == 0:
                 labelled_exs = np.random.choice(label_ind, size=(len(y_all.unique())-1)*samples, replace=False)
+            if label in [10,11,12,13]:
+                labelled_exs = np.random.choice(label_ind, size=samples*4, replace=False)
             else:
                 while (len(label_ind)< samples) : samples = int(samples/2)
                 labelled_exs = np.random.choice(label_ind, size=samples, replace=False)

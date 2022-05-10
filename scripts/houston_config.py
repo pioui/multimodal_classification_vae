@@ -14,18 +14,50 @@ from mcvae.architectures.encoders import (
 data_dir = "/home/plo026/data/houston/"
 outputs_dir = "outputs/houston/"
 labels = [
-    "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 
-    "Deciduous Trees", "Bare Earth", "Water", "Residential buildings",
-    "Non-residential buildings", "Roads", "Sidewalks", "Crosswalks",
-    "Major thoroughfares", "Highways", "Railways", "Paved parking lots", "Unpaved parking lots",
-    "Cars", "Trains", "Stadium seats"
+    "Unknown", 
+    "Healthy Grass", 
+    "Stressed Grass", 
+    "Artificial Turf", 
+    "Evergreen Trees", 
+    "Deciduous Trees", 
+    "Bare Earth", 
+    "Water", 
+    "Residential buildings",
+    "Non-residential buildings", 
+    "Roads", 
+    "Sidewalks", 
+    "Crosswalks",
+    "Major thoroughfares", 
+    "Highways", 
+    "Railways", 
+    "Paved parking lots", 
+    "Unpaved parking lots",
+    "Cars", 
+    "Trains", 
+    "Stadium seats"
     ]
 color = [
-    "black", "limegreen", "lime", "forestgreen", "green", 
-    "darkgreen", "saddlebrown", "aqua", "white", 
-    "plum",  "red", "darkgray", "dimgray",
-    "firebrick", "darkred", "peru", "yellow", "orange",
-    "magenta", "blue", "skyblue"
+    "black", 
+    "limegreen", 
+    "lime", 
+    "forestgreen", 
+    "green", 
+    "darkgreen", 
+    "saddlebrown", 
+    "aqua", 
+    "white", 
+    "plum",  
+    "red", 
+    "darkgray", 
+    "dimgray",
+    "firebrick", 
+    "darkred", 
+    "peru", 
+    "yellow", 
+    "orange",
+    "magenta", 
+    "blue", 
+    "skyblue"
     ]
 images_dir =  "outputs/houston/images/"
 
@@ -47,7 +79,7 @@ CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 1024
 PROJECT_NAME = "houston"
-SAMPLES_PER_CLASS = 2000
+SAMPLES_PER_CLASS = 500
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
@@ -86,23 +118,23 @@ SCENARIOS = [  # WAKE updates
     #         )}
     #     ),
     # ),
-    dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        n_latent = 30,
-        model_name="EncoderB0_L30_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB0( 
-                n_input=N_INPUT,
-                n_output=30,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-    ),
+    # dict(
+    #     loss_gen="ELBO",
+    #     loss_wvar="ELBO",
+    #     reparam_latent=True,
+    #     counts=None,
+    #     n_latent = 30,
+    #     model_name="EncoderB0_L30_VAE",
+    #     encoder_z1=nn.ModuleDict(
+    #         {"default": EncoderB0( 
+    #             n_input=N_INPUT,
+    #             n_output=30,
+    #             n_hidden=128,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #         )}
+    #     ),
+    # ),
     # dict(
     #     loss_gen="ELBO",
     #     loss_wvar="ELBO",
@@ -173,23 +205,23 @@ SCENARIOS = [  # WAKE updates
     #         )}
     #     ),
     # ),
-    dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        n_latent=40,
-        model_name="EncoderB1_L40_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB1( 
-                n_input=N_INPUT,
-                n_output=40,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-    ),
+    # dict(
+    #     loss_gen="ELBO",
+    #     loss_wvar="ELBO",
+    #     reparam_latent=True,
+    #     counts=None,
+    #     n_latent=40,
+    #     model_name="EncoderB1_L40_VAE",
+    #     encoder_z1=nn.ModuleDict(
+    #         {"default": EncoderB1( 
+    #             n_input=N_INPUT,
+    #             n_output=40,
+    #             n_hidden=128,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #         )}
+    #     ),
+    # ),
 
     # dict(
     #     loss_gen="ELBO",
@@ -300,24 +332,24 @@ SCENARIOS = [  # WAKE updates
     #         )}
     #     ),
     # ),
-    dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        n_latent=30,
-        model_name="EncoderB3_L30_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB3( 
-                n_input=N_INPUT,
-                n_output=30,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-                kernel_size=9
-            )}
-        ),
-    ),
+    # dict(
+    #     loss_gen="ELBO",
+    #     loss_wvar="ELBO",
+    #     reparam_latent=True,
+    #     counts=None,
+    #     n_latent=30,
+    #     model_name="EncoderB3_L30_VAE",
+    #     encoder_z1=nn.ModuleDict(
+    #         {"default": EncoderB3( 
+    #             n_input=N_INPUT,
+    #             n_output=30,
+    #             n_hidden=128,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #             kernel_size=9
+    #         )}
+    #     ),
+    # ),
     # dict(
     #     loss_gen="ELBO",
     #     loss_wvar="ELBO",
@@ -356,24 +388,24 @@ SCENARIOS = [  # WAKE updates
     #         )}
     #     ),
     # ),
-    dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        n_latent=20,
-        model_name="EncoderB4_L20_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB4( 
-                n_input=N_INPUT,
-                n_output=20,
-                n_hidden=512,
-                dropout_rate=0,
-                do_batch_norm=False,
-                kernel_size=9
-            )}
-        ),
-    ),
+    # dict(
+    #     loss_gen="ELBO",
+    #     loss_wvar="ELBO",
+    #     reparam_latent=True,
+    #     counts=None,
+    #     n_latent=20,
+    #     model_name="EncoderB4_L20_VAE",
+    #     encoder_z1=nn.ModuleDict(
+    #         {"default": EncoderB4( 
+    #             n_input=N_INPUT,
+    #             n_output=20,
+    #             n_hidden=512,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #             kernel_size=9
+    #         )}
+    #     ),
+    # ),
     #     dict(
     #     loss_gen="ELBO",
     #     loss_wvar="ELBO",

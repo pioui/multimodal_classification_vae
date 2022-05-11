@@ -79,7 +79,7 @@ CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 1024
 PROJECT_NAME = "houston"
-SAMPLES_PER_CLASS = 500
+SAMPLES_PER_CLASS = 2000
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 

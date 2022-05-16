@@ -11,7 +11,7 @@ import torch
 import tifffile
 import csv
 
-from mcvae.utils.utility_functions import compute_reject_label
+from mcvae.utils.utility_functions import compute_reject_label, centroid, entropy, variance
 
 print(os.listdir('outputs/'))
 
@@ -44,7 +44,7 @@ for project_name in os.listdir('outputs/'):
             SHAPE
         )
     elif project_name == 'houston':
-        continue
+        # continue
         dataset = 'houston'
         from houston_config import (
             labels,
@@ -111,8 +111,8 @@ for project_name in os.listdir('outputs/'):
             plt.plot(train_loss, color="red", label = 'Train Loss')
             plt.plot(test_loss, color="blue", label='Test Loss')
             plt.xlabel("Epochs")
-            plt.ylim(-1.2,2) #Trento
-            # plt.ylim(-0.35,0.35) # Houston
+            # plt.ylim(-1.2,2) #Trento
+            plt.ylim(-0.35,0.35) # Houston
             plt.grid()
             plt.legend()
             plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_LOSS.png", pad_inches=0.2, bbox_inches='tight')
@@ -125,8 +125,8 @@ for project_name in os.listdir('outputs/'):
             plt.yticks(np.arange(0,N_LABELS,1), range(1,len(labels)))
             for k in range (len(m_confusion_matrix)):
                 for l in range(len(m_confusion_matrix[k])):
-                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='small') #trento
-                    # plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small') #houston
+                    # plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='small') #trento
+                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small') #houston
             plt.savefig(f"{images_dir}{project_name}_{model_name}_{encoder_type}_test_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
             np.savetxt(f"{outputs_dir}{project_name}_{model_name}_{encoder_type}_test_CONFUSION_MATRIX.csv", m_confusion_matrix.astype(int), delimiter=',')
     else:
@@ -147,6 +147,7 @@ for project_name in os.listdir('outputs/'):
             model_name = file[:-4]
 
             y_pred_prob = np.load(os.path.join(outputs_dir,file))
+            print(y_pred_prob.shape)
             y_pred_max_prob = y_pred_prob.max(1)
             y_pred = y_pred_prob.argmax(1)+1
             y_pred_reject = compute_reject_label(y_pred_prob, threshold=0.5)
@@ -158,11 +159,40 @@ for project_name in os.listdir('outputs/'):
             plt.savefig(f"{images_dir}{model_name}_PREDICTIONS.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
             plt.figure(dpi=500)
-            plt.imshow((1-y_pred_max_prob).reshape(SHAPE), cmap='coolwarm', vmin=0, vmax=1)
+            plt.imshow((1-y_pred_max_prob).reshape(SHAPE), cmap='coolwarm', 
+            vmin=0, vmax=1
+            )
             plt.axis('off')
             cbar = plt.colorbar(location='top')
             cbar.ax.tick_params(labelsize =8 )
             plt.savefig(f"{images_dir}{model_name}_UNCERTAINTY.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
+            
+            plt.figure(dpi=500)
+            plt.imshow(centroid(y_pred_prob).reshape(SHAPE), cmap='coolwarm', 
+            vmin=0, vmax=1
+            )
+            plt.axis('off')
+            cbar = plt.colorbar(location='top')
+            cbar.ax.tick_params(labelsize =8 )
+            plt.savefig(f"{images_dir}{model_name}_CENTROID.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
+
+            plt.figure(dpi=500)
+            plt.imshow(variance(y_pred_prob).reshape(SHAPE), cmap='coolwarm', 
+            # vmin=0, vmax=1
+            )
+            plt.axis('off')
+            cbar = plt.colorbar(location='top')
+            cbar.ax.tick_params(labelsize =8 )
+            plt.savefig(f"{images_dir}{model_name}_VARIANCE.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
+
+            plt.figure(dpi=500)
+            plt.imshow(entropy(y_pred_prob).reshape(SHAPE), cmap='coolwarm', 
+            # vmin=0, vmax=1
+            )
+            plt.axis('off')
+            cbar = plt.colorbar(location='top')
+            cbar.ax.tick_params(labelsize =8 )
+            plt.savefig(f"{images_dir}{model_name}_ENTROPY.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
 
             # Total Confusion matrix
             m_confusion_matrix = confusion_matrix(y_true, y_pred, normalize='true')
@@ -177,8 +207,8 @@ for project_name in os.listdir('outputs/'):
             plt.yticks(np.arange(0,N_LABELS,1), range(1,len(labels)))
             for k in range (len(m_confusion_matrix)):
                 for l in range(len(m_confusion_matrix[k])):
-                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='small') # trento
-                    # plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small') # houston
+                    # plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='small') # trento
+                    plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small') # houston
             plt.savefig(f"{images_dir}{model_name}_total_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
             np.savetxt(f"{outputs_dir}{model_name}_total_CONFUSION_MATRIX.csv", m_confusion_matrix.astype(int), delimiter=',')
 

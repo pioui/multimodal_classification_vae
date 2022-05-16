@@ -30,7 +30,6 @@ def normalize(x):
     assert torch.unique(xn.max(dim=0)[0] == 1.)
     return xn
 
-
 # Utils functions
 def compute_reject_label(y_pred_prob, threshold):
     y_pred = y_pred_prob.argmax(1)+1
@@ -41,7 +40,6 @@ def compute_reject_label(y_pred_prob, threshold):
     y_pred[reject_idx]=0
 
     return y_pred
-
 
 def model_evaluation(
     trainer,
@@ -94,3 +92,44 @@ def log_train_test_split(list_of_tensors):
         for l in torch.unique(y):
             logger.info(f'Label {l}: {torch.sum(y==l)}')
         logger.info('')
+
+
+def centroid(p):
+    """
+    p :  number of pixels x N probability for each class
+    return the centroid of the N-dimentional triangle defined by one-hot encoding points.
+    """
+    N = p.shape[-1]
+    return 1-np.sqrt(np.sum((p-1/N)**2, axis = 1))/(1-1/N)
+
+
+def variance(p):
+    """
+    p :  number of pixels x N probability for each class
+    return the variance of the N-dimentional categorical distribution
+    """
+    N = p.shape[-1]
+    x = np.arange(N)+1
+    var = np.sum(x**2*p, axis =1) - np.sum(x*p, axis = 1)**2
+
+    return 12* var/(N**2-1)
+
+
+def entropy(p):
+    """
+    p :  number of pixels x N probability for each class
+    return the variance of the N-dimentional categorical distribution
+    """
+    p=p+1e-7
+
+    return -np.sum(p*np.log(p), axis =1)
+
+
+
+
+
+
+
+    
+
+

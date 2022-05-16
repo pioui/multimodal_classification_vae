@@ -7,7 +7,9 @@ from mcvae.architectures.encoders import (
     EncoderB5,
     BernoulliDecoderA5,
     EncoderB6,
-    BernoulliDecoderA6
+    BernoulliDecoderA6,
+    EncoderB8,
+    BernoulliDecoderA8
 )
 
 data_dir = "/home/plo026/data/houston/"
@@ -75,16 +77,41 @@ SCENARIOS = [  # WAKE updates
     #             do_batch_norm=False,
     #     ),
     # ),
-        dict(
+    #     dict(
+    #     loss_gen="ELBO",
+    #     loss_wvar="ELBO",
+    #     reparam_latent=True,
+    #     counts=None,
+    #     n_latent = 30,
+    #     model_name="EncoderB6_L30_VAE",
+    #     encoder_z1=nn.ModuleDict(
+    #         {
+    #             "default": EncoderB6( 
+    #             n_input=N_INPUT,
+    #             n_output=30,
+    #             n_hidden=128,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #         )}
+    #     ),
+    #     x_decoder=BernoulliDecoderA6( 
+    #             n_input=30,
+    #             n_output=N_INPUT,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #     ),
+    # ),
+
+    dict(
         loss_gen="ELBO",
         loss_wvar="ELBO",
         reparam_latent=True,
         counts=None,
         n_latent = 30,
-        model_name="EncoderB6_L30_VAE",
+        model_name="EncoderB6_L3o_VAE",
         encoder_z1=nn.ModuleDict(
             {
-                "default": EncoderB6( 
+                "default": EncoderB8( 
                 n_input=N_INPUT,
                 n_output=30,
                 n_hidden=128,
@@ -92,11 +119,12 @@ SCENARIOS = [  # WAKE updates
                 do_batch_norm=False,
             )}
         ),
-        x_decoder=BernoulliDecoderA6( 
+        x_decoder=BernoulliDecoderA8( 
                 n_input=30,
                 n_output=N_INPUT,
                 dropout_rate=0,
                 do_batch_norm=False,
         ),
     ),
+
 ]

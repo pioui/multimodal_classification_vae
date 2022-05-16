@@ -46,9 +46,11 @@ class houstonMultimodalDataset(Dataset):
             samples = samples_per_class
             if label == 0:
                 labelled_exs = np.random.choice(label_ind, size=(len(y_all.unique())-1)*samples, replace=False)
+            elif (len(label_ind)< samples):
+                labelled_exs = np.random.choice(label_ind, size=samples, replace=True)
             else:
-                while (len(label_ind)< samples) : samples = int(samples/2)
                 labelled_exs = np.random.choice(label_ind, size=samples, replace=False)
+
             train_inds.append(labelled_exs)
         train_inds = np.concatenate(train_inds)
 

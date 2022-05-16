@@ -48,7 +48,7 @@ CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 128
 PROJECT_NAME = "houston_patch"
-SAMPLES_PER_CLASS = 10
+SAMPLES_PER_CLASS = 200
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 

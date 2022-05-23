@@ -50,8 +50,7 @@ class houstonPatchDataset(Dataset):
         x_all = x_patched.transpose(1,0) # [5731136,57,p,p]
 
         y = torch.tensor(tifffile.imread(data_dir+"houston_gt.tif"), dtype = torch.int64) # [1202,4768]
-        y_all = y
-        y_all = y_all.reshape(-1) # [5731136] 0 to 20
+        y_all = y.reshape(-1) # [5731136] 0 to 20
 
         train_inds = []
         for label in y_all.unique():
@@ -59,9 +58,11 @@ class houstonPatchDataset(Dataset):
             samples = samples_per_class
             if label == 0:
                 labelled_exs = np.random.choice(label_ind, size=(len(y_all.unique())-1)*samples, replace=False)
+            elif (len(label_ind)< samples):
+                labelled_exs = np.random.choice(label_ind, size=samples, replace=True)
             else:
-                while (len(label_ind)< samples) : samples = int(samples/2)
                 labelled_exs = np.random.choice(label_ind, size=samples, replace=False)
+
             train_inds.append(labelled_exs)
         train_inds = np.concatenate(train_inds)
 
@@ -92,7 +93,7 @@ class houstonPatchDataset(Dataset):
 if __name__ == "__main__":
 
     DATASET = houstonPatchDataset(
-        data_dir = "/Users/plo026/data/houston/",
+        data_dir = "/home/plo026/data/houston/",
     )
     x,y = DATASET.train_dataset.tensors # 819
     print(x.shape, y.shape, torch.unique(y))

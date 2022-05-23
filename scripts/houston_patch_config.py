@@ -7,10 +7,12 @@ from mcvae.architectures.encoders import (
     EncoderB5,
     BernoulliDecoderA5,
     EncoderB6,
-    BernoulliDecoderA6
+    BernoulliDecoderA6,
+    EncoderB8,
+    BernoulliDecoderA8
 )
 
-data_dir = "/Users/plo026/data/houston/"
+data_dir = "/home/plo026/data/houston/"
 outputs_dir = "outputs/houston_patch/"
 labels = [
     "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 
@@ -64,14 +66,14 @@ N_PARTICULES = 30
 N_HIDDEN = 128
 N_EXPERIMENTS = 1
 N_INPUT = 57
-PATCH_SIZE = 250
+PATCH_SIZE = 3
 N_LABELS = 20
 SHAPE = (1202,4768)
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
-BATCH_SIZE = 1024
+BATCH_SIZE = 128
 PROJECT_NAME = "houston_patch"
-SAMPLES_PER_CLASS = 10
+SAMPLES_PER_CLASS = 200
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
@@ -100,28 +102,54 @@ SCENARIOS = [  # WAKE updates
     #             do_batch_norm=False,
     #     ),
     # ),
-        dict(
+    #     dict(
+    #     loss_gen="ELBO",
+    #     loss_wvar="ELBO",
+    #     reparam_latent=True,
+    #     counts=None,
+    #     n_latent = 30,
+    #     model_name="EncoderB6_L30_VAE",
+    #     encoder_z1=nn.ModuleDict(
+    #         {
+    #             "default": EncoderB6( 
+    #             n_input=N_INPUT,
+    #             n_output=30,
+    #             n_hidden=128,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #         )}
+    #     ),
+    #     x_decoder=BernoulliDecoderA6( 
+    #             n_input=30,
+    #             n_output=N_INPUT,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #     ),
+    # ),
+
+    dict(
         loss_gen="ELBO",
         loss_wvar="ELBO",
         reparam_latent=True,
         counts=None,
-        n_latent = 15,
-        model_name="EncoderB6_L15_VAE",
+        n_latent = 30,
+        model_name="EncoderB6_L3o_VAE",
         encoder_z1=nn.ModuleDict(
             {
-                "default": EncoderB6( 
+                "default": EncoderB8( 
                 n_input=N_INPUT,
-                n_output=15,
+                n_output=30,
                 n_hidden=128,
                 dropout_rate=0,
                 do_batch_norm=False,
             )}
         ),
-        x_decoder=BernoulliDecoderA6( 
-                n_input=15,
+        x_decoder=BernoulliDecoderA8( 
+                n_input=30,
                 n_output=N_INPUT,
                 dropout_rate=0,
                 do_batch_norm=False,
         ),
     ),
+
 ]

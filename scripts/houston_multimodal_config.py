@@ -27,6 +27,32 @@ color = [
     "firebrick", "darkred", "peru", "yellow", "orange",
     "magenta", "blue", "skyblue"
     ]
+
+heterophil_matrix = np.array(
+    [
+        [1,2,3,5,5,4,6,6,6,5,5,5,5,5,6,5,5,6,6,6],
+        [2,1,3,5,5,4,6,6,6,5,5,5,5,5,6,5,5,6,6,6],
+        [3,3,1,5,5,4,6,6,6,5,5,5,5,5,6,5,5,6,6,6],
+        [5,5,5,1,2,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
+        [5,5,5,2,1,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
+        [4,4,4,6,6,1,6,6,6,5,5,5,5,5,6,5,2,6,6,6],
+        [6,6,6,6,6,6,1,6,6,6,6,6,6,6,6,6,6,6,6,6],
+        [6,6,6,6,6,6,6,1,2,5,5,5,5,5,6,5,6,6,6,6],
+        [6,6,6,6,6,6,6,2,1,5,5,5,5,5,6,5,6,6,6,6],
+        [5,5,5,6,6,5,6,5,5,1,2,2,2,2,6,2,6,6,6,6],
+        [5,5,5,6,6,5,6,5,5,2,1,3,2,2,6,2,6,6,6,6],
+        [5,5,5,6,6,5,6,5,5,3,3,1,3,3,6,4,6,6,6,6],
+        [5,5,5,6,6,5,6,5,5,2,2,3,1,2,6,2,6,6,6,6],
+        [5,5,5,6,6,5,6,5,5,2,2,3,2,1,6,2,6,6,6,6],
+        [6,6,6,6,6,6,6,6,6,6,6,6,6,6,1,6,6,3,3,6],
+        [5,5,5,6,6,5,6,5,5,2,2,4,2,2,6,1,3,6,6,6],
+        [5,5,5,6,6,2,6,6,6,6,6,6,6,6,6,3,1,6,6,6],
+        [6,6,6,6,6,6,6,6,6,6,6,6,6,6,3,6,6,1,3,6],
+        [6,6,6,6,6,6,6,6,6,6,6,6,6,6,3,6,6,3,1,6],
+        [6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,1],
+    ]
+)
+
 images_dir =  "outputs/houston_multimodal/images/"
 
 if not os.path.exists(outputs_dir):
@@ -48,7 +74,7 @@ CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 512
 PROJECT_NAME = "houston_multimodal"
-SAMPLES_PER_CLASS = 500
+SAMPLES_PER_CLASS = 2000
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
@@ -110,32 +136,32 @@ SCENARIOS = [  # WAKE updates
     #     ),
     # ),
 
-    #     dict(
-    #     loss_gen="ELBO",
-    #     loss_wvar="ELBO",
-    #     reparam_latent=True,
-    #     counts=None,
-    #     n_latent=30,
-    #     model_name="EncoderB2_L30_VAE",
-    #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB2( 
-    #             n_input=N1_INPUT,
-    #             n_output=30,
-    #             n_hidden=256,
-    #             dropout_rate=0,
-    #             do_batch_norm=False,
-    #         )}
-    #     ),
-    #     encoder_z2=nn.ModuleDict(
-    #         {"default": EncoderB2( 
-    #             n_input=N2_INPUT,
-    #             n_output=30,
-    #             n_hidden=256,
-    #             dropout_rate=0,
-    #             do_batch_norm=False,
-    #         )}
-    #     ),
-    # ),
+        dict(
+        loss_gen="ELBO",
+        loss_wvar="ELBO",
+        reparam_latent=True,
+        counts=None,
+        n_latent=30,
+        model_name="EncoderB2_L30_VAE",
+        encoder_z1=nn.ModuleDict(
+            {"default": EncoderB2( 
+                n_input=N1_INPUT,
+                n_output=30,
+                n_hidden=256,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+        encoder_z2=nn.ModuleDict(
+            {"default": EncoderB2( 
+                n_input=N2_INPUT,
+                n_output=30,
+                n_hidden=256,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+    ),
 
     #     dict(
     #     loss_gen="ELBO",
@@ -164,31 +190,31 @@ SCENARIOS = [  # WAKE updates
     #     ),
     # ),
 
-        dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        n_latent=20,
-        model_name="EncoderB4_L20_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB4( 
-                n_input=N1_INPUT,
-                n_output=20,
-                n_hidden=512,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-        encoder_z2=nn.ModuleDict(
-            {"default": EncoderB4( 
-                n_input=N2_INPUT,
-                n_output=20,
-                n_hidden=512,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-    ),
+#         dict(
+#         loss_gen="ELBO",
+#         loss_wvar="ELBO",
+#         reparam_latent=True,
+#         counts=None,
+#         n_latent=20,
+#         model_name="EncoderB4_L20_VAE",
+#         encoder_z1=nn.ModuleDict(
+#             {"default": EncoderB4( 
+#                 n_input=N1_INPUT,
+#                 n_output=20,
+#                 n_hidden=512,
+#                 dropout_rate=0,
+#                 do_batch_norm=False,
+#             )}
+#         ),
+#         encoder_z2=nn.ModuleDict(
+#             {"default": EncoderB4( 
+#                 n_input=N2_INPUT,
+#                 n_output=20,
+#                 n_hidden=512,
+#                 dropout_rate=0,
+#                 do_batch_norm=False,
+#             )}
+#         ),
+#     ),
     
-]
+# ]

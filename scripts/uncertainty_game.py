@@ -2,66 +2,122 @@ from mpl_toolkits import mplot3d
 import numpy as np
 import matplotlib.pyplot as plt
 
-def centroid(p1, p2):
-    return 1-np.sqrt((2/3-p1-p2)**2+ (p1-1/3)**2 + (p2-1/3)**2)/(2/3)
 
-def variance(p1, p2):
-    return ((1-p1-p2)+ 4*p1 + 9*p2 - (1-p1-p2+ 2*p1 + 3*p2)**2) / (8/12)
+from mcvae.utils import centroid, variance_heterophil, variance
+from trento_config import heterophil_matrix, labels
 
-p1 = np.linspace(0, 1, 100)
-p2 = np.linspace(0, 1, 100)
+print('labels:')
+for i in range(len(labels)-1):
+    print(i+1, labels[i+1])
+print()
+print("heterophil matrix:")
+print(heterophil_matrix)
+print()
+print("Sure case")
+p = [1,0,0,0,0,0]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
+p = [0,1,0,0,0,0]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
 
-# X_, Y_ = np.meshgrid(p1, p2)
-# X = X_[X_+Y_ <=1 ]
-# Y = Y_[X_+Y_ <=1 ]
+p = [0,0,1,0,0,0]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
 
-X, Y = np.meshgrid(p1, p2)
+p = [0,0,0,1,0,0]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
+
+p = [0,0,0,0,1,0]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
+
+p = [0,0,0,0,0,1]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
+
 
 print()
-print("Centroid ")
-Z = centroid(X, Y)
-print("Max: ",np.max(Z))
-ind = np.unravel_index(np.argmax(Z, axis=None), Z.shape)
-print(X[ind], Y[ind])
-print("1,0,0 :",centroid(0,0))
-print("0,1,0 :",centroid(1,0))
-print("0,0,1 :",centroid(0,1))
-print("1/3,1/3,1/3 :",centroid(1/3,1/3))
+print("Confusion between 2 classes")
+print(" Distance 2")
+p = [0.5,0,0,0,0.5,0]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
 
-print("Min: ", np.min(Z))
-ind = np.unravel_index(np.argmin(Z, axis=None), Z.shape)
-print(X[ind], Y[ind])
+p = [0.8,0,0,0,0.2,0]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
 
-fig = plt.figure()
-ax = plt.axes(projection='3d')
-ax.contour3D(X, Y, Z, 100, cmap='binary')
-ax.set_xlabel('p1')
-ax.set_ylabel('p2')
-ax.set_zlabel('Uncertainty')
 
-# plt.show()
+
+print(" Distance 3")
+p = [0.5,0,0,0.5,0,0]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
+
+p = [0.8,0,0,0.2,0,0]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
+
+p = [0,0,0.5,0,0,0.5]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
+
+p = [0,0,0.8,0,0,0.2]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
+
+print(" Distance 4")
+p = [0.5,0.5,0,0,0,0]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
+
+p = [0.8,0.2,0,0,0,0]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
+
 print()
-print("Variance ")
-Z = variance(X, Y)
-print("Max: ",np.max(Z))
-ind = np.unravel_index(np.argmax(Z, axis=None), Z.shape)
-print(X[ind], Y[ind])
+print("Confusion between more classes")
+p = [0.5,0,0,0.2,0.3,0]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
 
-print("Min: ", np.min(Z))
-ind = np.unravel_index(np.argmin(Z, axis=None), Z.shape)
-print(X[ind], Y[ind])
-print("1,0,0 :",variance(0,0))
-print("0,1,0 :",variance(1,0))
-print("0,0,1 :",variance(0,1))
-print("1/3,1/3,1/3 :",variance(1/3,1/3))
+p = [0.5,0.2,0,0,0.3,0]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
 
-fig = plt.figure()
-ax = plt.axes(projection='3d')
-ax.contour3D(X, Y, Z, 100, cmap='binary')
-ax.set_xlabel('p1')
-ax.set_ylabel('p2')
-ax.set_zlabel('Uncertainty')
+p = [0.3,0.2,0.1,0.1,0.3,0]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
 
-plt.show()
+p = [1/6,1/6,1/6,1/6,1/6,1/6]
+p = np.array([p])
+print(p,variance_heterophil(p=p, w=heterophil_matrix))
+
+
+# heterophil_matrix = np.array([
+#     [1,3,2,2],
+#     [3,1,2,2],
+#     [2,3,1,2],
+#     [2,3,2,1],
+
+# ])
+# a=3
+# b=2
+# c=2
+
+
+# p = [0.51,0.49,0,0]
+# p = np.array([p])
+# print(p,variance_heterophil(p=p, w=heterophil_matrix))
+
+
+# p = [0.25,5/12,1/6,1/6]
+# p = np.array([p])
+# print(p,variance_heterophil(p=p, w=heterophil_matrix))
+
+
+
 
 

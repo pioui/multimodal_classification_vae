@@ -11,15 +11,15 @@ import torch
 import tifffile
 import csv
 
-from mcvae.utils.utility_functions import compute_reject_label, centroid, entropy, variance
+from mcvae.utils.utility_functions import compute_reject_label, centroid, entropy, variance, variance_heterophil
 
 print(os.listdir('outputs/'))
 
 for project_name in os.listdir('outputs/'):
     if project_name == 'trento':
-        continue
+        # continue
         print(project_name)
-        # dataset = 'trento'
+        dataset = 'trento'
         from trento_config import (
             labels,
             color,
@@ -28,7 +28,8 @@ for project_name in os.listdir('outputs/'):
             outputs_dir,
             PROJECT_NAME,
             N_LABELS,
-            SHAPE
+            SHAPE,
+            heterophil_matrix
         )
     elif project_name == 'trento_patch':
         # continue
@@ -41,7 +42,8 @@ for project_name in os.listdir('outputs/'):
             outputs_dir,
             PROJECT_NAME,
             N_LABELS,
-            SHAPE
+            SHAPE,
+            heterophil_matrix
         )
     elif project_name == 'houston':
         # continue
@@ -55,9 +57,24 @@ for project_name in os.listdir('outputs/'):
             PROJECT_NAME,
             N_LABELS,
             SHAPE,
+            heterophil_matrix
+        )
+    elif project_name == 'houston_patch':
+        # continue
+        dataset = 'houston'
+        from houston_patch_config import (
+            labels,
+            color,
+            data_dir,
+            images_dir,
+            outputs_dir,
+            PROJECT_NAME,
+            N_LABELS,
+            SHAPE,
+            heterophil_matrix
         )
     elif project_name == 'trento_multimodal':
-        continue
+        # continue
         dataset = 'trento'
         from trento_multimodal_config import (
             labels,
@@ -67,10 +84,11 @@ for project_name in os.listdir('outputs/'):
             outputs_dir,
             PROJECT_NAME,
             N_LABELS,
-            SHAPE
+            SHAPE,
+            heterophil_matrix,
         )
     elif project_name == 'houston_multimodal':
-        continue
+        # continue
         dataset = 'houston'
         from houston_multimodal_config import (
             labels,
@@ -81,6 +99,7 @@ for project_name in os.listdir('outputs/'):
             PROJECT_NAME,
             N_LABELS,
             SHAPE,
+            heterophil_matrix
         )
 
     else:
@@ -101,7 +120,7 @@ for project_name in os.listdir('outputs/'):
         for i in range(len(data_dict['LR'])):
             encoder_type = data_dict["encoder_type"][i]
             model_name =  data_dict["MODEL_NAME"][i]
-            m_confusion_matrix = data_dict["CONFUSION_MATRIX"][i]
+            m_confusion_matrix = data_dict["CONFUSION_MATRIX"][i][1:,1:]
             m_confusion_matrix = np.around(m_confusion_matrix.astype('float') / m_confusion_matrix.sum(axis=1)[:, np.newaxis], decimals=2)
             train_loss = data_dict["train_LOSS"][i]
             test_loss = data_dict["test_LOSS"][i]
@@ -143,6 +162,7 @@ for project_name in os.listdir('outputs/'):
 
     acc_dict = []
     for file in os.listdir(os.path.join(outputs_dir)):
+        print(file)
         if os.path.splitext(file)[-1].lower()=='.npy':
             model_name = file[:-4]
 
@@ -158,41 +178,51 @@ for project_name in os.listdir('outputs/'):
             plt.axis('off')
             plt.savefig(f"{images_dir}{model_name}_PREDICTIONS.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
-            plt.figure(dpi=500)
-            plt.imshow((1-y_pred_max_prob).reshape(SHAPE), cmap='coolwarm', 
-            vmin=0, vmax=1
-            )
-            plt.axis('off')
-            cbar = plt.colorbar(location='top')
-            cbar.ax.tick_params(labelsize =8 )
-            plt.savefig(f"{images_dir}{model_name}_UNCERTAINTY.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
+            # plt.figure(dpi=500)
+            # plt.imshow((1-y_pred_max_prob).reshape(SHAPE), cmap='coolwarm', 
+            # vmin=0, vmax=1
+            # )
+            # plt.axis('off')
+            # cbar = plt.colorbar(location='top')
+            # cbar.ax.tick_params(labelsize =8 )
+            # plt.savefig(f"{images_dir}{model_name}_UNCERTAINTY.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
             
-            plt.figure(dpi=500)
-            plt.imshow(centroid(y_pred_prob).reshape(SHAPE), cmap='coolwarm', 
-            vmin=0, vmax=1
-            )
-            plt.axis('off')
-            cbar = plt.colorbar(location='top')
-            cbar.ax.tick_params(labelsize =8 )
-            plt.savefig(f"{images_dir}{model_name}_CENTROID.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
+            # plt.figure(dpi=500)
+            # plt.imshow(centroid(y_pred_prob).reshape(SHAPE), cmap='coolwarm', 
+            # vmin=0, vmax=1
+            # )
+            # plt.axis('off')
+            # cbar = plt.colorbar(location='top')
+            # cbar.ax.tick_params(labelsize =8 )
+            # plt.savefig(f"{images_dir}{model_name}_CENTROID.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
+
+            # plt.figure(dpi=500)
+            # plt.imshow(variance(y_pred_prob).reshape(SHAPE), cmap='coolwarm', 
+            # # vmin=0, vmax=1
+            # )
+            # plt.axis('off')
+            # cbar = plt.colorbar(location='top')
+            # cbar.ax.tick_params(labelsize =8 )
+            # plt.savefig(f"{images_dir}{model_name}_VARIANCE.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
 
             plt.figure(dpi=500)
-            plt.imshow(variance(y_pred_prob).reshape(SHAPE), cmap='coolwarm', 
-            # vmin=0, vmax=1
+            plt.imshow(variance_heterophil(p = y_pred_prob, w = heterophil_matrix ).reshape(SHAPE), cmap='coolwarm', 
+            # vmin=0, vmax=2.25
+            vmin=0, vmax=6.25
             )
             plt.axis('off')
             cbar = plt.colorbar(location='top')
             cbar.ax.tick_params(labelsize =8 )
-            plt.savefig(f"{images_dir}{model_name}_VARIANCE.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
+            plt.savefig(f"{images_dir}{model_name}_VARIANCE_HETERO.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
 
-            plt.figure(dpi=500)
-            plt.imshow(entropy(y_pred_prob).reshape(SHAPE), cmap='coolwarm', 
-            # vmin=0, vmax=1
-            )
-            plt.axis('off')
-            cbar = plt.colorbar(location='top')
-            cbar.ax.tick_params(labelsize =8 )
-            plt.savefig(f"{images_dir}{model_name}_ENTROPY.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
+            # plt.figure(dpi=500)
+            # plt.imshow(entropy(y_pred_prob).reshape(SHAPE), cmap='coolwarm', 
+            # # vmin=0, vmax=1
+            # )
+            # plt.axis('off')
+            # cbar = plt.colorbar(location='top')
+            # cbar.ax.tick_params(labelsize =8 )
+            # plt.savefig(f"{images_dir}{model_name}_ENTROPY.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
 
             # Total Confusion matrix
             m_confusion_matrix = confusion_matrix(y_true, y_pred, normalize='true')

@@ -100,7 +100,7 @@ def centroid(p):
     return the centroid of the N-dimentional triangle defined by one-hot encoding points.
     """
     N = p.shape[-1]
-    return 1-np.sqrt(np.sum((p-1/N)**2, axis = 1))/(1-1/N)
+    return 1-np.sqrt(np.sum((p-1/N)**2, axis = 1))/ np.sqrt((1-1/N))
 
 
 def variance(p):
@@ -111,8 +111,19 @@ def variance(p):
     N = p.shape[-1]
     x = np.arange(N)+1
     var = np.sum(x**2*p, axis =1) - np.sum(x*p, axis = 1)**2
+    mean = np.sum(x*p, axis =1)
 
-    return 12* var/(N**2-1)
+    return var/mean
+
+def variance_heterophil(p,w):
+    """
+    p :  number of pixels x N probability for each class
+    return the variance of the N-dimentional categorical distribution
+    w: NxN distances of classes
+    """
+    d = w[p.argmax(1)]
+    return (np.sum(d**2*p, axis =1) - np.sum(d*p, axis = 1)**2)
+
 
 
 def entropy(p):

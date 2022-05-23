@@ -7,6 +7,7 @@ import numpy as np
 from matplotlib import colors
 from sklearn.metrics import confusion_matrix
 
+from mcvae.utils.utility_functions import variance_heterophil
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--dataset", "-d",
@@ -36,6 +37,7 @@ if dataset=="trento":
         images_dir,
         labels,
         color,
+        heterophil_matrix,
 
     )
     from mcvae.dataset import trentoDataset
@@ -64,6 +66,7 @@ elif dataset=="houston":
         images_dir,
         labels,
         color,
+        heterophil_matrix
 
     )
     from mcvae.dataset import houstonDataset
@@ -73,15 +76,12 @@ elif dataset=="houston":
     )
 
 X_train,y_train = DATASET.train_dataset_labelled.tensors # 819
-print(X_train.shape, y_train.shape, torch.unique(y_train))
 X_test,y_test = DATASET.test_dataset_labelled.tensors # 15107
-print(X_test.shape, y_test.shape, torch.unique(y_test))
 X,y = DATASET.full_dataset.tensors # 15107
-print(X.shape, y.shape, torch.unique(y))
 
 # ----- SVM -----#
 
-clf_svm = SVC(C=1, kernel="rbf")
+clf_svm = SVC(C=1, kernel="rbf", probability=True)
 
 clf_svm.fit(X_train.numpy(), y_train.numpy())
 
@@ -102,18 +102,28 @@ for k in range (len(m_confusion_matrix)):
         plt.text(k,l,str(m_confusion_matrix[k][l]), va='center', ha='center', fontsize='xx-small') #houston
 plt.savefig(f"{images_dir}{dataset}_SVM_test_CONFUSION_MATRIX.png",bbox_inches='tight', pad_inches=0.2, dpi=500)
             
-
 y_pred = clf_svm.predict(X.numpy())
 plt.figure(dpi=500)
 plt.imshow(y_pred.reshape(SHAPE), interpolation='nearest', cmap = colors.ListedColormap(color[1:]))
 plt.axis('off')
 plt.savefig(f"{images_dir}{dataset}_SVM_PREDICTIONS.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
+y_pred_prob = clf_svm.predict_proba(X.numpy())
+plt.figure(dpi=500)
+plt.imshow(variance_heterophil(p = y_pred_prob, w = heterophil_matrix ).reshape(SHAPE), cmap='coolwarm', 
+# vmin=0, vmax=2.25
+vmin=0, vmax=6.25
+)
+plt.axis('off')
+cbar = plt.colorbar(location='top')
+cbar.ax.tick_params(labelsize =8 )
+plt.savefig(f"{images_dir}{dataset}_SVM_VARIANCE_HETERO.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
+
 
 np.save(f"{outputs_dir}{PROJECT_NAME}_SVM.npy", y_pred)
 
 
-# # ----- RF -----#
+# # ----- RF -----
 
 clf_rf = RandomForestClassifier(
 
@@ -157,5 +167,15 @@ plt.imshow(y_pred.reshape(SHAPE), interpolation='nearest', cmap = colors.ListedC
 plt.axis('off')
 plt.savefig(f"{images_dir}{dataset}_RF_PREDICTIONS.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
+y_pred_prob = clf_rf.predict_proba(X.numpy())
+plt.figure(dpi=500)
+plt.imshow(variance_heterophil(p = y_pred_prob, w = heterophil_matrix ).reshape(SHAPE), cmap='coolwarm', 
+# vmin=0, vmax=2.25
+vmin=0, vmax=6.25
+)
+plt.axis('off')
+cbar = plt.colorbar(location='top')
+cbar.ax.tick_params(labelsize =8 )
+plt.savefig(f"{images_dir}{dataset}_RF_VARIANCE_HETERO.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
 
 np.save(f"{outputs_dir}{PROJECT_NAME}_RF.npy", y_pred)

@@ -17,7 +17,16 @@ outputs_dir = "outputs/trento_patch/"
 labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
 images_dir =  "outputs/trento_patch/images/"
-
+heterophil_matrix = np.array(
+    [
+        [1,4,4,3,2,4],
+        [4,1,4,4,4,3],
+        [4,4,1,4,4,3],
+        [3,4,4,1,3,4],
+        [2,4,4,3,1,4],
+        [4,3,3,4,4,1],
+    ]
+    )
 if not os.path.exists(outputs_dir):
     os.makedirs(outputs_dir)
 if not os.path.exists(images_dir):

@@ -57,8 +57,11 @@ class houstonDataset(Dataset):
         # x_all_train = x_all[train_inds]
         # y_all_train = y_all[train_inds]
         
+        x_train_all, _, y_train_all, _ = train_test_split(
+            x_all, y_all, train_size = 40000, random_state = 42, stratify = y_all
+        ) # 0 to 20
         x_train, x_test, y_train, y_test = train_test_split(
-            x_all, y_all, train_size = train_size, random_state = 42, stratify = y_all
+            x_train_all, y_train_all, train_size = 0.5, random_state = 42, stratify = y_all
         ) # 0 to 20
 
 

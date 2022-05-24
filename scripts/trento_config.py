@@ -14,8 +14,12 @@ from mcvae.architectures.encoders import (
 data_dir = "/home/plo026/data/trento/"
 outputs_dir = "outputs/trento/"
 images_dir =  "outputs/trento/images/"
-labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
-color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
+labels = ["Unknown",
+#  "A.Trees", 
+ "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
+color = ["black", 
+# "red", 
+"gray", "blue", "orange", "green","yellow"]
 heterophil_matrix = np.array(
     [
         [1,4,4,3,2,4],

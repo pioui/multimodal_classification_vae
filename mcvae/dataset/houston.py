@@ -40,25 +40,25 @@ class houstonDataset(Dataset):
         y_all = y
         y_all = y_all.reshape(-1) # [5731136] 0 to 20
 
-        train_inds = []
-        for label in y_all.unique():
-            label_ind = np.where(y_all == label)[0]
-            samples = samples_per_class
-            if label == 0:
-                labelled_exs = np.random.choice(label_ind, size=(len(y_all.unique())-1)*samples, replace=False)
-            elif (len(label_ind)< samples):
-                labelled_exs = np.random.choice(label_ind, size=samples, replace=True)
-            else:
-                labelled_exs = np.random.choice(label_ind, size=samples, replace=False)
+        # train_inds = []
+        # for label in y_all.unique():
+        #     label_ind = np.where(y_all == label)[0]
+        #     samples = samples_per_class
+        #     if label == 0:
+        #         labelled_exs = np.random.choice(label_ind, size=(len(y_all.unique())-1)*samples, replace=False)
+        #     elif (len(label_ind)< samples):
+        #         labelled_exs = np.random.choice(label_ind, size=samples, replace=True)
+        #     else:
+        #         labelled_exs = np.random.choice(label_ind, size=samples, replace=False)
 
-            train_inds.append(labelled_exs)
-        train_inds = np.concatenate(train_inds)
+        #     train_inds.append(labelled_exs)
+        # train_inds = np.concatenate(train_inds)
 
-        x_all_train = x_all[train_inds]
-        y_all_train = y_all[train_inds]
+        # x_all_train = x_all[train_inds]
+        # y_all_train = y_all[train_inds]
         
         x_train, x_test, y_train, y_test = train_test_split(
-            x_all_train, y_all_train, train_size = train_size, random_state = 42, stratify = y_all_train
+            x_all, y_all, train_size = train_size, random_state = 42, stratify = y_all
         ) # 0 to 20
 
 

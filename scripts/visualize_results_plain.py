@@ -46,7 +46,7 @@ for project_name in os.listdir('outputs/'):
             heterophil_matrix
         )
     elif project_name == 'houston':
-        # continue
+        continue
         dataset = 'houston'
         from houston_config import (
             labels,
@@ -205,8 +205,9 @@ for project_name in os.listdir('outputs/'):
             # cbar.ax.tick_params(labelsize =8 )
             # plt.savefig(f"{images_dir}{model_name}_VARIANCE.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
 
+            var = variance_heterophil(p = y_pred_prob, w = heterophil_matrix )
             plt.figure(dpi=500)
-            plt.imshow(variance_heterophil(p = y_pred_prob, w = heterophil_matrix ).reshape(SHAPE), cmap='coolwarm', 
+            plt.imshow(var.reshape(SHAPE), cmap='coolwarm', 
             # vmin=0, vmax=2.25
             vmin=0, vmax=6.25
             )
@@ -260,6 +261,21 @@ for project_name in os.listdir('outputs/'):
                 'unkown label accuracy': um_accuracy, 
                 'uknown label balanced accuracy': ub_accuracy,
                 })
+
+            # # Uncertain label
+            # print(y_pred_prob[var>2])
+            # print(y_pred[var>2])
+            # print(y_pred_prob.shape)
+            # two_classes = (-y_pred_prob).argsort(1)[:,:2]
+            # import sys
+            # np.set_printoptions(threshold=sys.maxsize)
+
+            # print(two_classes.shape)
+            # print(two_classes[var>2])
+
+
+
+
 
 
     with open(f'{outputs_dir}/{PROJECT_NAME}_total_accuracies.csv', 'w') as csvfile:

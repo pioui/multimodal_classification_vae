@@ -386,7 +386,7 @@ class EncoderH(nn.Module):
     ):
         """
         :param n_in:
-        :param n_out:
+        :param n_ougit t:
         :param n_cat_list:
         :param n_layers:
         :param n_hidden:

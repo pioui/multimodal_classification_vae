@@ -151,6 +151,7 @@ for project_name in os.listdir('outputs/'):
     else:
         print("No .pkl file")
 
+
     if dataset == "trento":
         y = np.array(io.loadmat(data_dir+"TNsecSUBS_Test.mat")["TNsecSUBS_Test"]) # [166,600] 0 to 6
         y_true = y.reshape(-1)
@@ -232,6 +233,7 @@ for project_name in os.listdir('outputs/'):
 
             plt.figure(dpi=500)
             plt.matshow(m_confusion_matrix, cmap="coolwarm")
+
             plt.xlabel("True Labels")
             plt.xticks(np.arange(0,N_LABELS,1), range(1,len(labels)))
             plt.ylabel("Predicted Labels")

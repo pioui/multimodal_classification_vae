@@ -46,7 +46,7 @@ for project_name in os.listdir('outputs/'):
             heterophil_matrix
         )
     elif project_name == 'houston':
-        continue
+        # continue
         dataset = 'houston'
         from houston_config import (
             labels,

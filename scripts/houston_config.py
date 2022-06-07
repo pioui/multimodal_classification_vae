@@ -11,7 +11,7 @@ from mcvae.architectures.encoders import (
     EncoderB4,
 )
 
-data_dir = "/home/plo026/data/houston/"
+data_dir = "/Users/plo026/data/houston/"
 outputs_dir = "outputs/houston/"
 images_dir =  "outputs/houston/images/"
 

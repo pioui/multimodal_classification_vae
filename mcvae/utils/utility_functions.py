@@ -117,9 +117,9 @@ def variance(p):
 
 def variance_heterophil(p,w):
     """
-    p :  number of pixels x N probability for each class
-    return the variance of the N-dimentional categorical distribution
-    w: NxN distances of classes
+    @param p : np.array(N,C) N pixels x C probability for each class
+    @param w : np.array(C,C) distances of classes / heterophily matrix
+    @return  : np.array(N) the variance of the C-dimentional categorical distribution
     """
     d = w[p.argmax(1)]
     return (np.sum(d**2*p, axis =1) - np.sum(d*p, axis = 1)**2)
@@ -132,8 +132,9 @@ def entropy(p):
     return the variance of the N-dimentional categorical distribution
     """
     p=p+1e-7
+    N = p.shape[-1]
 
-    return -np.sum(p*np.log(p), axis =1)
+    return -np.sum(p*np.log(p), axis =1)/np.log(N)
 
 
 

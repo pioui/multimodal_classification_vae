@@ -11,7 +11,7 @@ from mcvae.architectures.encoders import (
     EncoderB4
 )
 
-data_dir = "/home/plo026/data/trento/"
+data_dir = "/Users/plo026/data/trento/"
 outputs_dir = "outputs/trento/"
 images_dir =  "outputs/trento/images/"
 labels = ["Unknown",

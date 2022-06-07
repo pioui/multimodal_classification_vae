@@ -1,18 +1,19 @@
 import numpy as np
 import logging
 import os
-from mcvae.dataset import houstonDataset
+from mcvae.dataset import trentoDataset
 import torch.nn as nn
 from mcvae.architectures.encoders import (
-    EncoderB0,
-    EncoderB1,
-    EncoderB2,
-    EncoderB3,
-    EncoderB4,
+    EncoderB5,
+    BernoulliDecoderA5,
+    EncoderB6,
+    BernoulliDecoderA6,
+    EncoderB8,
+    BernoulliDecoderA8
 )
 
 data_dir = "/Users/plo026/data/houston/"
-outputs_dir = "outputs/houston_multimodal/"
+outputs_dir = "outputs/houston_patch/"
 labels = [
     "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 
     "Deciduous Trees", "Bare Earth", "Water", "Residential buildings",
@@ -27,7 +28,7 @@ color = [
     "firebrick", "darkred", "peru", "yellow", "orange",
     "magenta", "blue", "skyblue"
     ]
-
+images_dir =  "outputs/houston_patch/images/"
 heterophil_matrix = np.array(
     [
         [1,2,3,5,5,4,6,6,6,5,5,5,5,5,6,5,5,6,6,6],
@@ -53,11 +54,9 @@ heterophil_matrix = np.array(
     ]
 )
 
-images_dir =  "outputs/houston_multimodal/images/"
 
 if not os.path.exists(outputs_dir):
     os.makedirs(outputs_dir)
-
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
 
@@ -66,102 +65,91 @@ LR = 1e-4
 N_PARTICULES = 30
 N_HIDDEN = 128
 N_EXPERIMENTS = 1
-N1_INPUT = 50
-N2_INPUT = 7
+N_INPUT = 57
+PATCH_SIZE = 3
 N_LABELS = 20
 SHAPE = (1202,4768)
 CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
-BATCH_SIZE = 512
-PROJECT_NAME = "houston_multimodal"
-SAMPLES_PER_CLASS = 2000
-
+BATCH_SIZE = 128
+PROJECT_NAME = "houston_patch"
+SAMPLES_PER_CLASS = 200
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
-
 SCENARIOS = [  # WAKE updates
-
     # dict(
     #     loss_gen="ELBO",
     #     loss_wvar="ELBO",
     #     reparam_latent=True,
     #     counts=None,
-    #     n_latent=30,
-    #     model_name="EncoderB0_L30_VAE",
+    #     n_latent = 5,
+    #     model_name="EncoderB0_L05_VAE",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB0( 
-    #             n_input=N1_INPUT,
+    #         {
+    #             "default": EncoderB5( 
+    #             n_input=N_INPUT,
+    #             n_output=5,
+    #             n_hidden=128,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #         )}
+    #     ),
+    #     x_decoder=BernoulliDecoderA5( 
+    #             n_input=5,
+    #             n_output=N_INPUT,
+    #             dropout_rate=0,
+    #             do_batch_norm=False,
+    #     ),
+    # ),
+    #     dict(
+    #     loss_gen="ELBO",
+    #     loss_wvar="ELBO",
+    #     reparam_latent=True,
+    #     counts=None,
+    #     n_latent = 30,
+    #     model_name="EncoderB6_L30_VAE",
+    #     encoder_z1=nn.ModuleDict(
+    #         {
+    #             "default": EncoderB6( 
+    #             n_input=N_INPUT,
     #             n_output=30,
     #             n_hidden=128,
     #             dropout_rate=0,
     #             do_batch_norm=False,
     #         )}
     #     ),
-    #     encoder_z2=nn.ModuleDict(
-    #         {"default": EncoderB0( 
-    #             n_input=N2_INPUT,
-    #             n_output=30,
-    #             n_hidden=128,
+    #     x_decoder=BernoulliDecoderA6( 
+    #             n_input=30,
+    #             n_output=N_INPUT,
     #             dropout_rate=0,
     #             do_batch_norm=False,
-    #         )}
     #     ),
     # ),
 
-        dict(
+    dict(
         loss_gen="ELBO",
         loss_wvar="ELBO",
         reparam_latent=True,
         counts=None,
-        n_latent=30,
-        model_name="EncoderB2_L30_VAE",
+        n_latent = 30,
+        model_name="EncoderB6_L3o_VAE",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB2( 
-                n_input=N1_INPUT,
+            {
+                "default": EncoderB8( 
+                n_input=N_INPUT,
                 n_output=30,
-                n_hidden=256,
+                n_hidden=128,
                 dropout_rate=0,
                 do_batch_norm=False,
             )}
         ),
-        encoder_z2=nn.ModuleDict(
-            {"default": EncoderB2( 
-                n_input=N2_INPUT,
-                n_output=30,
-                n_hidden=256,
+        x_decoder=BernoulliDecoderA8( 
+                n_input=30,
+                n_output=N_INPUT,
                 dropout_rate=0,
                 do_batch_norm=False,
-            )}
         ),
     ),
 
-
-        dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        n_latent=20,
-        model_name="EncoderB4_L20_VAE",
-        encoder_z1=nn.ModuleDict(
-            {"default": EncoderB4( 
-                n_input=N1_INPUT,
-                n_output=20,
-                n_hidden=512,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-        encoder_z2=nn.ModuleDict(
-            {"default": EncoderB4( 
-                n_input=N2_INPUT,
-                n_output=20,
-                n_hidden=512,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-    ),
-    
 ]

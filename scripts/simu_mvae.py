@@ -4,6 +4,7 @@
 
 import os
 import logging
+from unittest.mock import patch
 import numpy as np
 import pandas as pd
 import torch
@@ -54,6 +55,30 @@ if dataset=="trento":
     from mcvae.dataset import trentoMultimodalDataset
     DATASET = trentoMultimodalDataset(
     data_dir = data_dir,
+    )
+if dataset=="trento-patch":
+    from trento_multimodal_patch_config import (
+        outputs_dir,
+        data_dir,
+        N_PARTICULES,
+        N_EPOCHS,
+        N_HIDDEN,
+        LR,
+        N_EXPERIMENTS,
+        BATCH_SIZE,
+        CLASSIFICATION_RATIO,
+        N_EVAL_SAMPLES,
+        N1_INPUT,
+        N2_INPUT,
+        PATCH_SIZE,
+        N_LABELS,
+        PROJECT_NAME,
+        SCENARIOS,
+    )
+    from mcvae.dataset import trentoMultimodalPatchDataset
+    DATASET = trentoMultimodalPatchDataset(
+    data_dir = data_dir,
+    patch_size = PATCH_SIZE,
     )
 
 
@@ -157,6 +182,9 @@ for scenario in SCENARIOS:
     encoder_z1=scenario.get("encoder_z1", None)
     encoder_z2=scenario.get("encoder_z2", None)
 
+    decoder_x1=scenario.get("decoder_x1", None)
+    decoder_x2=scenario.get("decoder_x2", None)
+
     do_defensive = type(loss_wvar) == list
     multi_encoder_keys = loss_wvar if do_defensive else ["default"]
     for t in range(N_EXPERIMENTS):
@@ -201,7 +229,9 @@ for scenario in SCENARIOS:
                     multi_encoder_keys=multi_encoder_keys,
                     vdist_map=vdist_map_train,
                     encoder_z1=encoder_z1,
-                    encoder_z2=encoder_z2
+                    encoder_z2=encoder_z2,
+                    decoder_x1=decoder_x1,
+                    decoder_x2=decoder_x2
                 )
                 if os.path.exists(mdl_name):
                     logger.info("model exists; loading from .pt")

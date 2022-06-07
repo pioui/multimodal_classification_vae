@@ -53,8 +53,34 @@ if dataset=="trento":
     from mcvae.dataset import trentoDataset
     DATASET = trentoDataset(
         data_dir = data_dir,
+
     )
-if dataset=="houston":
+elif dataset=="trento-patch":
+    from trento_patch_config import (
+        outputs_dir,
+        data_dir,
+        N_PARTICULES,
+        N_EPOCHS,
+        N_HIDDEN,
+        LR,
+        N_EXPERIMENTS,
+        BATCH_SIZE,
+        CLASSIFICATION_RATIO,
+        N_EVAL_SAMPLES,
+        N_INPUT,
+        PATCH_SIZE,
+        N_LABELS,
+        PROJECT_NAME,
+        SCENARIOS,
+    )
+    from mcvae.dataset import trentoPatchDataset
+    print("Train on trento with 2d Patching")
+    DATASET = trentoPatchDataset(
+        data_dir = data_dir,
+        patch_size=PATCH_SIZE,
+
+    )
+elif dataset=="houston":
     from houston_config import (
         outputs_dir,
         data_dir,
@@ -77,10 +103,36 @@ if dataset=="houston":
         data_dir = data_dir,
         samples_per_class=SAMPLES_PER_CLASS,
     )
+elif dataset=="houston-patch":
+    from houston_patch_config import (
+        outputs_dir,
+        data_dir,
+        N_PARTICULES,
+        N_EPOCHS,
+        N_HIDDEN,
+        LR,
+        N_EXPERIMENTS,
+        BATCH_SIZE,
+        CLASSIFICATION_RATIO,
+        N_EVAL_SAMPLES,
+        N_INPUT,
+        PATCH_SIZE,
+        N_LABELS,
+        PROJECT_NAME,
+        SCENARIOS,
+        SAMPLES_PER_CLASS,
+    )
+    from mcvae.dataset import houstonPatchDataset
+    DATASET = houstonPatchDataset(
+        data_dir = data_dir,
+        samples_per_class=SAMPLES_PER_CLASS,
+        patch_size = PATCH_SIZE,
+    )
 
 from mcvae.utils.utility_functions import (
     model_evaluation,
 )
+
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -146,6 +198,7 @@ for scenario in SCENARIOS:
     batch_size = scenario.get("batch_size", BATCH_SIZE)
 
     encoder_z1=scenario.get("encoder_z1", None)
+    x_decoder=scenario.get("x_decoder", None)
 
     do_defensive = type(loss_wvar) == list
     multi_encoder_keys = loss_wvar if do_defensive else ["default"]
@@ -189,7 +242,8 @@ for scenario in SCENARIOS:
                     do_batch_norm=batch_norm,
                     multi_encoder_keys=multi_encoder_keys,
                     vdist_map=vdist_map_train,
-                    encoder_z1=encoder_z1
+                    encoder_z1=encoder_z1,
+                    x_decoder=x_decoder
                 )
                 if os.path.exists(mdl_name):
                     logger.info("model exists; loading from .pt")
@@ -237,23 +291,22 @@ for scenario in SCENARIOS:
             break
         torch.save(mdl.state_dict(), mdl_name)
 
-        with torch.no_grad():
-            train_res = trainer.inference(
-                trainer.full_loader,
-                keys=[
-                    "qc_z1_all_probas",
-                    "y",
-                    "log_ratios",
-                    "qc_z1",
-                    "preds_is",
-                    "preds_plugin",
-                ],
-                n_samples=N_EVAL_SAMPLES,
-            )
-        y_pred = train_res["preds_plugin"].numpy()
-        y_pred = y_pred / y_pred.sum(1, keepdims=True)
-        np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}.npy", y_pred)
-
+        # with torch.no_grad():
+        #     train_res = trainer.inference(
+        #         trainer.full_loader,
+        #         keys=[
+        #             "qc_z1_all_probas",
+        #             "y",
+        #             "log_ratios",
+        #             "qc_z1",
+        #             "preds_is",
+        #             "preds_plugin",
+        #         ],
+        #         n_samples=N_EVAL_SAMPLES,
+        #     )
+        # y_pred = train_res["preds_plugin"].numpy()
+        # y_pred = y_pred / y_pred.sum(1, keepdims=True)
+        # np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}.npy", y_pred)
 
 
         mdl.eval()
@@ -373,7 +426,7 @@ for scenario in SCENARIOS:
                         logger.info(e)
                         continue
                     break
-                torch.save(mdl.state_dict(), mdl_name[:-3]+"train"+".pt")
+                torch.save(mdl.state_dict(), mdl_name[:-3]+".pt")
 
             with torch.no_grad():
                 train_res = trainer.inference(

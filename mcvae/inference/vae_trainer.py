@@ -223,6 +223,7 @@ class VAE_M1M2_Trainer:
                                 .classifier[0]
                                 .to_hidden.weight.grad.cpu()
                             )
+
                 self.iterate += 1
             logger.info(f"Train Loss: {running_loss/ len(self.train_loader)}")
             self.train_loss.append(running_loss/ len(self.train_loader))

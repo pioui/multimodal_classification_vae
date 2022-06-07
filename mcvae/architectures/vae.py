@@ -41,6 +41,7 @@ class VAE_M1M2(nn.Module):
         use_classifier: bool = False,
         encoder_z1: nn.Module = None,
         encoder_z2_z1: nn.Module = None,
+        x_decoder: nn.Module = None,
         vdist_map=None,
     ):
         if vdist_map is None:
@@ -107,9 +108,12 @@ class VAE_M1M2(nn.Module):
             n_input=n_latent + n_labels, n_output=n_latent, n_hidden=n_hidden
         )
 
-        self.x_decoder = BernoulliDecoderA(
-            n_input=n_latent, n_output=n_input, do_batch_norm=do_batch_norm
-        )
+        if x_decoder is None:
+            self.x_decoder = BernoulliDecoderA(
+                n_input=n_latent, n_output=n_input, do_batch_norm=do_batch_norm
+            )
+        else:
+            self.x_decoder=x_decoder
 
         y_prior_probs = (
             y_prior
@@ -144,7 +148,7 @@ class VAE_M1M2(nn.Module):
         outs=None,
     ):
 
-        n_batch, _ = x.shape
+        n_batch = x.shape[0]
         inference_kwargs = dict(
             n_samples=n_samples,
             encoder_key=encoder_key,
@@ -357,7 +361,10 @@ class VAE_M1M2(nn.Module):
         log_pz2 = Normal(torch.zeros_like(z2), torch.ones_like(z2)).log_prob(z2).sum(-1)
 
         px_z_loc = self.x_decoder(z1)
-        log_px_z = torch.nn.BCELoss()(px_z_loc,x.expand(px_z_loc.shape[0],-1,-1)).sum(-1)
+        if len(px_z_loc.shape)>3:
+            log_px_z = torch.nn.BCELoss()(px_z_loc,x.expand(px_z_loc.shape[0],-1,-1,-1,-1)).sum(-1)
+        else:
+            log_px_z = torch.nn.BCELoss()(px_z_loc,x.expand(px_z_loc.shape[0],-1,-1)).sum(-1)
         generative_density = log_pz2 + log_pc + log_pz1_z2 + log_px_z
         variational_density = log_qz1_x + log_qz2_z1
         log_ratio = generative_density - variational_density
@@ -392,7 +399,7 @@ class VAE_M1M2(nn.Module):
 
     def inference_defensive_sampling(self, x, y, temperature, counts: pd.Series):
         n_samples_total = counts.sum()
-        n_batch, _ = x.shape
+        n_batch = x.shape[0]
         n_latent = self.n_latent
         n_labels = self.n_labels
         sum_key = "sum_supervised" if y is not None else "sum_unsupervised"
@@ -462,7 +469,10 @@ class VAE_M1M2(nn.Module):
 
         # Decoder part
         px_z_loc = self.x_decoder(z_all)
-        log_px_z = torch.nn.BCELoss()(px_z_loc,x.expand(px_z_loc.shape[0],-1,-1)).sum(-1)
+        if len(px_z_loc)>3:
+            log_px_z = torch.nn.BCELoss()(px_z_loc,x.expand(px_z_loc.shape[0],-1,-1,-1,-1)).sum(-1)
+        else:
+            log_px_z = torch.nn.BCELoss()(px_z_loc,x.expand(px_z_loc.shape[0],-1,-1)).sum(-1)
 
         # Log ratio contruction
         log_ratio = log_px_z + log_proba_prior - sum_log_q

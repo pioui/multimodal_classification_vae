@@ -43,6 +43,8 @@ class MVAE_M1M2(nn.Module):
         encoder_z1: nn.Module = None,
         encoder_z2:  nn.Module = None,
         encoder_u: nn.Module = None,
+        decoder_x1: nn.Module = None,
+        decoder_x2: nn.Module = None,
         vdist_map=None,
     ):
         if vdist_map is None:
@@ -126,13 +128,19 @@ class MVAE_M1M2(nn.Module):
             n_input=n_latent + n_labels, n_output=n_latent*2, n_hidden=n_hidden
         )
 
-        self.decoder_x1 = BernoulliDecoderA(
-            n_input=n_latent, n_output=n1_input, do_batch_norm=do_batch_norm
-        )
-
-        self.decoder_x2 = BernoulliDecoderA(
-            n_input=n_latent, n_output=n2_input, do_batch_norm=do_batch_norm
-        )
+        if decoder_x1 is None:
+            self.decoder_x1 = BernoulliDecoderA(
+                n_input=n_latent, n_output=n1_input, do_batch_norm=do_batch_norm
+            )
+        else:
+            self.decoder_x1=decoder_x1
+        
+        if decoder_x2 is None:
+            self.decoder_x2 = BernoulliDecoderA(
+                n_input=n_latent, n_output=n2_input, do_batch_norm=do_batch_norm
+            )
+        else:
+            self.decoder_x2=decoder_x2
 
         y_prior_probs = (
             y_prior
@@ -170,7 +178,7 @@ class MVAE_M1M2(nn.Module):
         encoder_key="default",
         outs=None,
     ):
-        n_batch, _ = x1.shape
+        n_batch = x1.shape[0]
         inference_kwargs = dict(
             n_samples=n_samples,
             encoder_key=encoder_key,
@@ -283,7 +291,6 @@ class MVAE_M1M2(nn.Module):
             log_qz2 = log_qz2.sum(-1)
 
         z1_z2 = torch.car([z1,z2], dim=-1)
-        print(z1.shape, z2.shape, z1_z2.shape)
         qc_z1z2 = self.classifier[encoder_key](z1_z2)
         log_qc_z1z2 = qc_z1z2.log()
         y_int = y.argmax(-1)
@@ -422,10 +429,17 @@ class MVAE_M1M2(nn.Module):
         log_pu = Normal(torch.zeros_like(u), torch.ones_like(u)).log_prob(u).sum(-1)
 
         px1_z1_loc = self.decoder_x1(z1)
-        log_px1_z1 = torch.nn.BCELoss()(px1_z1_loc,x1.expand(px1_z1_loc.shape[0],-1,-1)).sum(-1)
+        if len(px1_z1_loc.shape)>3:
+            log_px1_z1 = torch.nn.BCELoss()(px1_z1_loc,x1.expand(px1_z1_loc.shape[0],-1,-1,-1,-1)).sum(-1)
+        else:
+            log_px1_z1 = torch.nn.BCELoss()(px1_z1_loc,x1.expand(px1_z1_loc.shape[0],-1,-1)).sum(-1)
 
         px2_z2_loc = self.decoder_x2(z2)
-        log_px2_z2 = torch.nn.BCELoss()(px2_z2_loc,x2.expand(px2_z2_loc.shape[0],-1,-1)).sum(-1)
+        if len(px2_z2_loc.shape)>3:
+            log_px2_z2 = torch.nn.BCELoss()(px2_z2_loc,x2.expand(px2_z2_loc.shape[0],-1,-1,-1,-1)).sum(-1)
+        else:
+            log_px2_z2 = torch.nn.BCELoss()(px2_z2_loc,x2.expand(px2_z2_loc.shape[0],-1,-1)).sum(-1)
+
 
         generative_density = log_pu + log_pc + log_pz1z2_uc + log_px1_z1 + log_px2_z2
         variational_density = log_qz1_x1 +log_qz2_x2+ log_qu_z1z2c
@@ -467,7 +481,7 @@ class MVAE_M1M2(nn.Module):
 
     def inference_defensive_sampling(self, x1, x2, y, temperature, counts: pd.Series):
         n_samples_total = counts.sum()
-        n_batch, _ = x1.shape
+        n_batch = x1.shape[0]
         n_latent = self.n_latent
         n_labels = self.n_labels
         sum_key = "sum_supervised" if y is not None else "sum_unsupervised"
@@ -541,10 +555,16 @@ class MVAE_M1M2(nn.Module):
 
         # Decoder part
         px1_z1_loc = self.decoder_x1(z1_all)
-        log_px1_z1 = torch.nn.BCELoss()(px1_z1_loc,x1.expand(px1_z1_loc.shape[0],-1,-1)).sum(-1)
+        if len(px1_z1_loc.shape)>3:
+            log_px1_z1 = torch.nn.BCELoss()(px1_z1_loc,x1.expand(px1_z1_loc.shape[0],-1,-1,-1,-1)).sum(-1)
+        else:
+            log_px1_z1 = torch.nn.BCELoss()(px1_z1_loc,x1.expand(px1_z1_loc.shape[0],-1,-1)).sum(-1)
 
         px2_z2_loc = self.decoder_x2(z2_all)
-        log_px2_z2 = torch.nn.BCELoss()(px2_z2_loc,x2.expand(px2_z2_loc.shape[0],-1,-1)).sum(-1)
+        if len(px2_z2_loc.shape)>3:
+            log_px2_z2 = torch.nn.BCELoss()(px2_z2_loc,x2.expand(px2_z2_loc.shape[0],-1,-1,-1,-1)).sum(-1)
+        else:
+            log_px2_z2 = torch.nn.BCELoss()(px2_z2_loc,x2.expand(px2_z2_loc.shape[0],-1,-1)).sum(-1)
 
         # Log ratio contruction
         log_ratio = log_px1_z1 +log_px2_z2+ log_proba_prior - sum_log_q

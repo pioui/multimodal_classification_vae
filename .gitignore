@@ -94,9 +94,11 @@ ENV/
 
 
 #model  data
-models/
 *.pkl
 *.pt
 
 #logs
 logs/
+outputs/
+images/
+models/

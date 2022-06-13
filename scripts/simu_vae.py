@@ -174,7 +174,7 @@ EVAL_ENCODERS = [
 
 
 DF_LI = []
-logging.info("Number of experiments : {}".format(N_EXPERIMENTS))
+logger.info("Number of experiments : {}".format(N_EXPERIMENTS))
 # Main script
 for scenario in SCENARIOS:
     loss_gen = scenario.get("loss_gen", None)
@@ -333,12 +333,12 @@ for scenario in SCENARIOS:
             }
             logger.info("ENCODER TYPE : {}".format(encoder_type))
             if encoder_type == "train":
-                logging.info("Using train variational distribution for evaluation ...")
+                logger.info("Using train variational distribution for evaluation ...")
                 eval_encoder = None
                 do_defensive_eval = do_defensive
                 multi_counts_eval = multi_counts
             else:
-                logging.info(
+                logger.info(
                     "Training eval variational distribution for evaluation with {} ...".format(
                         encoder_type
                     )
@@ -355,7 +355,7 @@ for scenario in SCENARIOS:
 
                 while True:
                     try:
-                        logging.info("Using map {} ...".format(vdist_map_eval))
+                        logger.info("Using map {} ...".format(vdist_map_eval))
                         new_classifier = nn.ModuleDict(
                             {
                                 key: ClassifierA(
@@ -402,14 +402,14 @@ for scenario in SCENARIOS:
                             os.path.exists(filen) for filen in mdl_names.values()
                         ]
                         if np.array(filen_exists_arr).all():
-                            logging.info("Loading eval mdls")
+                            logger.info("Loading eval mdls")
                             for key in mdl_names:
                                 encoders[key].load_state_dict(
                                     torch.load(mdl_names[key])
                                 )
                             mdl.update_q(**encoders)
                         else:
-                            logging.info("training {}".format(encoder_type))
+                            logger.info("training {}".format(encoder_type))
                             trainer.train_eval_encoder(
                                 encoders=encoders,
                                 n_epochs=n_epochs,
@@ -447,14 +447,15 @@ for scenario in SCENARIOS:
 
             logger.info(trainer.model.encoder_z2_z1.keys())
             loop_results_dict = model_evaluation(
+
                 trainer=trainer,
                 counts_eval=multi_counts_eval,
                 encoder_eval_name="default",
                 n_eval_samples = N_EVAL_SAMPLES,
             )
+
             res = {**loop_setup_dict, **loop_results_dict, **eval_encoder_loop}
             logger.info(res)
             DF_LI.append(res)
             DF = pd.DataFrame(DF_LI)
             DF.to_pickle(FILENAME)
-

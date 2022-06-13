@@ -24,6 +24,7 @@ class trentoDataset(Dataset):
     ) -> None:
         super().__init__()
 
+
         image_hyper = torch.tensor(tifffile.imread(data_dir+"hyper_Italy.tif")) # [63,166,600]
         image_lidar = torch.tensor(tifffile.imread(data_dir+"LiDAR_Italy.tif")) # [2,166,600]
         x = torch.cat((image_hyper,image_lidar), dim = 0) # [65,166,600]
@@ -89,3 +90,4 @@ if __name__ == "__main__":
 
     x,y = DATASET.full_dataset.tensors # 15107
     print(x.shape, y.shape, torch.unique(y))
+

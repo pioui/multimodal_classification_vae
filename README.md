@@ -86,10 +86,6 @@ uncertainty
     │       │   
     |       └── houston.png
 
-
-
-
-
 ```
 
 #### To do

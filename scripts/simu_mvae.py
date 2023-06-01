@@ -1,8 +1,13 @@
 """
-Script to train and make predictions on multi-M1+M2 model 
+This script is specifically designed to handle the training and prediction tasks 
+associated with multi-M1+M2 architecture.
 Usage:
   python3 scripts/simu_mvae.py -d <DATASET NAME> 
 
+Replace <DATASET NAME> with the specific dataset you intend to use. The script will 
+then initiate the training process for the M1+M2 model using the specified dataset. 
+Once the training is complete, the script allows you to make accurate predictions 
+on new data.
 """
 
 import os

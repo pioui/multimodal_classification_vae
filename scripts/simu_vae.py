@@ -44,7 +44,6 @@ if dataset=="trento":
 elif dataset=="trento-patch":
     from trento_patch_config import *
     from mcvae.dataset import trentoPatchDataset
-    print("Train on trento with 2d Patching")
     DATASET = trentoPatchDataset(
         data_dir = data_dir,
         patch_size=PATCH_SIZE,

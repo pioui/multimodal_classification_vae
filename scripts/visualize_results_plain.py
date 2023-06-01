@@ -20,88 +20,27 @@ for project_name in os.listdir('outputs/'):
         # continue
         print(project_name)
         dataset = 'trento'
-        from trento_config import (
-            labels,
-            color,
-            data_dir,
-            images_dir,
-            outputs_dir,
-            PROJECT_NAME,
-            N_LABELS,
-            SHAPE,
-            heterophil_matrix
-        )
+        from trento_config import *
     elif project_name == 'trento_patch':
         # continue
         dataset = 'trento'
-        from trento_patch_config import (
-            labels,
-            color,
-            data_dir,
-            images_dir,
-            outputs_dir,
-            PROJECT_NAME,
-            N_LABELS,
-            SHAPE,
-            heterophil_matrix
-        )
+        from trento_patch_config import *
     elif project_name == 'houston':
         # continue
         dataset = 'houston'
-        from houston_config import (
-            labels,
-            color,
-            data_dir,
-            images_dir,
-            outputs_dir,
-            PROJECT_NAME,
-            N_LABELS,
-            SHAPE,
-            heterophil_matrix
-        )
+        from houston_config import *
     elif project_name == 'houston_patch':
         # continue
         dataset = 'houston'
-        from houston_patch_config import (
-            labels,
-            color,
-            data_dir,
-            images_dir,
-            outputs_dir,
-            PROJECT_NAME,
-            N_LABELS,
-            SHAPE,
-            heterophil_matrix
-        )
+        from houston_patch_config import *
     elif project_name == 'trento_multimodal':
         # continue
         dataset = 'trento'
-        from trento_multimodal_config import (
-            labels,
-            color,
-            data_dir,
-            images_dir,
-            outputs_dir,
-            PROJECT_NAME,
-            N_LABELS,
-            SHAPE,
-            heterophil_matrix,
-        )
+        from trento_multimodal_config import *
     elif project_name == 'houston_multimodal':
         # continue
         dataset = 'houston'
-        from houston_multimodal_config import (
-            labels,
-            color,
-            data_dir,
-            images_dir,
-            outputs_dir,
-            PROJECT_NAME,
-            N_LABELS,
-            SHAPE,
-            heterophil_matrix
-        )
-
+        from houston_multimodal_config import *
     else:
         continue
 
@@ -206,12 +145,12 @@ for project_name in os.listdir('outputs/'):
             # cbar.ax.tick_params(labelsize =8 )
             # plt.savefig(f"{images_dir}{model_name}_VARIANCE.png",bbox_inches='tight', pad_inches=0.1 ,dpi=500)
 
-            var = variance_heterophil(p = y_pred_prob, w = heterophil_matrix )
-            plt.figure(dpi=500)
-            plt.imshow(var.reshape(SHAPE), cmap='coolwarm', 
-            # vmin=0, vmax=2.25
-            vmin=0, vmax=6.25
-            )
+            # var = variance_heterophil(p = y_pred_prob, w = heterophil_matrix )
+            # plt.figure(dpi=500)
+            # plt.imshow(var.reshape(SHAPE), cmap='coolwarm', 
+            # # vmin=0, vmax=2.25
+            # vmin=0, vmax=6.25
+            # )
             plt.axis('off')
             cbar = plt.colorbar(location='top')
             cbar.ax.tick_params(labelsize =8 )

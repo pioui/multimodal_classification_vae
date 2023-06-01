@@ -1,6 +1,8 @@
 """
-Configuation file for trento dataset with two stacked patched input
-
+This Python script serves as a configuration file specifically designed for the Houston dataset, 
+which comprises two stacked patched modalities as input. The configuration file plays a crucial role in 
+defining and organizing the settings, parameters, and options required to effectively process 
+and analyze the Houston dataset.
 """
 
 import numpy as np

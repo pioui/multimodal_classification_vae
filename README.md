@@ -38,11 +38,9 @@ Run classification for different classification methods.
 ```
 python3 scripts/simu_SVM_RF.py -d <DATASET NAME>
 ```
-
 2. M1+M2 
 ```
 python3 scripts/simu_vae.py -d <DATASET NAME>
-
 ```
 3. multi-M1+M2
 ```
@@ -80,5 +78,5 @@ uncertainty
     |       └── houston.png
 ```
 
-#### To do
+## To dos
  - Logging and documentation

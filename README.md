@@ -58,9 +58,14 @@ python3 scripts/simu_mvae.py -d <DATASET NAME>
 
 #### Metrics and classification, and uncertainty maps for all the output/*.npy files
 ```
-python3 scripts/output_analysis.py
+python3 scripts/outputs_analysis.py
 ```
-### Output .npy, logs and uncertainty images files are saved at :
+
+#### Generate plots to compare data distributions for trento and houston dataset
+```
+python3 scripts/data_distributions.py
+```
+### Output .npys, pngs, logs and uncertainty images files are saved at :
 
 ```
 uncertainty
@@ -71,7 +76,19 @@ uncertainty
     │   │   trento.logs
     │   │   trento.npy
     │   └───images
-    │   
+    │       │   
+    |       └── trento.png
+    |
+    └───houston
+    │   │   houston.logs
+    │   │   houston.npy
+    │   └───images
+    │       │   
+    |       └── houston.png
+
+
+
+
 
 ```
 

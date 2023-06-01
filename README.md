@@ -1,30 +1,25 @@
 # Multimodal Data Classification using Variational Autoencoder - Under Construction
 
-
-# Uncertainty 
-Based on https://github.com/PierreBoyeau/decision-making-vaes I develop a framework for multimodal data classification with VAE.
-by Pigi Lozou
+This repository provides a framework for multimodal data classification using Variational Autoencoder (VAE). The goal is to classify multimodal data and analyze uncertainty in the classification process. It is based on the work done by Pierre Boyeau in his repository decision-making-vaes.
 
 ## Installation:
-#### Create conda envirioment
+Create conda envirioment
 ```
 conda env create -f environment.yml
 conda activate mcvae
 ```
-
-#### Install
+Install
 ```
 python3 setup.py build install
 ```
-#### Install - editable version
+Install - editable version
 ```
 pip install -e .
 ```
 
 
 ## Configuration
-#### Edit data directories and output at the configurations files :
-
+Edit the data directories and output paths in the configuration files:
 ```
 mcvae
 │   
@@ -37,34 +32,34 @@ mcvae
 
 
 ## Classification
-#### SVM and RF 
+
+Run classification for different classification methods. 
+1. SVM and RF 
 ```
 python3 scripts/simu_SVM_RF.py -d <DATASET NAME>
 ```
 
-#### M1+M2 
+2. M1+M2 
 ```
 python3 scripts/simu_vae.py -d <DATASET NAME>
 
 ```
-#### multi-M1+M2
+3. multi-M1+M2
 ```
 python3 scripts/simu_mvae.py -d <DATASET NAME>
 ```
 
 ## Results and Analysis
 
-#### Metrics and classification, and uncertainty maps for all the output/*.npy files
+Metrics, classification, and uncertainty maps for all the output/*.npy files
 ```
 python3 scripts/outputs_analysis.py
 ```
-
-#### Generate plots to compare data distributions for trento and houston dataset
+Generate plots to compare data distributions for the trento and houston datasets
 ```
 python3 scripts/data_distributions.py
 ```
-### Output .npys, pngs, logs and uncertainty images files are saved at :
-
+The output files, including .npy, .png, logs, and uncertainty images, are saved in the following directory structure:
 ```
 uncertainty
 │   

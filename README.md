@@ -30,9 +30,9 @@ mcvae
 │   
 └───scripts
     │   trento_config.py
-    │   bcss_config.py
-    │  
-
+    │   houston_config.py
+    │   simu_M1M2.py  
+    |   simu_multi-M1M2.py  
 ```
 
 
@@ -40,7 +40,6 @@ mcvae
 #### SVM and RF 
 ```
 python3 scripts/simu_SVM_RF.py -d <DATASET NAME>
-
 ```
 
 #### M1+M2 
@@ -51,7 +50,6 @@ python3 scripts/simu_vae.py -d <DATASET NAME>
 #### multi-M1+M2
 ```
 python3 scripts/simu_mvae.py -d <DATASET NAME>
-
 ```
 
 ## Results and Analysis
@@ -85,7 +83,6 @@ uncertainty
     │   └───images
     │       │   
     |       └── houston.png
-
 ```
 
 #### To do

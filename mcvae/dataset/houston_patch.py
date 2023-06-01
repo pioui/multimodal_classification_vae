@@ -93,7 +93,7 @@ class houstonPatchDataset(Dataset):
 if __name__ == "__main__":
 
     DATASET = houstonPatchDataset(
-        data_dir = "/Users/plo026/data/houston/",
+        data_dir = "/home/pigi/data/houston/",
     )
     x,y = DATASET.train_dataset.tensors # 819
     print(x.shape, y.shape, torch.unique(y))

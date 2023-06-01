@@ -1,5 +1,8 @@
 """
-    Decision theory: Experiment for M1+M1 model on trento
+Script to train and make predictions on M1+M2 model 
+Usage:
+  python3 scripts/simu_vae.py -d <DATASET NAME> 
+
 """
 
 import os
@@ -9,7 +12,6 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import argparse
-
 
 from mcvae.architectures import VAE_M1M2
 from mcvae.inference import VAE_M1M2_Trainer
@@ -34,105 +36,41 @@ args = parser.parse_args()
 dataset = args.dataset
 
 if dataset=="trento":
-    from trento_config import (
-        outputs_dir,
-        data_dir,
-        N_PARTICULES,
-        N_EPOCHS,
-        N_HIDDEN,
-        LR,
-        N_EXPERIMENTS,
-        BATCH_SIZE,
-        CLASSIFICATION_RATIO,
-        N_EVAL_SAMPLES,
-        N_INPUT,
-        N_LABELS,
-        PROJECT_NAME,
-        SCENARIOS,
-    )
+    from trento_config import *
     from mcvae.dataset import trentoDataset
     DATASET = trentoDataset(
         data_dir = data_dir,
-
     )
 elif dataset=="trento-patch":
-    from trento_patch_config import (
-        outputs_dir,
-        data_dir,
-        N_PARTICULES,
-        N_EPOCHS,
-        N_HIDDEN,
-        LR,
-        N_EXPERIMENTS,
-        BATCH_SIZE,
-        CLASSIFICATION_RATIO,
-        N_EVAL_SAMPLES,
-        N_INPUT,
-        PATCH_SIZE,
-        N_LABELS,
-        PROJECT_NAME,
-        SCENARIOS,
-    )
+    from trento_patch_config import *
     from mcvae.dataset import trentoPatchDataset
     print("Train on trento with 2d Patching")
     DATASET = trentoPatchDataset(
         data_dir = data_dir,
         patch_size=PATCH_SIZE,
-
     )
 elif dataset=="houston":
-    from houston_config import (
-        outputs_dir,
-        data_dir,
-        N_PARTICULES,
-        N_EPOCHS,
-        N_HIDDEN,
-        LR,
-        N_EXPERIMENTS,
-        BATCH_SIZE,
-        CLASSIFICATION_RATIO,
-        N_EVAL_SAMPLES,
-        N_INPUT,
-        N_LABELS,
-        PROJECT_NAME,
-        SCENARIOS,
-        SAMPLES_PER_CLASS,
-    )
+    from houston_config import *
     from mcvae.dataset import houstonDataset
     DATASET = houstonDataset(
         data_dir = data_dir,
         samples_per_class=SAMPLES_PER_CLASS,
     )
 elif dataset=="houston-patch":
-    from houston_patch_config import (
-        outputs_dir,
-        data_dir,
-        N_PARTICULES,
-        N_EPOCHS,
-        N_HIDDEN,
-        LR,
-        N_EXPERIMENTS,
-        BATCH_SIZE,
-        CLASSIFICATION_RATIO,
-        N_EVAL_SAMPLES,
-        N_INPUT,
-        PATCH_SIZE,
-        N_LABELS,
-        PROJECT_NAME,
-        SCENARIOS,
-        SAMPLES_PER_CLASS,
-    )
+    from houston_patch_config import *
     from mcvae.dataset import houstonPatchDataset
     DATASET = houstonPatchDataset(
         data_dir = data_dir,
         samples_per_class=SAMPLES_PER_CLASS,
         patch_size = PATCH_SIZE,
     )
+else:
+    print("Dataset name is not valid. Please try one of the following: trento, houston, trento-patch, houston-patch")
+    exit()
 
 from mcvae.utils.utility_functions import (
     model_evaluation,
 )
-
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -148,6 +86,7 @@ DEFAULT_MAP = dict(
 Z1_MAP = dict(gaussian=EncoderB, student=EncoderBStudent,)
 Z2_MAP = dict(gaussian=EncoderA, student=EncoderAStudent,)
 
+
 FILENAME = f"{outputs_dir}/{PROJECT_NAME}.pkl"
 MDL_DIR = f"{outputs_dir}/models"
 DEBUG = False
@@ -160,22 +99,19 @@ if not os.path.exists(outputs_dir):
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-
 logger.info("train all examples {}".format(len(DATASET.train_dataset.tensors[0])))
 logger.info("train labelled examples {}".format(len(DATASET.train_dataset_labelled.tensors[0])))
 logger.info("test all examples {}".format(len(DATASET.test_dataset.tensors[0])))
 logger.info("test labelled examples {}".format(len(DATASET.test_dataset_labelled.tensors[0])))
 
 EVAL_ENCODERS = [
-    dict(encoder_type="train", eval_encoder_name="train"),  # MUST BE ON TOP!!!
+    dict(encoder_type="train", eval_encoder_name="train"),  
     # dict(encoder_type="ELBO", reparam=True, eval_encoder_name="VAE"),
 ]
 
-
-
 DF_LI = []
 logger.info("Number of experiments : {}".format(N_EXPERIMENTS))
-# Main script
+
 for scenario in SCENARIOS:
     loss_gen = scenario.get("loss_gen", None)
     loss_wvar = scenario.get("loss_wvar", None)
@@ -308,9 +244,8 @@ for scenario in SCENARIOS:
         # y_pred = y_pred / y_pred.sum(1, keepdims=True)
         # np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}.npy", y_pred)
 
-
         mdl.eval()
-        # TODO: find something cleaner
+
         if do_defensive:
             factor = N_EVAL_SAMPLES / counts.sum()
             multi_counts = factor * counts
@@ -443,7 +378,7 @@ for scenario in SCENARIOS:
                 )
             y_pred = train_res["preds_plugin"].numpy()
             y_pred = y_pred / y_pred.sum(1, keepdims=True)
-            np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}_ELBO.npy", y_pred)
+            np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}_M1M2.npy", y_pred)
 
             logger.info(trainer.model.encoder_z2_z1.keys())
             loop_results_dict = model_evaluation(

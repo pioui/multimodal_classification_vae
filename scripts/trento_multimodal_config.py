@@ -1,3 +1,8 @@
+"""
+Configuation file for trento dataset with two seperate modalities input
+
+"""
+
 import numpy as np
 import logging
 import os
@@ -5,27 +10,15 @@ from mcvae.dataset import trentoMultimodalDataset
 import torch.nn as nn
 from mcvae.architectures.encoders import (
     EncoderB0,
-    EncoderB1,
     EncoderB2,
-    EncoderB3,
     EncoderB4
 )
 
-data_dir = "/Users/plo026/data/trento/"
+data_dir = "/home/pigi/data/trento/"
 outputs_dir = "outputs/trento_multimodal/"
 images_dir =  "outputs/trento_multimodal/images/"
 labels = ["Unknown", "A.Trees", "Buildings", "Ground", "Wood", "Vineyards", "Roads"]
 color = ["black", "red", "gray", "blue", "orange", "green","yellow"]
-heterophil_matrix = np.array(
-    [
-        [1,4,4,3,2,4],
-        [4,1,4,4,4,3],
-        [4,4,1,4,4,3],
-        [3,4,4,1,3,4],
-        [2,4,4,3,1,4],
-        [4,3,3,4,4,1],
-    ]
-    )
 
 if not os.path.exists(outputs_dir):
     os.makedirs(outputs_dir)
@@ -39,6 +32,7 @@ N_HIDDEN = 128
 N_EXPERIMENTS = 1
 N1_INPUT = 63
 N2_INPUT = 2
+
 N_LABELS = 6
 SHAPE = (166,600)
 CLASSIFICATION_RATIO = 50.0
@@ -48,9 +42,7 @@ PROJECT_NAME = "trento_multimodal"
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
-SCENARIOS = [  # WAKE updates
-
-
+SCENARIOS = [ 
     dict(
         loss_gen="ELBO",
         loss_wvar="ELBO",
@@ -105,9 +97,7 @@ SCENARIOS = [  # WAKE updates
         ),
     ),
 
-    
-
-        dict(
+    dict(
         loss_gen="ELBO",
         loss_wvar="ELBO",
         reparam_latent=True,

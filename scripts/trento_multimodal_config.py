@@ -49,7 +49,7 @@ SCENARIOS = [
         reparam_latent=True,
         counts=None,
         n_latent=20,
-        model_name="EncoderB0_L20_VAE",
+        model_name="multi-M1M2_EncoderB0_L20",
         encoder_z1=nn.ModuleDict(
             {"default": EncoderB0( 
                 n_input=N1_INPUT,
@@ -76,7 +76,7 @@ SCENARIOS = [
         reparam_latent=True,
         counts=None,
         n_latent=15,
-        model_name="EncoderB2_L15_VAE",
+        model_name="multi-M1M2_EncoderB2_L15",
         encoder_z1=nn.ModuleDict(
             {"default": EncoderB2( 
                 n_input=N1_INPUT,
@@ -103,7 +103,7 @@ SCENARIOS = [
         reparam_latent=True,
         counts=None,
         n_latent=10,
-        model_name="EncoderB4_L10_VAE",
+        model_name="multi-M1M2_EncoderB4_L10",
         encoder_z1=nn.ModuleDict(
             {"default": EncoderB4( 
                 n_input=N1_INPUT,

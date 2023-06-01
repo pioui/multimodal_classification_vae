@@ -378,7 +378,7 @@ for scenario in SCENARIOS:
                 )
             y_pred = train_res["preds_plugin"].numpy()
             y_pred = y_pred / y_pred.sum(1, keepdims=True)
-            np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}_M1M2.npy", y_pred)
+            np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}.npy", y_pred)
 
             logger.info(trainer.model.encoder_z2_z1.keys())
             loop_results_dict = model_evaluation(

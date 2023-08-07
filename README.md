@@ -1,4 +1,4 @@
-# Multimodal Data Classification using Variational Autoencoder - Under Construction
+# Multimodal Data Classification using Variational Autoencoder 
 
 This repository provides a framework for multimodal data classification using Variational Autoencoder (VAE). The goal is to classify multimodal data and analyze uncertainty in the classification process. It is based on the work done by Pierre Boyeau in his repository decision-making-vaes.
 

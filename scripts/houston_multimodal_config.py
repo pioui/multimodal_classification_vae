@@ -43,29 +43,64 @@ labels = [
     "Trains", 
     "Stadium seats"
     ]
+# color = [
+#     "black", 
+
+#     "green", 
+#     "olive", 
+#     "lime", 
+
+#     "orange", 
+#     "maroon", 
+
+#     "brown", 
+#     "turquoise",
+
+#     "pink", 
+#     "magenta", 
+
+#     "gray", 
+#     "navy", 
+
+#     "white", 
+
+#     "red", 
+#     "coral", 
+
+#     "yellow", 
+
+#     "indigo", 
+#     "purple", 
+
+#     "blue", 
+#     "cyan", 
+#     "teal", 
+#     ]
+
 color = [
-    "black", 
-    "limegreen", 
-    "lime", 
-    "forestgreen", 
-    "green", 
-    "darkgreen", 
-    "saddlebrown", 
-    "aqua", 
-    "white", 
-    "plum",  
-    "red", 
-    "darkgray", 
-    "dimgray",
-    "firebrick", 
-    "darkred", 
-    "peru", 
-    "yellow", 
-    "orange",
-    "magenta", 
-    "blue", 
-    "skyblue"
+    '#000000',
+    '#3cb44b', 
+    '#aaffc3', 
+    '#bfef45', 
+    '#f58231',
+    '#ffd8b1', 
+    '#9A6324', 
+    '#469990', 
+    '#911eb4', 
+    '#dcbeff', 
+    '#000075', 
+    '#a9a9a9', 
+    '#ffffff', 
+    '#4363d8', 
+    '#42d4f4', 
+    '#ffe119', 
+    '#800000', 
+    '#e6194B', 
+    '#fabed4', 
+    '#f032e6', 
+    '#fffac8', 
     ]
+    
 
 if not os.path.exists(outputs_dir):
     os.makedirs(outputs_dir)
@@ -85,7 +120,7 @@ CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 512
 PROJECT_NAME = "houston_multimodal"
-SAMPLES_PER_CLASS = 2000
+SAMPLES_PER_CLASS = 500
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 

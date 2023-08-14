@@ -82,7 +82,7 @@ mcvae
 
 
 
-# Results and Analysis
+## Results and Analysis
 
 Metrics, classification, and uncertainty maps for all the output/*.npy files
 ```
@@ -113,7 +113,7 @@ mcvae
     |       └── houston.png
 ```
 
-# Roadmap
+## Roadmap
 - [x] Convert architecture to RS multimodal data
 - [x] Logging
 - [x] Experiment on different encoders
@@ -125,10 +125,10 @@ mcvae
 - [ ] Testing
 - [ ] Add delight to the experience when all tasks are complete :tada:
 
-# License
+## License
 
 This project is licensed under the MIT License.
 
-# Contact
+## Contact
 
 Pigi Lozou - [piyilozou@gmail.com](mailto:piyilozou@gmail.com)

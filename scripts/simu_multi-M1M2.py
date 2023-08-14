@@ -24,9 +24,9 @@ from mcvae.inference import MVAE_M1M2_Trainer
 from mcvae.architectures.regular_modules import (
     encoder_A,
     encoder_B,
-    ClassifierA,
-    encoder_AStudent,
-    encoder_BStudent,
+    classifier_A,
+    encoder_A_student,
+    encoder_B_student,
 )
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -88,9 +88,9 @@ DEFAULT_MAP = dict(
     default="gaussian",
 )
 
-Z1_MAP = dict(gaussian=encoder_B, student=encoder_BStudent,)
-Z2_MAP = dict(gaussian=encoder_B, student=encoder_BStudent,)
-U_MAP = dict(gaussian=encoder_A, student=encoder_AStudent,)
+Z1_MAP = dict(gaussian=encoder_B, student=encoder_B_student,)
+Z2_MAP = dict(gaussian=encoder_B, student=encoder_B_student,)
+U_MAP = dict(gaussian=encoder_A, student=encoder_A_student,)
 
 FILENAME = f"{outputs_dir}/{PROJECT_NAME}.pkl"
 MDL_DIR = f"{outputs_dir}/models"
@@ -304,7 +304,7 @@ for scenario in SCENARIOS:
                         logging.info("Using map {} ...".format(vdist_map_eval))
                         new_classifier = nn.ModuleDict(
                             {
-                                key: ClassifierA(
+                                key: classifier_A(
                                     n_input= 2*n_latent,
                                     n_output=N_LABELS,
                                     do_batch_norm=False,

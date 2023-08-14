@@ -151,7 +151,7 @@ class encoder_B(nn.Module):
         )
 
 
-class encoder_BStudent(encoder_B):
+class encoder_B_student(encoder_B):
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
@@ -195,7 +195,7 @@ class encoder_BStudent(encoder_B):
         )
 
 
-class encoder_AStudent(nn.Module):
+class encoder_A_student(nn.Module):
     def __init__(
         self,
         n_input,
@@ -263,7 +263,7 @@ class encoder_AStudent(nn.Module):
             q_m=q_m, q_v=q_v, df=df_to_use, dist=st_dist, latent=latent, sum_last=False
         )
 
-class LinearEncoder(nn.Module):
+class linear_encoder(nn.Module):
     def __init__(self, n_input, n_output):
         super().__init__()
         self.mean_encoder = nn.Linear(n_input, n_output)
@@ -304,7 +304,7 @@ class LinearEncoder(nn.Module):
 
 
 # Decoder
-class DecoderA(nn.Module):
+class decoder_A(nn.Module):
     def __init__(self, n_input: int, n_output: int, n_hidden: int):
         super().__init__()
         self.decoder = FCLayersA(n_input=n_input, n_output=n_hidden, dropout_rate=0.0)
@@ -334,7 +334,7 @@ class DecoderA(nn.Module):
         return p_m, p_v.exp()
 
 
-class ClassifierA(nn.Module):
+class classifier_A(nn.Module):
     def __init__(self, n_input, n_output, dropout_rate=0.0, do_batch_norm=False):
         super().__init__()
         self.classifier = nn.Sequential(
@@ -373,7 +373,7 @@ class bernoulli_decoder_A(nn.Module):
         return means
 
 
-class EncoderH(nn.Module):
+class encoder_H(nn.Module):
     def __init__(
         self,
         n_in,
@@ -472,7 +472,7 @@ class EncoderIAF(nn.Module):
         self.n_latent = n_latent
         self.encoders = torch.nn.ModuleList()
         self.encoders.append(
-            EncoderH(
+            encoder_H(
                 n_in=n_in,
                 n_out=n_latent,
                 n_cat_list=n_cat_list,
@@ -488,7 +488,7 @@ class EncoderIAF(nn.Module):
         n_in = 2 * n_latent if do_h else n_latent
         for _ in range(t - 1):
             self.encoders.append(
-                EncoderH(
+                encoder_H(
                     n_in=n_in,
                     n_out=n_latent,
                     n_cat_list=None,
@@ -554,8 +554,8 @@ class EncoderIAF(nn.Module):
 if __name__ == "__main__":
     from torchsummary import summary
 
-    print('ClassifierA')
-    layer = ClassifierA(n_input=10, n_output=5, dropout_rate=0.1, do_batch_norm=False)
+    print('classifier_A')
+    layer = classifier_A(n_input=10, n_output=5, dropout_rate=0.1, do_batch_norm=False)
     summary(layer, (1,10))
 
     print('encoder_B')
@@ -566,8 +566,8 @@ if __name__ == "__main__":
     layer = encoder_A(n_input=15, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
     summary(layer, (1,15))
 
-    print('DecoderA')
-    layer = DecoderA(n_input=15, n_output=10, n_hidden=128)
+    print('decoder_A')
+    layer = decoder_A(n_input=15, n_output=10, n_hidden=128)
     summary(layer, (1,15))
 
     print('bernoulli_decoder_A')

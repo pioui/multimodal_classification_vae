@@ -6,8 +6,10 @@
 - [Project Description](#project-description)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Results and Analysis](#results-and-analysis)
+- [Roadmap](#roadmap)
 - [License](#license)
-
+- [Contact](#contact)
 ## Project Description
 
 This repository provides a framework for multimodal data classification using Variational Autoencoder (VAE). The goal is to classify multimodal remote sensing data and analyze uncertainty in the classification process. It is based on the work done by Pierre Boyeau in his repository decision-making-vaes.

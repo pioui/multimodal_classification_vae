@@ -57,32 +57,52 @@ python3 scripts/simu_vae.py -d <DATASET NAME>
 python3 scripts/simu_mvae.py -d <DATASET NAME>
 ```
 
-### Results and Analysis
+### Uncertainty
 
-Metrics, classification, and uncertainty maps for all the output/*.npy files
+To calculate uncertainty please use [this repository](https://github.com/pioui/uncertainty).
+Save the calculated uncertainties for each classification senario in the following structure:
+
 ```
-python3 scripts/outputs_analysis.py
-```
-Generate plots to compare data distributions for the trento and houston datasets
-```
-python3 scripts/data_distributions.py
-```
-The output files, including .npy, .png, logs, and uncertainty images, are saved in the following directory structure:
-```
-uncertainty
+mcvae
 │   
 └───outputs
     │   
     └───trento
     │   │   trento.logs
-    │   │   trento.npy
+    │   │   trento_classification.npy
+    │   └───uncertainties
+    │       │   
+    |       └── trento_uncertainty.npy
+```
+
+
+
+### Results and Analysis
+
+Metrics, classification, and uncertainty maps for all the output/*.npy files
+```
+python3 scripts/results_analysis.py
+```
+Generate plots to compare data distributions for the trento and houston datasets
+```
+python3 scripts/data_distributions_analysis.py
+```
+The output files, including .npy, .png, logs, and uncertainty images, are saved in the following directory structure:
+```
+mcvae
+│   
+└───outputs
+    │   
+    └───trento
+    │   │   trento.logs
+    │   │   trento_classification.npy
     │   └───images
     │       │   
     |       └── trento.png
     |
     └───houston
     │   │   houston.logs
-    │   │   houston.npy
+    │   │   houston_classification.npy
     │   └───images
     │       │   
     |       └── houston.png

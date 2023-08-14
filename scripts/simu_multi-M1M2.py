@@ -22,11 +22,11 @@ import argparse
 from mcvae.architectures import MVAE_M1M2
 from mcvae.inference import MVAE_M1M2_Trainer
 from mcvae.architectures.regular_modules import (
-    EncoderA,
-    EncoderB,
+    encoder_A,
+    encoder_B,
     ClassifierA,
-    EncoderAStudent,
-    EncoderBStudent,
+    encoder_AStudent,
+    encoder_BStudent,
 )
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -49,8 +49,8 @@ if dataset=="trento":
     )
 elif dataset=="trento-patch":
     from trento_multimodal_patch_config import *
-    from mcvae.dataset import trentoMultimodalPatchDataset
-    DATASET = trentoMultimodalPatchDataset(
+    from mcvae.dataset import trento_multimodal_patch_dataset
+    DATASET = trento_multimodal_patch_dataset(
     data_dir = data_dir,
     patch_size = PATCH_SIZE,
     )
@@ -88,9 +88,9 @@ DEFAULT_MAP = dict(
     default="gaussian",
 )
 
-Z1_MAP = dict(gaussian=EncoderB, student=EncoderBStudent,)
-Z2_MAP = dict(gaussian=EncoderB, student=EncoderBStudent,)
-U_MAP = dict(gaussian=EncoderA, student=EncoderAStudent,)
+Z1_MAP = dict(gaussian=encoder_B, student=encoder_BStudent,)
+Z2_MAP = dict(gaussian=encoder_B, student=encoder_BStudent,)
+U_MAP = dict(gaussian=encoder_A, student=encoder_AStudent,)
 
 FILENAME = f"{outputs_dir}/{PROJECT_NAME}.pkl"
 MDL_DIR = f"{outputs_dir}/models"
@@ -318,7 +318,7 @@ for scenario in SCENARIOS:
 
                         new_encoder_u= nn.ModuleDict(
                             {
-                                # key: EncoderA(
+                                # key: encoder_A(
                                 key: U_MAP[vdist_map_eval[key]](
                                     n_input=2*n_latent + N_LABELS,
                                     n_output=n_latent,

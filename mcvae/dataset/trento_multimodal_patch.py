@@ -16,7 +16,7 @@ random.seed(42)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-class trentoMultimodalPatchDataset(Dataset):
+class trento_multimodal_patch_dataset(Dataset):
     def __init__(
         self,
         data_dir,
@@ -87,7 +87,7 @@ class trentoMultimodalPatchDataset(Dataset):
 
 if __name__ == "__main__":
 
-    DATASET = trentoMultimodalPatchDataset(
+    DATASET = trento_multimodal_patch_dataset(
         data_dir = "/home/pigi/data/trento/",
     )
     x1,x2,y = DATASET.train_dataset.tensors # 1819, -1 to 5

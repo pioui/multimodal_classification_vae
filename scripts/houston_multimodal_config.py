@@ -6,14 +6,14 @@ Configuation file for houston dataset with two seperate modalities input
 import numpy as np
 import logging
 import os
-from mcvae.dataset import houstonDataset
+from mcvae.dataset import houston_dataset
 import torch.nn as nn
 from mcvae.architectures.encoders import (
-    EncoderB0,
-    EncoderB1,
-    EncoderB2,
-    EncoderB3,
-    EncoderB4,
+    encoder_B0,
+    encoder_B1,
+    encoder_B2,
+    encoder_B3,
+    encoder_B4,
 )
 
 data_dir = "/home/pigi/data/houston/"
@@ -131,9 +131,9 @@ SCENARIOS = [
         reparam_latent=True,
         counts=None,
         n_latent=30,
-        model_name="multi-M1M2_EncoderB0_L30",
+        model_name="multi-M1M2_encoder_B0_L30",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB0( 
+            {"default": encoder_B0( 
                 n_input=N1_INPUT,
                 n_output=30,
                 n_hidden=128,
@@ -142,7 +142,7 @@ SCENARIOS = [
             )}
         ),
         encoder_z2=nn.ModuleDict(
-            {"default": EncoderB0( 
+            {"default": encoder_B0( 
                 n_input=N2_INPUT,
                 n_output=30,
                 n_hidden=128,
@@ -158,9 +158,9 @@ SCENARIOS = [
         reparam_latent=True,
         counts=None,
         n_latent=30,
-        model_name="multi-M1M2_EncoderB2_L30",
+        model_name="multi-M1M2_encoder_B2_L30",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB2( 
+            {"default": encoder_B2( 
                 n_input=N1_INPUT,
                 n_output=30,
                 n_hidden=256,
@@ -169,7 +169,7 @@ SCENARIOS = [
             )}
         ),
         encoder_z2=nn.ModuleDict(
-            {"default": EncoderB2( 
+            {"default": encoder_B2( 
                 n_input=N2_INPUT,
                 n_output=30,
                 n_hidden=256,
@@ -185,9 +185,9 @@ SCENARIOS = [
         reparam_latent=True,
         counts=None,
         n_latent=20,
-        model_name="multi-M1M2_EncoderB4_L20",
+        model_name="multi-M1M2_encoder_B4_L20",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB4( 
+            {"default": encoder_B4( 
                 n_input=N1_INPUT,
                 n_output=20,
                 n_hidden=512,
@@ -196,7 +196,7 @@ SCENARIOS = [
             )}
         ),
         encoder_z2=nn.ModuleDict(
-            {"default": EncoderB4( 
+            {"default": encoder_B4( 
                 n_input=N2_INPUT,
                 n_output=20,
                 n_hidden=512,

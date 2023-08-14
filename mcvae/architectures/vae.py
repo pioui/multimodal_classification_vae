@@ -11,13 +11,13 @@ from torch.distributions import (
 )
 
 from mcvae.architectures.regular_modules import (
-    BernoulliDecoderA,
+    bernoulli_decoder_A,
     ClassifierA,
     DecoderA,
-    EncoderA,
-    EncoderAStudent,
-    EncoderB,
-    EncoderBStudent,
+    encoder_A,
+    encoder_AStudent,
+    encoder_B,
+    encoder_BStudent,
 )
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -71,7 +71,7 @@ class VAE_M1M2(nn.Module):
         )
 
         if encoder_z1 is None:
-            z1_map = dict(gaussian=EncoderB, student=EncoderBStudent,)
+            z1_map = dict(gaussian=encoder_B, student=encoder_BStudent,)
             self.encoder_z1 = nn.ModuleDict(
                 {
                     key: z1_map[vdist_map[key]](
@@ -88,7 +88,7 @@ class VAE_M1M2(nn.Module):
             self.encoder_z1 = encoder_z1
 
         if encoder_z2_z1 is None:
-            z2_map = dict(gaussian=EncoderA, student=EncoderAStudent,)
+            z2_map = dict(gaussian=encoder_A, student=encoder_AStudent,)
             self.encoder_z2_z1 = nn.ModuleDict(
                 {
                     key: z2_map[vdist_map[key]](
@@ -109,7 +109,7 @@ class VAE_M1M2(nn.Module):
         )
 
         if x_decoder is None:
-            self.x_decoder = BernoulliDecoderA(
+            self.x_decoder = bernoulli_decoder_A(
                 n_input=n_latent, n_output=n_input, do_batch_norm=do_batch_norm
             )
         else:

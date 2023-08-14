@@ -44,11 +44,11 @@ for project_name in os.listdir('outputs/'):
         continue
 
     if dataset == "trento":
-        from mcvae.dataset import trentoDataset
-        DATASET = trentoDataset(data_dir=data_dir)
+        from mcvae.dataset import trento_dataset
+        DATASET = trento_dataset(data_dir=data_dir)
     elif dataset == "houston":
-        from mcvae.dataset import houstonDataset
-        DATASET = houstonDataset(data_dir=data_dir, samples_per_class=SAMPLES_PER_CLASS)
+        from mcvae.dataset import houston_dataset
+        DATASET = houston_dataset(data_dir=data_dir, samples_per_class=SAMPLES_PER_CLASS)
 
     X_train,y_train = DATASET.train_dataset_labelled.tensors 
     X_test,y_test = DATASET.test_dataset_labelled.tensors 

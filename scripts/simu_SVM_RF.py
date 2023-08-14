@@ -30,12 +30,12 @@ dataset = args.dataset
 
 if dataset == "trento":
     from trento_config import *
-    from mcvae.dataset import trentoDataset
-    DATASET = trentoDataset(data_dir=data_dir)
+    from mcvae.dataset import trento_dataset
+    DATASET = trento_dataset(data_dir=data_dir)
 elif dataset == "houston":
     from houston_config import *
-    from mcvae.dataset import houstonDataset
-    DATASET = houstonDataset(data_dir=data_dir, samples_per_class=SAMPLES_PER_CLASS)
+    from mcvae.dataset import houston_dataset
+    DATASET = houston_dataset(data_dir=data_dir, samples_per_class=SAMPLES_PER_CLASS)
 else:
     print("Dataset name is not valid. Please try one of the following: trento, houston, trento-patch, houston-patch")
     exit()

@@ -6,7 +6,7 @@ import torch.nn as nn
 
 import torch.distributions as db
 
-from mcvae.architectures.distributions import EllipticalStudent
+from mcvae.architectures.distributions import elliptical_student
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -52,7 +52,7 @@ class FCLayersA(nn.Module):
         return res
 
 
-class EncoderA(nn.Module):
+class encoder_A(nn.Module):
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
@@ -91,7 +91,7 @@ class EncoderA(nn.Module):
         )
 
 
-class EncoderB(nn.Module):
+class encoder_B(nn.Module):
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
@@ -151,7 +151,7 @@ class EncoderB(nn.Module):
         )
 
 
-class EncoderBStudent(EncoderB):
+class encoder_BStudent(encoder_B):
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
@@ -180,7 +180,7 @@ class EncoderBStudent(EncoderB):
         df = 1.0 + self.df_fn(q).exp()
         df = torch.clamp(df, max=1e5)
 
-        st_dist = EllipticalStudent(df=df, loc=q_m, scale=torch.sqrt(q_v))
+        st_dist = elliptical_student(df=df, loc=q_m, scale=torch.sqrt(q_v))
 
         if n_samples == 1 and squeeze:
             sample_shape = []
@@ -195,7 +195,7 @@ class EncoderBStudent(EncoderB):
         )
 
 
-class EncoderAStudent(nn.Module):
+class encoder_AStudent(nn.Module):
     def __init__(
         self,
         n_input,
@@ -251,7 +251,7 @@ class EncoderAStudent(nn.Module):
         q_v = q_v.exp()
 
         df_to_use = self.df(q)
-        st_dist = EllipticalStudent(df=df_to_use, loc=q_m, scale=torch.sqrt(q_v))
+        st_dist = elliptical_student(df=df_to_use, loc=q_m, scale=torch.sqrt(q_v))
         if n_samples == 1 and squeeze:
             sample_shape = []
         else:
@@ -354,7 +354,7 @@ class ClassifierA(nn.Module):
         return probas    
 
 
-class BernoulliDecoderA(nn.Module):
+class bernoulli_decoder_A(nn.Module):
     def __init__(
         self,
         n_input: int,
@@ -558,18 +558,18 @@ if __name__ == "__main__":
     layer = ClassifierA(n_input=10, n_output=5, dropout_rate=0.1, do_batch_norm=False)
     summary(layer, (1,10))
 
-    print('EncoderB')
-    layer = EncoderB(n_input=784, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    print('encoder_B')
+    layer = encoder_B(n_input=784, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
     summary(layer, (1,784))
 
-    print('EncoderA')
-    layer = EncoderA(n_input=15, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    print('encoder_A')
+    layer = encoder_A(n_input=15, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
     summary(layer, (1,15))
 
     print('DecoderA')
     layer = DecoderA(n_input=15, n_output=10, n_hidden=128)
     summary(layer, (1,15))
 
-    print('BernoulliDecoderA')
-    layer = BernoulliDecoderA(n_input=10, n_output=784, dropout_rate=0.1, do_batch_norm=False)
+    print('bernoulli_decoder_A')
+    layer = bernoulli_decoder_A(n_input=10, n_output=784, dropout_rate=0.1, do_batch_norm=False)
     summary(layer, (1,10))

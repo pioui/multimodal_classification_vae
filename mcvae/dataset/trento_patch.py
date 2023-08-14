@@ -16,7 +16,7 @@ random.seed(42)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-class trentoPatchDataset(Dataset):
+class trento_patch_dataset(Dataset):
     def __init__(
         self,
         data_dir,
@@ -91,7 +91,7 @@ class trentoPatchDataset(Dataset):
 
 if __name__ == "__main__":
 
-    DATASET = trentoPatchDataset(
+    DATASET = trento_patch_dataset(
         data_dir = "/home/pigi/data/trento/",
     )
     x,y = DATASET.train_dataset.tensors # 819

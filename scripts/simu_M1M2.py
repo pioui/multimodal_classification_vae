@@ -21,11 +21,11 @@ import argparse
 from mcvae.architectures import VAE_M1M2
 from mcvae.inference import VAE_M1M2_Trainer
 from mcvae.architectures.regular_modules import (
-    EncoderA,
-    EncoderB,
-    ClassifierA,
-    EncoderAStudent,
-    EncoderBStudent,
+    encoder_A,
+    encoder_B,
+    classifier_A,
+    encoder_A_student,
+    encoder_B_student,
 )
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -42,21 +42,21 @@ dataset = args.dataset
 
 if dataset=="trento":
     from trento_config import *
-    from mcvae.dataset import trentoDataset
-    DATASET = trentoDataset(
+    from mcvae.dataset import trento_dataset
+    DATASET = trento_dataset(
         data_dir = data_dir,
     )
 elif dataset=="trento-patch":
     from trento_patch_config import *
-    from mcvae.dataset import trentoPatchDataset
-    DATASET = trentoPatchDataset(
+    from mcvae.dataset import trento_patch_dataset
+    DATASET = trento_patch_dataset(
         data_dir = data_dir,
         patch_size=PATCH_SIZE,
     )
 elif dataset=="houston":
     from houston_config import *
-    from mcvae.dataset import houstonDataset
-    DATASET = houstonDataset(
+    from mcvae.dataset import houston_dataset
+    DATASET = houston_dataset(
         data_dir = data_dir,
         samples_per_class=SAMPLES_PER_CLASS,
     )
@@ -87,8 +87,8 @@ DEFAULT_MAP = dict(
     default="gaussian",
 )
 
-Z1_MAP = dict(gaussian=EncoderB, student=EncoderBStudent,)
-Z2_MAP = dict(gaussian=EncoderA, student=EncoderAStudent,)
+Z1_MAP = dict(gaussian=encoder_B, student=encoder_B_student,)
+Z2_MAP = dict(gaussian=encoder_A, student=encoder_A_student,)
 
 
 FILENAME = f"{outputs_dir}/{PROJECT_NAME}.pkl"
@@ -297,7 +297,7 @@ for scenario in SCENARIOS:
                         logger.info("Using map {} ...".format(vdist_map_eval))
                         new_classifier = nn.ModuleDict(
                             {
-                                key: ClassifierA(
+                                key: classifier_A(
                                     n_latent,
                                     n_output=N_LABELS,
                                     do_batch_norm=False,
@@ -310,7 +310,7 @@ for scenario in SCENARIOS:
 
                         new_encoder_z2_z1 = nn.ModuleDict(
                             {
-                                # key: EncoderA(
+                                # key: encoder_A(
                                 key: Z2_MAP[vdist_map_eval[key]](
                                     n_input=n_latent + N_LABELS,
                                     n_output=n_latent,

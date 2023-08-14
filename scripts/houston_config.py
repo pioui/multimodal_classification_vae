@@ -8,14 +8,14 @@ and analyze the Houston dataset.
 import numpy as np
 import logging
 import os
-from mcvae.dataset import houstonDataset
+from mcvae.dataset import houston_dataset
 import torch.nn as nn
 from mcvae.architectures.encoders import (
-    EncoderB0,
-    EncoderB1,
-    EncoderB2,
-    EncoderB3,
-    EncoderB4,
+    encoder_B0,
+    encoder_B1,
+    encoder_B2,
+    encoder_B3,
+    encoder_B4,
 )
 
 data_dir = "/home/pigi/data/houston/"
@@ -157,10 +157,10 @@ SCENARIOS = [  # WAKE updates
         loss_wvar="ELBO",
         reparam_latent=True,
         counts=None,
-        model_name="M1M2_EncoderB0_L10",
+        model_name="M1M2_encoder_B0_L10",
         n_latent = 10,
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB0( 
+            {"default": encoder_B0( 
                 n_input=N_INPUT,
                 n_output=10,
                 n_hidden=128,
@@ -175,10 +175,10 @@ SCENARIOS = [  # WAKE updates
         loss_wvar="ELBO",
         reparam_latent=True,
         counts=None,
-        model_name="M1M2_EncoderB0_L20",
+        model_name="M1M2_encoder_B0_L20",
         n_latent = 20,
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB0( 
+            {"default": encoder_B0( 
                 n_input=N_INPUT,
                 n_output=20,
                 n_hidden=128,
@@ -194,9 +194,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent = 30,
-        model_name="M1M2_EncoderB0_L30",
+        model_name="M1M2_encoder_B0_L30",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB0( 
+            {"default": encoder_B0( 
                 n_input=N_INPUT,
                 n_output=30,
                 n_hidden=128,
@@ -212,9 +212,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent = 40,
-        model_name="M1M2_EncoderB0_L40",
+        model_name="M1M2_encoder_B0_L40",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB0( 
+            {"default": encoder_B0( 
                 n_input=N_INPUT,
                 n_output=40,
                 n_hidden=128,
@@ -230,9 +230,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent =10,
-        model_name="M1M2_EncoderB1_L10",
+        model_name="M1M2_encoder_B1_L10",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB1( 
+            {"default": encoder_B1( 
                 n_input=N_INPUT,
                 n_output=10,
                 n_hidden=128,
@@ -248,9 +248,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=20,
-        model_name="M1M2_EncoderB1_L20",
+        model_name="M1M2_encoder_B1_L20",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB1( 
+            {"default": encoder_B1( 
                 n_input=N_INPUT,
                 n_output=20,
                 n_hidden=128,
@@ -266,9 +266,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=30,
-        model_name="M1M2_EncoderB1_L30",
+        model_name="M1M2_encoder_B1_L30",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB1( 
+            {"default": encoder_B1( 
                 n_input=N_INPUT,
                 n_output=30,
                 n_hidden=128,
@@ -284,9 +284,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=40,
-        model_name="M1M2_EncoderB1_L40",
+        model_name="M1M2_encoder_B1_L40",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB1( 
+            {"default": encoder_B1( 
                 n_input=N_INPUT,
                 n_output=40,
                 n_hidden=128,
@@ -302,9 +302,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=10,
-        model_name="M1M2_EncoderB2_L10",
+        model_name="M1M2_encoder_B2_L10",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB2( 
+            {"default": encoder_B2( 
                 n_input=N_INPUT,
                 n_output=10,
                 n_hidden=256,
@@ -321,9 +321,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=20,
-        model_name="M1M2_EncoderB2_L20",
+        model_name="M1M2_encoder_B2_L20",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB2( 
+            {"default": encoder_B2( 
                 n_input=N_INPUT,
                 n_output=20,
                 n_hidden=256,
@@ -339,9 +339,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=30,
-        model_name="M1M2_EncoderB2_L30",
+        model_name="M1M2_encoder_B2_L30",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB2( 
+            {"default": encoder_B2( 
                 n_input=N_INPUT,
                 n_output=30,
                 n_hidden=256,
@@ -358,9 +358,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=40,
-        model_name="M1M2_EncoderB2_L40",
+        model_name="M1M2_encoder_B2_L40",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB2( 
+            {"default": encoder_B2( 
                 n_input=N_INPUT,
                 n_output=40,
                 n_hidden=256,
@@ -377,9 +377,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=10,
-        model_name="M1M2_EncoderB3_L10",
+        model_name="M1M2_encoder_B3_L10",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB3( 
+            {"default": encoder_B3( 
                 n_input=N_INPUT,
                 n_output=10,
                 n_hidden=128,
@@ -396,9 +396,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=20,
-        model_name="M1M2_EncoderB3_L20",
+        model_name="M1M2_encoder_B3_L20",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB3( 
+            {"default": encoder_B3( 
                 n_input=N_INPUT,
                 n_output=20,
                 n_hidden=128,
@@ -415,9 +415,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=30,
-        model_name="M1M2_EncoderB3_L30",
+        model_name="M1M2_encoder_B3_L30",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB3( 
+            {"default": encoder_B3( 
                 n_input=N_INPUT,
                 n_output=30,
                 n_hidden=128,
@@ -434,9 +434,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=40,
-        model_name="M1M2_EncoderB3_L40",
+        model_name="M1M2_encoder_B3_L40",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB3( 
+            {"default": encoder_B3( 
                 n_input=N_INPUT,
                 n_output=40,
                 n_hidden=128,
@@ -453,9 +453,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=10,
-        model_name="M1M2_EncoderB4_L10",
+        model_name="M1M2_encoder_B4_L10",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB4( 
+            {"default": encoder_B4( 
                 n_input=N_INPUT,
                 n_output=10,
                 n_hidden=512,
@@ -472,9 +472,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=20,
-        model_name="M1M2_EncoderB4_L20",
+        model_name="M1M2_encoder_B4_L20",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB4( 
+            {"default": encoder_B4( 
                 n_input=N_INPUT,
                 n_output=20,
                 n_hidden=512,
@@ -491,9 +491,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=30,
-        model_name="M1M2_EncoderB4_L30",
+        model_name="M1M2_encoder_B4_L30",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB4( 
+            {"default": encoder_B4( 
                 n_input=N_INPUT,
                 n_output=30,
                 n_hidden=512,
@@ -510,9 +510,9 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent=40,
-        model_name="M1M2_EncoderB4_L40",
+        model_name="M1M2_encoder_B4_L40",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB4( 
+            {"default": encoder_B4( 
                 n_input=N_INPUT,
                 n_output=40,
                 n_hidden=512,

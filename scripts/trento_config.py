@@ -8,14 +8,14 @@ and analyze the Trento dataset.
 import numpy as np
 import logging
 import os
-from mcvae.dataset import trentoDataset
+from mcvae.dataset import trento_dataset
 import torch.nn as nn
 from mcvae.architectures.encoders import (
-    EncoderB0,
-    EncoderB1,
-    EncoderB2,
-    EncoderB3,
-    EncoderB4
+    encoder_B0,
+    encoder_B1,
+    encoder_B2,
+    encoder_B3,
+    encoder_B4
 )
 
 data_dir = "/home/pigi/data/trento/"
@@ -52,10 +52,10 @@ SCENARIOS = [
     #     loss_wvar="ELBO",
     #     reparam_latent=True,
     #     counts=None,
-    #     model_name="M1M2_EncoderB0_L05",
+    #     model_name="M1M2_encoder_B0_L05",
     #     n_latent = 5,
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB0( 
+    #         {"default": encoder_B0( 
     #             n_input=N_INPUT,
     #             n_output=5,
     #             n_hidden=128,
@@ -70,10 +70,10 @@ SCENARIOS = [
     #     loss_wvar="ELBO",
     #     reparam_latent=True,
     #     counts=None,
-    #     model_name="M1M2_EncoderB0_L10",
+    #     model_name="M1M2_encoder_B0_L10",
     #     n_latent = 10,
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB0( 
+    #         {"default": encoder_B0( 
     #             n_input=N_INPUT,
     #             n_output=10,
     #             n_hidden=128,
@@ -89,9 +89,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent = 15,
-    #     model_name="M1M2_EncoderB0_L15",
+    #     model_name="M1M2_encoder_B0_L15",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB0( 
+    #         {"default": encoder_B0( 
     #             n_input=N_INPUT,
     #             n_output=15,
     #             n_hidden=128,
@@ -107,9 +107,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent = 20,
-    #     model_name="M1M2_EncoderB0_L20",
+    #     model_name="M1M2_encoder_B0_L20",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB0( 
+    #         {"default": encoder_B0( 
     #             n_input=N_INPUT,
     #             n_output=20,
     #             n_hidden=128,
@@ -125,9 +125,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent =5,
-    #     model_name="M1M2_EncoderB1_L05",
+    #     model_name="M1M2_encoder_B1_L05",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB1( 
+    #         {"default": encoder_B1( 
     #             n_input=N_INPUT,
     #             n_output=5,
     #             n_hidden=128,
@@ -143,9 +143,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent=10,
-    #     model_name="M1M2_EncoderB1_L10",
+    #     model_name="M1M2_encoder_B1_L10",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB1( 
+    #         {"default": encoder_B1( 
     #             n_input=N_INPUT,
     #             n_output=10,
     #             n_hidden=128,
@@ -161,9 +161,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent=15,
-    #     model_name="M1M2_EncoderB1_L15",
+    #     model_name="M1M2_encoder_B1_L15",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB1( 
+    #         {"default": encoder_B1( 
     #             n_input=N_INPUT,
     #             n_output=15,
     #             n_hidden=128,
@@ -179,9 +179,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent=20,
-    #     model_name="M1M2_EncoderB1_L20",
+    #     model_name="M1M2_encoder_B1_L20",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB1( 
+    #         {"default": encoder_B1( 
     #             n_input=N_INPUT,
     #             n_output=20,
     #             n_hidden=128,
@@ -197,9 +197,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent=5,
-    #     model_name="M1M2_EncoderB2_L05",
+    #     model_name="M1M2_encoder_B2_L05",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB2( 
+    #         {"default": encoder_B2( 
     #             n_input=N_INPUT,
     #             n_output=5,
     #             n_hidden=256,
@@ -216,9 +216,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent=10,
-    #     model_name="M1M2_EncoderB2_L10",
+    #     model_name="M1M2_encoder_B2_L10",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB2( 
+    #         {"default": encoder_B2( 
     #             n_input=N_INPUT,
     #             n_output=10,
     #             n_hidden=256,
@@ -234,9 +234,9 @@ SCENARIOS = [
         reparam_latent=True,
         counts=None,
         n_latent=15,
-        model_name="M1M2_EncoderB2_L15",
+        model_name="M1M2_encoder_B2_L15",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB2( 
+            {"default": encoder_B2( 
                 n_input=N_INPUT,
                 n_output=15,
                 n_hidden=256,
@@ -253,9 +253,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent=20,
-    #     model_name="M1M2_EncoderB2_L20",
+    #     model_name="M1M2_encoder_B2_L20",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB2( 
+    #         {"default": encoder_B2( 
     #             n_input=N_INPUT,
     #             n_output=20,
     #             n_hidden=256,
@@ -272,9 +272,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent=5,
-    #     model_name="M1M2_EncoderB3_L05",
+    #     model_name="M1M2_encoder_B3_L05",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB3( 
+    #         {"default": encoder_B3( 
     #             n_input=N_INPUT,
     #             n_output=5,
     #             n_hidden=128,
@@ -290,9 +290,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent=10,
-    #     model_name="M1M2_EncoderB3_L10",
+    #     model_name="M1M2_encoder_B3_L10",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB3( 
+    #         {"default": encoder_B3( 
     #             n_input=N_INPUT,
     #             n_output=10,
     #             n_hidden=128,
@@ -308,9 +308,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent=15,
-    #     model_name="M1M2_EncoderB3_L15",
+    #     model_name="M1M2_encoder_B3_L15",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB3( 
+    #         {"default": encoder_B3( 
     #             n_input=N_INPUT,
     #             n_output=15,
     #             n_hidden=128,
@@ -326,9 +326,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent=20,
-    #     model_name="M1M2_EncoderB3_L20",
+    #     model_name="M1M2_encoder_B3_L20",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB3( 
+    #         {"default": encoder_B3( 
     #             n_input=N_INPUT,
     #             n_output=20,
     #             n_hidden=128,
@@ -344,9 +344,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent=5,
-    #     model_name="M1M2_EncoderB4_L05",
+    #     model_name="M1M2_encoder_B4_L05",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB4( 
+    #         {"default": encoder_B4( 
     #             n_input=N_INPUT,
     #             n_output=5,
     #             n_hidden=512,
@@ -362,9 +362,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent=10,
-    #     model_name="M1M2_EncoderB4_L10",
+    #     model_name="M1M2_encoder_B4_L10",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB4( 
+    #         {"default": encoder_B4( 
     #             n_input=N_INPUT,
     #             n_output=10,
     #             n_hidden=512,
@@ -380,9 +380,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent=15,
-    #     model_name="M1M2_EncoderB4_L15",
+    #     model_name="M1M2_encoder_B4_L15",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB4( 
+    #         {"default": encoder_B4( 
     #             n_input=N_INPUT,
     #             n_output=15,
     #             n_hidden=512,
@@ -398,9 +398,9 @@ SCENARIOS = [
     #     reparam_latent=True,
     #     counts=None,
     #     n_latent=20,
-    #     model_name="M1M2_EncoderB4_L20",
+    #     model_name="M1M2_encoder_B4_L20",
     #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB4( 
+    #         {"default": encoder_B4( 
     #             n_input=N_INPUT,
     #             n_output=20,
     #             n_hidden=512,

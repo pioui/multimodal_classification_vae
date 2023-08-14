@@ -1,18 +1,18 @@
 # Multimodal Data Classification using Variational Autoencoder 
 
-This repository provides a framework for multimodal data classification using Variational Autoencoder (VAE). The goal is to classify multimodal data and analyze uncertainty in the classification process. It is based on the work done by Pierre Boyeau in his repository decision-making-vaes.
-
 
 ## Table of Contents
 
 - [Project Description](#project-description)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Results and Analysis](#results-and-analysis)
+- [Roadmap](#roadmap)
 - [License](#license)
-
+- [Contact](#contact)
 ## Project Description
 
-This repository provides a framework for multimodal data classification using Variational Autoencoder (VAE). The goal is to classify multimodal data and analyze uncertainty in the classification process. It is based on the work done by Pierre Boyeau in his repository decision-making-vaes.
+This repository provides a framework for multimodal data classification using Variational Autoencoder (VAE). The goal is to classify multimodal remote sensing data and analyze uncertainty in the classification process. It is based on the work done by Pierre Boyeau in his repository decision-making-vaes.
 
 ## Installation
 Create conda envirioment
@@ -20,28 +20,33 @@ Create conda envirioment
 conda env create -f environment.yml
 conda activate mcvae
 ```
-Install
-```
-python3 setup.py build install
-```
-Install - editable version
-```
-pip install -e .
-```
 
+Build 
+```
+python3 -m build 
+```
 ## Usage
+
+### Datasets 
+
+This repository is made to run on the following datasets:
+
+1. <ins> Trento dataset </ins>
+2. <ins> Houston dataset </ins>
+
+The repository is designed to run on these specific datasets. However, it is possible to adapt the code to work with other datasets. To do so, you can create a new dataset loading file under ```mcvae/mcvae/datasets```, create a configuration file under ```mcvae/scripts/```. This will allow you to use the code with the new dataset.
+
 ### Configuration
 Edit the data directories and output paths in the configuration files:
+
 ```
 mcvae
 │   
 └───scripts
     │   trento_config.py
     │   houston_config.py
-    │   simu_M1M2.py  
-    |   simu_multi-M1M2.py  
+    │  
 ```
-
 
 ### Classification
 
@@ -59,40 +64,73 @@ python3 scripts/simu_vae.py -d <DATASET NAME>
 python3 scripts/simu_mvae.py -d <DATASET NAME>
 ```
 
-### Results and Analysis
+### Uncertainty
 
-Metrics, classification, and uncertainty maps for all the output/*.npy files
+To calculate uncertainty please use [this repository](https://github.com/pioui/uncertainty).
+Save the calculated uncertainties for each classification senario in the following structure:
+
 ```
-python3 scripts/outputs_analysis.py
-```
-Generate plots to compare data distributions for the trento and houston datasets
-```
-python3 scripts/data_distributions.py
-```
-The output files, including .npy, .png, logs, and uncertainty images, are saved in the following directory structure:
-```
-uncertainty
+mcvae
 │   
 └───outputs
     │   
     └───trento
     │   │   trento.logs
-    │   │   trento.npy
+    │   │   trento_classification.npy
+    │   └───uncertainties
+    │       │   
+    |       └── trento_uncertainty.npy
+```
+
+
+
+## Results and Analysis
+
+Metrics, classification, and uncertainty maps for all the output/*.npy files
+```
+python3 scripts/results_analysis.py
+```
+Generate plots to compare data distributions for the trento and houston datasets
+```
+python3 scripts/data_distributions_analysis.py
+```
+The output files, including .npy, .png, logs, and uncertainty images, are saved in the following directory structure:
+```
+mcvae
+│   
+└───outputs
+    │   
+    └───trento
+    │   │   trento.logs
+    │   │   trento_classification.npy
     │   └───images
     │       │   
     |       └── trento.png
     |
     └───houston
     │   │   houston.logs
-    │   │   houston.npy
+    │   │   houston_classification.npy
     │   └───images
     │       │   
     |       └── houston.png
 ```
 
+## Roadmap
+- [x] Convert architecture to RS multimodal data
+- [x] Logging
+- [x] Experiment on different encoders
+- [x] Experimnt on two datasets (trento and houston)
+- [x] Create Multi-M1+M2 model
+- [x] Results analysis
+- [x] Packaging
+- [ ] Documentation
+- [ ] Testing
+- [ ] Add delight to the experience when all tasks are complete :tada:
+
 ## License
 
 This project is licensed under the MIT License.
-## To dos:
- - Logging and documentation
- - Detailed project description
+
+## Contact
+
+Pigi Lozou - [piyilozou@gmail.com](mailto:piyilozou@gmail.com)

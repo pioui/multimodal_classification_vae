@@ -8,15 +8,15 @@ and analyze the Houston dataset.
 import numpy as np
 import logging
 import os
-from mcvae.dataset import trentoDataset
+from mcvae.dataset import trento_dataset
 import torch.nn as nn
 from mcvae.architectures.encoders import (
-    EncoderB5,
-    BernoulliDecoderA5,
-    EncoderB6,
-    BernoulliDecoderA6,
-    EncoderB8,
-    BernoulliDecoderA8
+    encoder_B5,
+    bernoulli_decoder_A5,
+    encoder_B6,
+    bernoulli_decoder_A6,
+    encoder_B8,
+    bernoulli_decoder_A8
 )
 
 data_dir = "/home/pigi/data/trento/"
@@ -54,10 +54,10 @@ SCENARIOS = [
         reparam_latent=True,
         counts=None,
         n_latent = 5,
-        model_name="M1M2_EncoderB0_L05",
+        model_name="M1M2_encoder_B0_L05",
         encoder_z1=nn.ModuleDict(
             {
-                "default": EncoderB5( 
+                "default": encoder_B5( 
                 n_input=N_INPUT,
                 n_output=5,
                 n_hidden=128,
@@ -65,7 +65,7 @@ SCENARIOS = [
                 do_batch_norm=False,
             )}
         ),
-        x_decoder=BernoulliDecoderA5( 
+        x_decoder=bernoulli_decoder_A5( 
                 n_input=5,
                 n_output=N_INPUT,
                 dropout_rate=0,
@@ -79,10 +79,10 @@ SCENARIOS = [
         reparam_latent=True,
         counts=None,
         n_latent = 15,
-        model_name="M1M2_EncoderB6_L15",
+        model_name="M1M2_encoder_B6_L15",
         encoder_z1=nn.ModuleDict(
             {
-                "default": EncoderB6( 
+                "default": encoder_B6( 
                 n_input=N_INPUT,
                 n_output=15,
                 n_hidden=128,
@@ -90,7 +90,7 @@ SCENARIOS = [
                 do_batch_norm=False,
             )}
         ),
-        x_decoder=BernoulliDecoderA6( 
+        x_decoder=bernoulli_decoder_A6( 
                 n_input=15,
                 n_output=N_INPUT,
                 dropout_rate=0,
@@ -104,10 +104,10 @@ SCENARIOS = [
         reparam_latent=True,
         counts=None,
         n_latent = 15,
-        model_name="M1M2_EncoderB6_L15",
+        model_name="M1M2_encoder_B6_L15",
         encoder_z1=nn.ModuleDict(
             {
-                "default": EncoderB8( 
+                "default": encoder_B8( 
                 n_input=N_INPUT,
                 n_output=15,
                 n_hidden=128,
@@ -115,7 +115,7 @@ SCENARIOS = [
                 do_batch_norm=False,
             )}
         ),
-        x_decoder=BernoulliDecoderA8( 
+        x_decoder=bernoulli_decoder_A8( 
                 n_input=15,
                 n_output=N_INPUT,
                 dropout_rate=0,

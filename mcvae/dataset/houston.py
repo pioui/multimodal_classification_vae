@@ -25,7 +25,7 @@ def select_random_elements(tensor, num_elements):
     
     return selected_elements
 
-class houstonDataset(Dataset):
+class houston_dataset(Dataset):
     def __init__(
         self,
         data_dir,
@@ -90,7 +90,7 @@ class houstonDataset(Dataset):
 
 if __name__ == "__main__":
 
-    DATASET = houstonDataset(
+    DATASET = houston_dataset(
         data_dir = "/home/pigi/data/houston/",
     )
 

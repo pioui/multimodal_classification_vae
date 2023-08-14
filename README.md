@@ -20,14 +20,12 @@ Create conda envirioment
 conda env create -f environment.yml
 conda activate mcvae
 ```
-Install
+
+Build 
 ```
-python3 setup.py build install
+python3 -m build 
 ```
-Install - editable version
-```
-pip install -e .
-```
+
 
 ## Usage
 ### Configuration

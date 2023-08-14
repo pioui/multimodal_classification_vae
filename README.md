@@ -1,7 +1,5 @@
 # Multimodal Data Classification using Variational Autoencoder 
 
-This repository provides a framework for multimodal data classification using Variational Autoencoder (VAE). The goal is to classify multimodal data and analyze uncertainty in the classification process. It is based on the work done by Pierre Boyeau in his repository decision-making-vaes.
-
 
 ## Table of Contents
 
@@ -12,7 +10,7 @@ This repository provides a framework for multimodal data classification using Va
 
 ## Project Description
 
-This repository provides a framework for multimodal data classification using Variational Autoencoder (VAE). The goal is to classify multimodal data and analyze uncertainty in the classification process. It is based on the work done by Pierre Boyeau in his repository decision-making-vaes.
+This repository provides a framework for multimodal data classification using Variational Autoencoder (VAE). The goal is to classify multimodal remote sensing data and analyze uncertainty in the classification process. It is based on the work done by Pierre Boyeau in his repository decision-making-vaes.
 
 ## Installation
 Create conda envirioment
@@ -25,21 +23,28 @@ Build
 ```
 python3 -m build 
 ```
-
-
 ## Usage
+
+### Datasets 
+
+This repository is made to run on the following datasets:
+
+1. <ins> Trento dataset </ins>
+2. <ins> Houston dataset </ins>
+
+The repository is designed to run on these specific datasets. However, it is possible to adapt the code to work with other datasets. To do so, you can create a new dataset loading file under ```mcvae/mcvae/datasets```, create a configuration file under ```mcvae/scripts/```. This will allow you to use the code with the new dataset.
+
 ### Configuration
 Edit the data directories and output paths in the configuration files:
+
 ```
 mcvae
 │   
 └───scripts
     │   trento_config.py
     │   houston_config.py
-    │   simu_M1M2.py  
-    |   simu_multi-M1M2.py  
+    │  
 ```
-
 
 ### Classification
 
@@ -77,7 +82,7 @@ mcvae
 
 
 
-### Results and Analysis
+# Results and Analysis
 
 Metrics, classification, and uncertainty maps for all the output/*.npy files
 ```
@@ -108,9 +113,22 @@ mcvae
     |       └── houston.png
 ```
 
-## License
+# Roadmap
+- [x] Convert architecture to RS multimodal data
+- [x] Logging
+- [x] Experiment on different encoders
+- [x] Experimnt on two datasets (trento and houston)
+- [x] Create Multi-M1+M2 model
+- [x] Results analysis
+- [x] Packaging
+- [ ] Documentation
+- [ ] Testing
+- [ ] Add delight to the experience when all tasks are complete :tada:
+
+# License
 
 This project is licensed under the MIT License.
-## To dos:
- - Logging and documentation
- - Detailed project description
+
+# Contact
+
+Pigi Lozou - [piyilozou@gmail.com](mailto:piyilozou@gmail.com)

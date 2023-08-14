@@ -58,7 +58,7 @@ fig, ax = plt.subplots(dpi=100)
 for label in y_all.unique():
     samples = 300
     label_ind = np.where(y_all == label)[0]
-    if label in [3,13]:
+    if label in [16,18]:
         labelled_exs = np.random.choice(label_ind, size=samples, replace=False)
     else: 
         continue
@@ -126,7 +126,7 @@ for label in y_all.unique():
     ax.plot(y, x_mean, '-', label = labels[label], color = color[label])
     ax.fill_between(y, x_mean - x_var, x_mean + x_var,color = color[label], alpha=0.2)
     ax.plot(y, x_mean, 'o', color = color[label])
-    ax.set_ylim([-0.01, 0.7])
+    ax.set_ylim([-0.01, 1.3])
 
 plt.legend(loc='upper left')
 plt.xlabel('LiDAR Channels')
@@ -137,7 +137,7 @@ fig, ax = plt.subplots(dpi=100)
 for label in y_all.unique():
     samples = 300
     label_ind = np.where(y_all == label)[0]
-    if label in [3,13]:
+    if label in [16,18]:
         labelled_exs = np.random.choice(label_ind, size=samples, replace=False)
     else: 
         continue
@@ -149,7 +149,7 @@ for label in y_all.unique():
     ax.plot(y, x_mean, '-', label = labels[label], color = color[label])
     ax.fill_between(y, x_mean - x_var, x_mean + x_var,color = color[label], alpha=0.2)
     ax.plot(y, x_mean, 'o', color = color[label])
-    ax.set_ylim([-0.01, 0.7])
+    ax.set_ylim([-0.01, 1.3])
 
 plt.legend(loc='upper left')
 plt.xlabel('LiDAR Channels')
@@ -172,7 +172,7 @@ for label in y_all.unique():
     ax.plot(y, x_mean, '-', label = labels[label], color = color[label+1])
     ax.fill_between(y, x_mean - x_var, x_mean + x_var,color = color[label+1], alpha=0.2)
     ax.plot(y, x_mean, 'o', color = color[label+1])
-    ax.set_ylim([-0.01, 1])
+    ax.set_ylim([-0.01, 1.3])
 
 plt.legend(loc='upper left')
 plt.xlabel('LiDAR Channels')
@@ -268,7 +268,7 @@ for label in y_all.unique():
     ax.plot(y, x_mean, '-', label = labels[label], color = color[label])
     ax.fill_between(y, x_mean - x_var, x_mean + x_var, color = color[label], alpha=0.2)
     ax.plot(y, x_mean, 'o',color = color[label])
-    ax.set_ylim([-0.01, 0.11])
+    ax.set_ylim([-0.01, 0.7])
 
 plt.xticks(y)
 plt.legend(loc='upper left')
@@ -292,7 +292,7 @@ for label in y_all.unique():
     ax.plot(y, x_mean, '-', label = labels[label], color = color[label])
     ax.fill_between(y, x_mean - x_var, x_mean + x_var, color = color[label], alpha=0.2)
     ax.plot(y, x_mean, 'o',color = color[label])
-    ax.set_ylim([-0.01, 0.72])
+    ax.set_ylim([-0.01, 0.7])
 
 plt.xticks(y)
 plt.legend(loc='upper left')

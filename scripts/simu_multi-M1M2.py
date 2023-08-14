@@ -56,15 +56,15 @@ elif dataset=="trento-patch":
     )
 elif dataset=="houston":
     from houston_multimodal_config import *
-    from mcvae.dataset import houstonMultimodalDataset
-    DATASET = houstonMultimodalDataset(
+    from mcvae.dataset import houston_multimodal_dataset
+    DATASET = houston_multimodal_dataset(
     data_dir = data_dir,
     samples_per_class=SAMPLES_PER_CLASS,
     )
 elif dataset=="houston-patch":
     from houston_patch_config import *
-    from mcvae.dataset import houstonPatchDataset
-    DATASET = houstonPatchDataset(
+    from mcvae.dataset import houston_patch_dataset
+    DATASET = houston_patch_dataset(
         data_dir = data_dir,
         samples_per_class=SAMPLES_PER_CLASS,
         patch_size = PATCH_SIZE,

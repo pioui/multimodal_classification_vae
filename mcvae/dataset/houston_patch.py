@@ -16,7 +16,7 @@ random.seed(42)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-class houstonPatchDataset(Dataset):
+class houston_patch_dataset(Dataset):
     def __init__(
         self,
         data_dir,
@@ -90,7 +90,7 @@ class houstonPatchDataset(Dataset):
 
 if __name__ == "__main__":
 
-    DATASET = houstonPatchDataset(
+    DATASET = houston_patch_dataset(
         data_dir = "/home/pigi/data/houston/",
     )
     x,y = DATASET.train_dataset.tensors 

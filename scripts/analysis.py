@@ -18,26 +18,26 @@ from mcvae.utils import generate_latex_matrix_from_dict, generate_latex_confusio
 print(os.listdir('outputs/'))
 
 for project_name in os.listdir('outputs/'):
-    # if project_name == 'trento':
-    #     # continue
-    #     dataset = 'trento'
-    #     from trento_config import *
-    # elif project_name == 'trento_patch':
-    #     # continue
-    #     dataset = 'trento'
-    #     from trento_patch_config import *
-    # elif project_name == 'trento_multimodal':
-    #     # continue
-    #     dataset = 'trento'
-    #     from trento_multimodal_config import *
+    if project_name == 'trento':
+        # continue
+        dataset = 'trento'
+        from trento_config import *
+    elif project_name == 'trento_patch':
+        # continue
+        dataset = 'trento'
+        from trento_patch_config import *
+    elif project_name == 'trento_multimodal':
+        # continue
+        dataset = 'trento'
+        from trento_multimodal_config import *
 
-    # if project_name == 'houston':
-    #     dataset = 'houston'
-    #     from houston_config import *
-    # elif project_name == 'houston_patch':
-    #     dataset = 'houston'
-    #     from houston_patch_config import *
-    if project_name == 'houston_multimodal':
+    elif project_name == 'houston':
+        dataset = 'houston'
+        from houston_config import *
+    elif project_name == 'houston_patch':
+        dataset = 'houston'
+        from houston_patch_config import *
+    elif project_name == 'houston_multimodal':
         dataset = 'houston'
         from houston_multimodal_config import *
     else:
@@ -83,6 +83,8 @@ for project_name in os.listdir('outputs/'):
             y_pred = y_pred[y!=0]
 
             y_labelled = y[y!=0]
+
+            print(y_pred)
             accuracy = 100*accuracy_score(y_labelled, y_pred)
             precision = 100*precision_score(y_labelled, y_pred, average='macro', zero_division = 0)
             recall = 100*recall_score(y_labelled, y_pred, average='macro', zero_division = 0)
@@ -97,10 +99,10 @@ for project_name in os.listdir('outputs/'):
             print("F1-score weighted:", '{0:.2f}'.format(f1))
             print("Kappa score:", '{0:.2f}'.format(kappa))
 
-            print()
-            m_confusion_matrix = confusion_matrix(y_labelled, y_pred, normalize='true')
-            m_confusion_matrix = np.around(m_confusion_matrix.astype('float') / m_confusion_matrix.sum(axis=1)[:, np.newaxis], decimals=2)
-            print(generate_latex_confusion_matrix(m_confusion_matrix, caption = model_name))
+            # print()
+            # m_confusion_matrix = confusion_matrix(y_labelled, y_pred, normalize='true')
+            # m_confusion_matrix = np.around(m_confusion_matrix.astype('float') / m_confusion_matrix.sum(axis=1)[:, np.newaxis], decimals=2)
+            # print(generate_latex_confusion_matrix(m_confusion_matrix, caption = model_name))
             
             print("------------------------------")
             plt.close('all')

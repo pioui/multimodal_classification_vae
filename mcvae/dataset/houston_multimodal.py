@@ -16,7 +16,7 @@ random.seed(42)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-class houstonMultimodalDataset(Dataset):
+class houston_multimodal_dataset(Dataset):
     def __init__(
         self,
         data_dir,
@@ -81,8 +81,8 @@ class houstonMultimodalDataset(Dataset):
 
 if __name__ == "__main__":
 
-    DATASET = houstonMultimodalDataset(
-        data_dir = "/Users/plo026/data/houston/",
+    DATASET = houston_multimodal_dataset(
+        data_dir = "/home/pigi/data/houston/",
     )
 
     x,y = DATASET.full_dataset.tensors # [5731136] 0 to 20

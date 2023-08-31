@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.distributions as db
 
-class EncoderB0(nn.Module):
+class encoder_B0(nn.Module):
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
@@ -75,7 +75,7 @@ class EncoderB0(nn.Module):
         )
 
 
-class EncoderB1(nn.Module):
+class encoder_B1(nn.Module):
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
@@ -126,7 +126,7 @@ class EncoderB1(nn.Module):
             q_m=q_m, q_v=q_v, latent=latent, dist=variational_dist, sum_last=True
         )
 
-class EncoderB2(nn.Module):
+class encoder_B2(nn.Module):
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
@@ -177,7 +177,7 @@ class EncoderB2(nn.Module):
             q_m=q_m, q_v=q_v, latent=latent, dist=variational_dist, sum_last=True
         )
 
-class EncoderB3(nn.Module):
+class encoder_B3(nn.Module):
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None, kernel_size = 9,
     ):
@@ -237,7 +237,7 @@ class EncoderB3(nn.Module):
             q_m=q_m, q_v=q_v, latent=latent, dist=variational_dist, sum_last=True
         )
 
-class EncoderB4(nn.Module):
+class encoder_B4(nn.Module):
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None, kernel_size=9
     ):
@@ -296,7 +296,7 @@ class EncoderB4(nn.Module):
             q_m=q_m, q_v=q_v, latent=latent, dist=variational_dist, sum_last=True
         )
 
-class EncoderB5(nn.Module):
+class encoder_B5(nn.Module):
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
@@ -346,7 +346,7 @@ class EncoderB5(nn.Module):
         )
 
     
-class BernoulliDecoderA5(nn.Module):
+class bernoulli_decoder_A5(nn.Module):
     """
     p=13
     """
@@ -382,7 +382,7 @@ class BernoulliDecoderA5(nn.Module):
         return means
 
 
-class EncoderB6(nn.Module):
+class encoder_B6(nn.Module):
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
@@ -429,7 +429,7 @@ class EncoderB6(nn.Module):
             q_m=q_m, q_v=q_v, latent=latent, dist=variational_dist, sum_last=True
         )
 
-class BernoulliDecoderA6(nn.Module):
+class bernoulli_decoder_A6(nn.Module):
     """
     p=5
     """
@@ -461,7 +461,7 @@ class BernoulliDecoderA6(nn.Module):
         means = means.reshape(n_samples, n_batch, channels, patch_size, patch_size )
         return means
 
-class EncoderB7(nn.Module):
+class encoder_B7(nn.Module):
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
@@ -522,10 +522,7 @@ class EncoderB7(nn.Module):
         )
     
 
-
-
-
-class EncoderB8(nn.Module):
+class encoder_B8(nn.Module):
     def __init__(
         self, n_input, n_output, n_hidden, dropout_rate, do_batch_norm, n_middle=None
     ):
@@ -572,7 +569,7 @@ class EncoderB8(nn.Module):
             q_m=q_m, q_v=q_v, latent=latent, dist=variational_dist, sum_last=True
         )
 
-class BernoulliDecoderA8(nn.Module):
+class bernoulli_decoder_A8(nn.Module):
     """
     p=5
     """
@@ -607,51 +604,51 @@ class BernoulliDecoderA8(nn.Module):
 if __name__ == "__main__":
     from torchsummary import summary
 
-    # layer = EncoderB0(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # layer = encoder_B0(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
     # summary(layer, (1,65))
 
-    # layer = EncoderB1(n_input=65, n_output=10, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
+    # layer = encoder_B1(n_input=65, n_output=10, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
     # summary(layer, (1,65))
 
-    # layer = EncoderB2(n_input=65, n_output=10, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
+    # layer = encoder_B2(n_input=65, n_output=10, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
     # summary(layer, (1,65))
 
-    # layer = EncoderB2(n_input=65, n_output=20, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
+    # layer = encoder_B2(n_input=65, n_output=20, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
     # summary(layer, (1,65))
 
-    # layer = EncoderB3(n_input=55, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # layer = encoder_B3(n_input=55, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
     # summary(layer, (1,55))
 
-    # layer = EncoderB4(n_input=2, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # layer = encoder_B4(n_input=2, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
     # summary(layer, (1,2))
 
-    # layer = EncoderB5(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # layer = encoder_B5(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
     # summary(layer, (65,13,13))
 
-    # layer = BernoulliDecoderA5(n_input=10, n_output=65, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # layer = bernoulli_decoder_A5(n_input=10, n_output=65, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
     # inx = torch.rand(25,5,10)
     # outx = layer(inx)
     # print(inx.shape, outx.shape)
 
 
-    # layer = EncoderB6(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # layer = encoder_B6(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
     # summary(layer, (65,5,5))
 
-    # layer = BernoulliDecoderA6(n_input=10, n_output=65, dropout_rate=0.1, do_batch_norm=False)
+    # layer = bernoulli_decoder_A6(n_input=10, n_output=65, dropout_rate=0.1, do_batch_norm=False)
     # inx = torch.rand(25,5,10)
     # outx = layer(inx)
     # print(inx.shape, outx.shape)
 
-    # layer = EncoderB6(n_input=65, n_output=10, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
+    # layer = encoder_B6(n_input=65, n_output=10, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
     # summary(layer, (1,65))
 
-    # layer = EncoderB7(n_input=65, n_output=20, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
+    # layer = encoder_B7(n_input=65, n_output=20, n_hidden=512, dropout_rate=0.1, do_batch_norm=False)
     # summary(layer, (1,65))
 
-    # layer = EncoderB8(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
+    # layer = encoder_B8(n_input=65, n_output=10, n_hidden=128, dropout_rate=0.1, do_batch_norm=False)
     # summary(layer, (65,3,3))
 
-    # layer = BernoulliDecoderA8(n_input=10, n_output=65, dropout_rate=0.1, do_batch_norm=False)
+    # layer = bernoulli_decoder_A8(n_input=10, n_output=65, dropout_rate=0.1, do_batch_norm=False)
     # inx = torch.rand(25,5,10)
     # outx = layer(inx)
     # print(inx.shape, outx.shape)

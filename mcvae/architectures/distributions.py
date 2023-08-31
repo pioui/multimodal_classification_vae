@@ -6,7 +6,7 @@ import torch.distributions as db
 from torch.distributions import constraints
 
 
-class EllipticalStudent(db.Distribution):
+class elliptical_student(db.Distribution):
     support = constraints.real
     has_rsample = True
     arg_constraints = {

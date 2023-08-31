@@ -1,5 +1,13 @@
 """
-    Decision theory: Experiment for M1+M1 model on trento
+This script is specifically designed to handle the training and prediction tasks 
+associated with M1+M2 architectures.
+Usage:
+  python3 scripts/simu_M1M2.py -d <DATASET NAME> 
+
+Replace <DATASET NAME> with the specific dataset you intend to use. The script will 
+then initiate the training process for the M1+M2 model using the specified dataset. 
+Once the training is complete, the script allows you to make accurate predictions 
+on new data.
 """
 
 import os
@@ -10,15 +18,14 @@ import torch
 import torch.nn as nn
 import argparse
 
-
 from mcvae.architectures import VAE_M1M2
 from mcvae.inference import VAE_M1M2_Trainer
 from mcvae.architectures.regular_modules import (
-    EncoderA,
-    EncoderB,
-    ClassifierA,
-    EncoderAStudent,
-    EncoderBStudent,
+    encoder_A,
+    encoder_B,
+    classifier_A,
+    encoder_A_student,
+    encoder_B_student,
 )
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -34,105 +41,40 @@ args = parser.parse_args()
 dataset = args.dataset
 
 if dataset=="trento":
-    from trento_config import (
-        outputs_dir,
-        data_dir,
-        N_PARTICULES,
-        N_EPOCHS,
-        N_HIDDEN,
-        LR,
-        N_EXPERIMENTS,
-        BATCH_SIZE,
-        CLASSIFICATION_RATIO,
-        N_EVAL_SAMPLES,
-        N_INPUT,
-        N_LABELS,
-        PROJECT_NAME,
-        SCENARIOS,
-    )
-    from mcvae.dataset import trentoDataset
-    DATASET = trentoDataset(
+    from trento_config import *
+    from mcvae.dataset import trento_dataset
+    DATASET = trento_dataset(
         data_dir = data_dir,
-
     )
 elif dataset=="trento-patch":
-    from trento_patch_config import (
-        outputs_dir,
-        data_dir,
-        N_PARTICULES,
-        N_EPOCHS,
-        N_HIDDEN,
-        LR,
-        N_EXPERIMENTS,
-        BATCH_SIZE,
-        CLASSIFICATION_RATIO,
-        N_EVAL_SAMPLES,
-        N_INPUT,
-        PATCH_SIZE,
-        N_LABELS,
-        PROJECT_NAME,
-        SCENARIOS,
-    )
-    from mcvae.dataset import trentoPatchDataset
-    print("Train on trento with 2d Patching")
-    DATASET = trentoPatchDataset(
+    from trento_patch_config import *
+    from mcvae.dataset import trento_patch_dataset
+    DATASET = trento_patch_dataset(
         data_dir = data_dir,
         patch_size=PATCH_SIZE,
-
     )
 elif dataset=="houston":
-    from houston_config import (
-        outputs_dir,
-        data_dir,
-        N_PARTICULES,
-        N_EPOCHS,
-        N_HIDDEN,
-        LR,
-        N_EXPERIMENTS,
-        BATCH_SIZE,
-        CLASSIFICATION_RATIO,
-        N_EVAL_SAMPLES,
-        N_INPUT,
-        N_LABELS,
-        PROJECT_NAME,
-        SCENARIOS,
-        SAMPLES_PER_CLASS,
-    )
-    from mcvae.dataset import houstonDataset
-    DATASET = houstonDataset(
+    from houston_config import *
+    from mcvae.dataset import houston_dataset
+    DATASET = houston_dataset(
         data_dir = data_dir,
         samples_per_class=SAMPLES_PER_CLASS,
     )
 elif dataset=="houston-patch":
-    from houston_patch_config import (
-        outputs_dir,
-        data_dir,
-        N_PARTICULES,
-        N_EPOCHS,
-        N_HIDDEN,
-        LR,
-        N_EXPERIMENTS,
-        BATCH_SIZE,
-        CLASSIFICATION_RATIO,
-        N_EVAL_SAMPLES,
-        N_INPUT,
-        PATCH_SIZE,
-        N_LABELS,
-        PROJECT_NAME,
-        SCENARIOS,
-        SAMPLES_PER_CLASS,
-    )
-    from mcvae.dataset import houstonPatchDataset
-    DATASET = houstonPatchDataset(
+    from houston_patch_config import *
+    from mcvae.dataset import houston_patch_dataset
+    DATASET = houston_patch_dataset(
         data_dir = data_dir,
         samples_per_class=SAMPLES_PER_CLASS,
         patch_size = PATCH_SIZE,
     )
+else:
+    print("Dataset name is not valid. Please try one of the following: trento, houston, trento-patch, houston-patch")
+    exit()
 
 from mcvae.utils.utility_functions import (
     model_evaluation,
 )
-
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -145,8 +87,9 @@ DEFAULT_MAP = dict(
     default="gaussian",
 )
 
-Z1_MAP = dict(gaussian=EncoderB, student=EncoderBStudent,)
-Z2_MAP = dict(gaussian=EncoderA, student=EncoderAStudent,)
+Z1_MAP = dict(gaussian=encoder_B, student=encoder_B_student,)
+Z2_MAP = dict(gaussian=encoder_A, student=encoder_A_student,)
+
 
 FILENAME = f"{outputs_dir}/{PROJECT_NAME}.pkl"
 MDL_DIR = f"{outputs_dir}/models"
@@ -160,22 +103,19 @@ if not os.path.exists(outputs_dir):
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-
 logger.info("train all examples {}".format(len(DATASET.train_dataset.tensors[0])))
 logger.info("train labelled examples {}".format(len(DATASET.train_dataset_labelled.tensors[0])))
 logger.info("test all examples {}".format(len(DATASET.test_dataset.tensors[0])))
 logger.info("test labelled examples {}".format(len(DATASET.test_dataset_labelled.tensors[0])))
 
 EVAL_ENCODERS = [
-    dict(encoder_type="train", eval_encoder_name="train"),  # MUST BE ON TOP!!!
+    dict(encoder_type="train", eval_encoder_name="train"),  
     # dict(encoder_type="ELBO", reparam=True, eval_encoder_name="VAE"),
 ]
 
-
-
 DF_LI = []
 logger.info("Number of experiments : {}".format(N_EXPERIMENTS))
-# Main script
+
 for scenario in SCENARIOS:
     loss_gen = scenario.get("loss_gen", None)
     loss_wvar = scenario.get("loss_wvar", None)
@@ -308,9 +248,8 @@ for scenario in SCENARIOS:
         # y_pred = y_pred / y_pred.sum(1, keepdims=True)
         # np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}.npy", y_pred)
 
-
         mdl.eval()
-        # TODO: find something cleaner
+
         if do_defensive:
             factor = N_EVAL_SAMPLES / counts.sum()
             multi_counts = factor * counts
@@ -358,7 +297,7 @@ for scenario in SCENARIOS:
                         logger.info("Using map {} ...".format(vdist_map_eval))
                         new_classifier = nn.ModuleDict(
                             {
-                                key: ClassifierA(
+                                key: classifier_A(
                                     n_latent,
                                     n_output=N_LABELS,
                                     do_batch_norm=False,
@@ -371,7 +310,7 @@ for scenario in SCENARIOS:
 
                         new_encoder_z2_z1 = nn.ModuleDict(
                             {
-                                # key: EncoderA(
+                                # key: encoder_A(
                                 key: Z2_MAP[vdist_map_eval[key]](
                                     n_input=n_latent + N_LABELS,
                                     n_output=n_latent,
@@ -443,7 +382,7 @@ for scenario in SCENARIOS:
                 )
             y_pred = train_res["preds_plugin"].numpy()
             y_pred = y_pred / y_pred.sum(1, keepdims=True)
-            np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}_ELBO.npy", y_pred)
+            np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}.npy", y_pred)
 
             logger.info(trainer.model.encoder_z2_z1.keys())
             loop_results_dict = model_evaluation(

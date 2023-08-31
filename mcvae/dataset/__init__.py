@@ -1,18 +1,17 @@
-from .trento import trentoDataset
-from .houston import houstonDataset
+from .trento import trento_dataset
+from .houston import houston_dataset
 from .trento_multimodal import trentoMultimodalDataset
-from .houston_multimodal import houstonMultimodalDataset
-from .trento_patch import trentoPatchDataset
-from .houston_patch import houstonPatchDataset
-from .trento_multimodal_patch import trentoMultimodalPatchDataset
+from .houston_multimodal import houston_multimodal_dataset
+from .trento_patch import trento_patch_dataset
+from .houston_patch import houston_patch_dataset
+from .trento_multimodal_patch import trento_multimodal_patch_dataset
 
 __all__ = [
-    "trentoDataset",
-    "houstonDataset",
+    "trento_dataset",
+    "houston_dataset",
     "trentoMultimodalDataset",
-    "houstonMultimodalDataset",
-    "trentoPatchDataset",
-    "houstonPatchDataset",
-    "trentoMultimodalPatchDataset",
-    
+    "houston_multimodal_dataset",
+    "trento_patch_dataset",
+    "houston_patch_dataset",
+    "trento_multimodal_patch_dataset",
 ]

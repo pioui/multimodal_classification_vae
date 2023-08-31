@@ -1,63 +1,109 @@
+"""
+Configuation file for houston dataset with two seperate modalities input
+
+"""
+
 import numpy as np
 import logging
 import os
-from mcvae.dataset import houstonDataset
+from mcvae.dataset import houston_dataset
 import torch.nn as nn
 from mcvae.architectures.encoders import (
-    EncoderB0,
-    EncoderB1,
-    EncoderB2,
-    EncoderB3,
-    EncoderB4,
+    encoder_B0,
+    encoder_B1,
+    encoder_B2,
+    encoder_B3,
+    encoder_B4,
 )
 
-data_dir = "/Users/plo026/data/houston/"
+data_dir = "/home/pigi/data/houston/"
 outputs_dir = "outputs/houston_multimodal/"
-labels = [
-    "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 
-    "Deciduous Trees", "Bare Earth", "Water", "Residential buildings",
-    "Non-residential buildings", "Roads", "Sidewalks", "Crosswalks",
-    "Major thoroughfares", "Highways", "Railways", "Paved parking lots", "Unpaved parking lots",
-    "Cars", "Trains", "Stadium seats"
-    ]
-color = [
-    "black", "limegreen", "lime", "forestgreen", "green", 
-    "darkgreen", "saddlebrown", "aqua", "white", 
-    "plum",  "red", "darkgray", "dimgray",
-    "firebrick", "darkred", "peru", "yellow", "orange",
-    "magenta", "blue", "skyblue"
-    ]
-
-heterophil_matrix = np.array(
-    [
-        [1,2,3,5,5,4,6,6,6,5,5,5,5,5,6,5,5,6,6,6],
-        [2,1,3,5,5,4,6,6,6,5,5,5,5,5,6,5,5,6,6,6],
-        [3,3,1,5,5,4,6,6,6,5,5,5,5,5,6,5,5,6,6,6],
-        [5,5,5,1,2,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
-        [5,5,5,2,1,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
-        [4,4,4,6,6,1,6,6,6,5,5,5,5,5,6,5,2,6,6,6],
-        [6,6,6,6,6,6,1,6,6,6,6,6,6,6,6,6,6,6,6,6],
-        [6,6,6,6,6,6,6,1,2,5,5,5,5,5,6,5,6,6,6,6],
-        [6,6,6,6,6,6,6,2,1,5,5,5,5,5,6,5,6,6,6,6],
-        [5,5,5,6,6,5,6,5,5,1,2,2,2,2,6,2,6,6,6,6],
-        [5,5,5,6,6,5,6,5,5,2,1,3,2,2,6,2,6,6,6,6],
-        [5,5,5,6,6,5,6,5,5,3,3,1,3,3,6,4,6,6,6,6],
-        [5,5,5,6,6,5,6,5,5,2,2,3,1,2,6,2,6,6,6,6],
-        [5,5,5,6,6,5,6,5,5,2,2,3,2,1,6,2,6,6,6,6],
-        [6,6,6,6,6,6,6,6,6,6,6,6,6,6,1,6,6,3,3,6],
-        [5,5,5,6,6,5,6,5,5,2,2,4,2,2,6,1,3,6,6,6],
-        [5,5,5,6,6,2,6,6,6,6,6,6,6,6,6,3,1,6,6,6],
-        [6,6,6,6,6,6,6,6,6,6,6,6,6,6,3,6,6,1,3,6],
-        [6,6,6,6,6,6,6,6,6,6,6,6,6,6,3,6,6,3,1,6],
-        [6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,1],
-    ]
-)
-
 images_dir =  "outputs/houston_multimodal/images/"
+
+labels = [
+    "Unknown", 
+    "Healthy Grass", 
+    "Stressed Grass", 
+    "Artificial Turf", 
+    "Evergreen Trees", 
+    "Deciduous Trees", 
+    "Bare Earth", 
+    "Water", 
+    "Residential buildings",
+    "Non-residential buildings", 
+    "Roads", 
+    "Sidewalks", 
+    "Crosswalks",
+    "Major thoroughfares", 
+    "Highways", 
+    "Railways", 
+    "Paved parking lots", 
+    "Unpaved parking lots",
+    "Cars", 
+    "Trains", 
+    "Stadium seats"
+    ]
+# color = [
+#     "black", 
+
+#     "green", 
+#     "olive", 
+#     "lime", 
+
+#     "orange", 
+#     "maroon", 
+
+#     "brown", 
+#     "turquoise",
+
+#     "pink", 
+#     "magenta", 
+
+#     "gray", 
+#     "navy", 
+
+#     "white", 
+
+#     "red", 
+#     "coral", 
+
+#     "yellow", 
+
+#     "indigo", 
+#     "purple", 
+
+#     "blue", 
+#     "cyan", 
+#     "teal", 
+#     ]
+
+color = [
+    '#000000',
+    '#3cb44b', 
+    '#aaffc3', 
+    '#bfef45', 
+    '#f58231',
+    '#ffd8b1', 
+    '#9A6324', 
+    '#469990', 
+    '#911eb4', 
+    '#dcbeff', 
+    '#000075', 
+    '#a9a9a9', 
+    '#ffffff', 
+    '#4363d8', 
+    '#42d4f4', 
+    '#ffe119', 
+    '#800000', 
+    '#e6194B', 
+    '#fabed4', 
+    '#f032e6', 
+    '#fffac8', 
+    ]
+    
 
 if not os.path.exists(outputs_dir):
     os.makedirs(outputs_dir)
-
 if not os.path.exists(images_dir):
     os.makedirs(images_dir)
 
@@ -74,50 +120,47 @@ CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 512
 PROJECT_NAME = "houston_multimodal"
-SAMPLES_PER_CLASS = 2000
-
+SAMPLES_PER_CLASS = 500
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
-
-SCENARIOS = [  # WAKE updates
-
-    # dict(
-    #     loss_gen="ELBO",
-    #     loss_wvar="ELBO",
-    #     reparam_latent=True,
-    #     counts=None,
-    #     n_latent=30,
-    #     model_name="EncoderB0_L30_VAE",
-    #     encoder_z1=nn.ModuleDict(
-    #         {"default": EncoderB0( 
-    #             n_input=N1_INPUT,
-    #             n_output=30,
-    #             n_hidden=128,
-    #             dropout_rate=0,
-    #             do_batch_norm=False,
-    #         )}
-    #     ),
-    #     encoder_z2=nn.ModuleDict(
-    #         {"default": EncoderB0( 
-    #             n_input=N2_INPUT,
-    #             n_output=30,
-    #             n_hidden=128,
-    #             dropout_rate=0,
-    #             do_batch_norm=False,
-    #         )}
-    #     ),
-    # ),
-
-        dict(
+SCENARIOS = [ 
+    dict(
         loss_gen="ELBO",
         loss_wvar="ELBO",
         reparam_latent=True,
         counts=None,
         n_latent=30,
-        model_name="EncoderB2_L30_VAE",
+        model_name="multi-M1M2_encoder_B0_L30",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB2( 
+            {"default": encoder_B0( 
+                n_input=N1_INPUT,
+                n_output=30,
+                n_hidden=128,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+        encoder_z2=nn.ModuleDict(
+            {"default": encoder_B0( 
+                n_input=N2_INPUT,
+                n_output=30,
+                n_hidden=128,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+    ),
+
+    dict(
+        loss_gen="ELBO",
+        loss_wvar="ELBO",
+        reparam_latent=True,
+        counts=None,
+        n_latent=30,
+        model_name="multi-M1M2_encoder_B2_L30",
+        encoder_z1=nn.ModuleDict(
+            {"default": encoder_B2( 
                 n_input=N1_INPUT,
                 n_output=30,
                 n_hidden=256,
@@ -126,7 +169,7 @@ SCENARIOS = [  # WAKE updates
             )}
         ),
         encoder_z2=nn.ModuleDict(
-            {"default": EncoderB2( 
+            {"default": encoder_B2( 
                 n_input=N2_INPUT,
                 n_output=30,
                 n_hidden=256,
@@ -136,16 +179,15 @@ SCENARIOS = [  # WAKE updates
         ),
     ),
 
-
-        dict(
+    dict(
         loss_gen="ELBO",
         loss_wvar="ELBO",
         reparam_latent=True,
         counts=None,
         n_latent=20,
-        model_name="EncoderB4_L20_VAE",
+        model_name="multi-M1M2_encoder_B4_L20",
         encoder_z1=nn.ModuleDict(
-            {"default": EncoderB4( 
+            {"default": encoder_B4( 
                 n_input=N1_INPUT,
                 n_output=20,
                 n_hidden=512,
@@ -154,7 +196,7 @@ SCENARIOS = [  # WAKE updates
             )}
         ),
         encoder_z2=nn.ModuleDict(
-            {"default": EncoderB4( 
+            {"default": encoder_B4( 
                 n_input=N2_INPUT,
                 n_output=20,
                 n_hidden=512,

@@ -4,7 +4,7 @@
 from setuptools import setup, find_packages
 
 requirements = [
-    "numpy>=1.16.2",
+    "numpy",
     "torch>=1.0.1",
     "matplotlib>=3.0.3",
     "scikit-learn>=0.20.3",
@@ -12,6 +12,7 @@ requirements = [
     "tqdm>=4.31.1",
     "statsmodels",
     "arviz",
+    "tifffile"
 ]
 
 setup_requirements = [

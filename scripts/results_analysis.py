@@ -11,7 +11,8 @@ import torch
 import tifffile
 import csv
 import pylab as pl
-
+import pandas as pd
+import seaborn as sns
 
 from mcvae.utils import generate_latex_matrix_from_dict, generate_latex_confusion_matrix
 
@@ -107,7 +108,20 @@ for project_name in os.listdir('outputs/'):
             print("------------------------------")
             plt.close('all')
             
+    
     print(generate_latex_matrix_from_dict(metrics_dict))
+
+
+    models_names = list(metrics_dict.keys())
+    metrics_values = {
+        'Accucaracy':[ round(metrics_dict[k][0],2) for k in metrics_dict.keys()],
+        'Precision': [ round(metrics_dict[k][1],2) for k in metrics_dict.keys()],
+        'Recall': [ round(metrics_dict[k][2],2) for k in metrics_dict.keys()],
+        'F1': [ round(metrics_dict[k][3],2) for k in metrics_dict.keys()],
+    }
+
+    print(models_names)
+    print(metrics_values)
 
     for file in sorted(os.listdir(os.path.join(outputs_dir, 'uncertainties'))):
         print(file)

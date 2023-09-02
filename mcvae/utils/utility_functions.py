@@ -3,7 +3,6 @@ import logging
 import torch
 from torch.distributions import Categorical
 import numpy as np
-from arviz.stats import psislw
 from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix, balanced_accuracy_score
 from tqdm.auto import tqdm
 import random
@@ -93,6 +92,12 @@ def log_train_test_split(list_of_tensors):
             logger.info(f'Label {l}: {torch.sum(y==l)}')
         logger.info('')
 
+
+def crop_npy(npyarray, top, right, size):
+    if len(npyarray.shape) == 3:
+        return npyarray[top:top+size, right:right+size, :]
+    else: return npyarray[top:top+size, right:right+size]
+    
 
 
 

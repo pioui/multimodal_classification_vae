@@ -13,22 +13,20 @@ import csv
 import pylab as pl
 import pandas as pd
 import seaborn as sns
+from PIL import Image
 
-from mcvae.utils import generate_latex_matrix_from_dict, generate_latex_confusion_matrix
+from mcvae.utils import generate_latex_matrix_from_dict, generate_latex_confusion_matrix, crop_npy
 
 print(os.listdir('outputs/'))
 
 for project_name in os.listdir('outputs/'):
     if project_name == 'trento':
-        # continue
         dataset = 'trento'
         from trento_config import *
     elif project_name == 'trento_patch':
-        # continue
         dataset = 'trento'
         from trento_patch_config import *
     elif project_name == 'trento_multimodal':
-        # continue
         dataset = 'trento'
         from trento_multimodal_config import *
 
@@ -45,11 +43,14 @@ for project_name in os.listdir('outputs/'):
         continue
 
     if dataset == "trento":
+        continue
         from mcvae.dataset import trento_dataset
         DATASET = trento_dataset(data_dir=data_dir)
+        (r,g,b) = (31,17,8)
     elif dataset == "houston":
         from mcvae.dataset import houston_dataset
         DATASET = houston_dataset(data_dir=data_dir, samples_per_class=SAMPLES_PER_CLASS)
+        (r,g,b) = (16,13,6)
 
     X_train,y_train = DATASET.train_dataset_labelled.tensors 
     X_test,y_test = DATASET.test_dataset_labelled.tensors 
@@ -58,9 +59,27 @@ for project_name in os.listdir('outputs/'):
     metrics_dict = {}
 
     plt.figure(dpi=500)
+    X_rgb = torch.stack( (X[:,r].reshape(SHAPE), X[:,g].reshape(SHAPE), X[:,b].reshape(SHAPE)), axis=-1) 
+    X_rgb = X_rgb.numpy()
+    plt.imshow(X_rgb, interpolation='nearest', vmin=0, vmax=1)
+    plt.axis('off')
+    plt.savefig(f"{images_dir}{dataset}_RGB.png",bbox_inches='tight', pad_inches=0, dpi=500)
+
+    if dataset == "houston":
+        # zoom in vegetation
+        (top, right, size) = (0,1400,1000)
+        X_rgb_veg_zoom = crop_npy(X_rgb, top, right, size)
+        plt.figure(dpi=500)
+        plt.imshow(X_rgb_veg_zoom, interpolation='nearest',vmin=0, vmax=1)
+        plt.axis('off')
+        plt.savefig(f"{images_dir}{dataset}_RGB_veg_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+
+
+
+    plt.figure(dpi=500)
     plt.imshow(y.reshape(SHAPE), interpolation='nearest', cmap = colors.ListedColormap(color))
     plt.axis('off')
-    plt.savefig(f"{images_dir}GT.png",bbox_inches='tight', pad_inches=0, dpi=500)
+    plt.savefig(f"{images_dir}{dataset}_GT.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
     for file in sorted(os.listdir(os.path.join(outputs_dir))):
         if os.path.splitext(file)[-1].lower()=='.npy':
@@ -79,7 +98,21 @@ for project_name in os.listdir('outputs/'):
             plt.imshow(y_pred.reshape(SHAPE), interpolation='nearest', cmap = colors.ListedColormap(color))
             plt.axis('off')
             plt.savefig(f"{images_dir}{model_name}_PREDICTIONS.png",bbox_inches='tight', pad_inches=0, dpi=500)
-        
+
+            if dataset == "houston":
+                # zoom in vegetation
+                (top, right, size) = (0,1400,1000)
+                y_pred_veg_zoom = crop_npy(y_pred.reshape(SHAPE), top, right, size)
+                for i in range(N_LABELS): y_pred_veg_zoom[-1,i] =i # to avoid zero coloring errors
+                plt.figure(dpi=500)
+                plt.imshow(y_pred_veg_zoom, interpolation='nearest', cmap = colors.ListedColormap(color))
+                plt.axis('off')
+                plt.savefig(f"{images_dir}{model_name}_PREDICTIONS_veg_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+
+
+
+# uncomment later
+
             # Metrics 
             y_pred = y_pred[y!=0]
 
@@ -129,7 +162,7 @@ for project_name in os.listdir('outputs/'):
 
         model_name = file[:-4]
         plt.figure(dpi=500)
-        plt.imshow(uncertainty.reshape(SHAPE), cmap='coolwarm', 
+        plt.imshow(uncertainty.reshape(SHAPE), cmap='turbo', 
         # vmin=0, vmax=2.25
         # vmin=0, vmax=6.25
         )
@@ -141,7 +174,7 @@ for project_name in os.listdir('outputs/'):
 
 a = np.array([[0,1]])
 pl.figure(figsize=(9, 1.5))
-img = pl.imshow(a, cmap="coolwarm")
+img = pl.imshow(a, cmap="turbo")
 pl.gca().set_visible(False)
 cax = pl.axes([0.1, 0.2, 0.8, 0.6])
 pl.colorbar(orientation="horizontal"

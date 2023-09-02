@@ -31,6 +31,17 @@ dataset = args.dataset
 if dataset == "trento":
     from trento_config import *
     from mcvae.dataset import trento_dataset
+    C = 100
+    gamma = 0.1
+
+    n_estimators = 100
+    criterion = 'entropy'
+    min_samples_leaf = 4
+    max_depth = None
+    bootstrap = False 
+    max_features = 'sqrt'
+    verbose = True
+
     DATASET = trento_dataset(data_dir=data_dir)
 elif dataset == "houston":
     from houston_config import *
@@ -48,8 +59,10 @@ X,y = DATASET.full_dataset.tensors
 print("Fitting SVM...")
 # Fit SVM classifier
 clf_svm = SVC(
-    C=1,
+    C=C,
     kernel="rbf", 
+    gamma = gamma
+    verbose = verbose
     probability=True
     )
 clf_svm.fit(X_train.numpy(), y_train.numpy())
@@ -61,17 +74,22 @@ np.save(f"{outputs_dir}{PROJECT_NAME}_SVM.npy", y_pred_prob)
 print("Fitting RF...")
 # Fit RF classifier
 clf_rf = RandomForestClassifier(
-    n_estimators=300,
-    min_samples_leaf=2,
-    max_depth=80,
-    min_samples_split=5,
-    bootstrap=True,
-    max_features="sqrt",
+    # n_estimators=300,
+    # min_samples_leaf=2,
+    # max_depth=80,
+    # min_samples_split=5,
+    # bootstrap=True,
+    # max_features="sqrt",
+    n_estimators=n_estimators,
+    criterion=criterion,
+    min_samples_leaf=min_samples_leaf,
+    max_depth=max_depth,
+    bootstrap=bootstrap,
+    max_features=max_features,
+    verbose=verbose,
+    n_jobs = 5,
     )
 clf_rf.fit(X_train.numpy(), y_train.numpy())
 
 y_pred_prob = clf_rf.predict_proba(X.numpy())
 np.save(f"{outputs_dir}{PROJECT_NAME}_RF.npy", y_pred_prob)
-
-# python3 scripts/simu_SVM_RF.py -d houston
-# python3 scripts/simu_SVM_RF.py -d trento

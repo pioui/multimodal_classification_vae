@@ -8,7 +8,6 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import logging
 import random
-import matplotlib.pyplot as plt
 
 from mcvae.utils import normalize, log_train_test_split
 

@@ -8,7 +8,6 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import logging
 import random
-import matplotlib.pyplot as plt
 
 from mcvae.utils import normalize, log_train_test_split
 
@@ -29,7 +28,7 @@ class houston_dataset(Dataset):
     def __init__(
         self,
         data_dir,
-        samples_per_class=500,
+        samples_per_class=2000,
         train_size=0.5,
         do_preprocess=True,
     ) -> None:
@@ -54,8 +53,15 @@ class houston_dataset(Dataset):
             label_ind = np.where(y_all == label)[0]
             if label == 0:
                 labelled_exs = np.random.choice(label_ind, size=5000, replace=False)
+            # Resample
+            # elif (len(label_ind)< samples_per_class):
+            #     labelled_exs = np.random.choice(label_ind, size=samples_per_class, replace=True)
+
             elif (len(label_ind)< samples_per_class):
-                labelled_exs = np.random.choice(label_ind, size=samples_per_class, replace=True)
+                if len(label_ind)< samples_per_class/2:
+                    labelled_exs = np.random.choice(label_ind, size=int(samples_per_class/4), replace=False)
+                else: 
+                    labelled_exs = np.random.choice(label_ind, size=int(samples_per_class/2), replace=False)
             else:
                 labelled_exs = np.random.choice(label_ind, size=samples_per_class, replace=False)
 

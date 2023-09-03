@@ -50,7 +50,10 @@ for project_name in os.listdir('outputs/'):
     elif dataset == "houston":
         from mcvae.dataset import houston_dataset
         DATASET = houston_dataset(data_dir=data_dir, samples_per_class=SAMPLES_PER_CLASS)
-        (r,g,b) = (16,13,6)
+        # (r,g,b) = (16,13,6) #real
+        (r,g,b) = (40,25,5) # orange
+        (r,g,b) = (20,30,10) # green
+        (r,g,b) = (25,30,15) # good contrast
 
     X_train,y_train = DATASET.train_dataset_labelled.tensors 
     X_test,y_test = DATASET.test_dataset_labelled.tensors 
@@ -67,19 +70,45 @@ for project_name in os.listdir('outputs/'):
 
     if dataset == "houston":
         # zoom in vegetation
-        (top, right, size) = (0,1400,1000)
-        X_rgb_veg_zoom = crop_npy(X_rgb, top, right, size)
+        (top, right, size) = (100,1600,1000)
+        X_rgb_zoom = crop_npy(X_rgb, top, right, size)
         plt.figure(dpi=500)
-        plt.imshow(X_rgb_veg_zoom, interpolation='nearest',vmin=0, vmax=1)
+        plt.imshow(X_rgb_zoom, interpolation='nearest',vmin=0, vmax=1)
         plt.axis('off')
         plt.savefig(f"{images_dir}{dataset}_RGB_veg_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
+        # zoom in water 
+        (top, right, size) = (900,3600,300)
+        X_rgb_zoom = crop_npy(X_rgb, top, right, size)
+        plt.figure(dpi=500)
+        plt.imshow(X_rgb_zoom, interpolation='nearest',vmin=0, vmax=1)
+        plt.axis('off')
+        plt.savefig(f"{images_dir}{dataset}_RGB_water_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+        
+        # zoom in stadium 
+        (top, right, size) = (0,1000,800)
+        X_rgb_zoom = crop_npy(X_rgb, top, right, size)
+        plt.figure(dpi=500)
+        plt.imshow(X_rgb_zoom, interpolation='nearest',vmin=0, vmax=1)
+        plt.axis('off')
+        plt.savefig(f"{images_dir}{dataset}_RGB_stadium_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
+        # zoom in roads 
+        (top, right, size) = (50,3300,800)
+        X_rgb_zoom = crop_npy(X_rgb, top, right, size)
+        plt.figure(dpi=500)
+        plt.imshow(X_rgb_zoom, interpolation='nearest',vmin=0, vmax=1)
+        plt.axis('off')
+        plt.savefig(f"{images_dir}{dataset}_RGB_roads_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+
+    # break
 
     plt.figure(dpi=500)
     plt.imshow(y.reshape(SHAPE), interpolation='nearest', cmap = colors.ListedColormap(color))
     plt.axis('off')
     plt.savefig(f"{images_dir}{dataset}_GT.png",bbox_inches='tight', pad_inches=0, dpi=500)
+
+
 
     for file in sorted(os.listdir(os.path.join(outputs_dir))):
         if os.path.splitext(file)[-1].lower()=='.npy':
@@ -94,23 +123,50 @@ for project_name in os.listdir('outputs/'):
             print(file)
 
             # Classification Map
+            y_pred_all = y_pred.reshape(SHAPE)
+            for i in range(N_LABELS): y_pred_all[-4:,i] =i # to avoid zero coloring errors
+
             plt.figure(dpi=500)
-            plt.imshow(y_pred.reshape(SHAPE), interpolation='nearest', cmap = colors.ListedColormap(color))
+            plt.imshow(y_pred_all, interpolation='nearest', cmap = colors.ListedColormap(color))
             plt.axis('off')
             plt.savefig(f"{images_dir}{model_name}_PREDICTIONS.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
             if dataset == "houston":
                 # zoom in vegetation
-                (top, right, size) = (0,1400,1000)
-                y_pred_veg_zoom = crop_npy(y_pred.reshape(SHAPE), top, right, size)
-                for i in range(N_LABELS): y_pred_veg_zoom[-1,i] =i # to avoid zero coloring errors
+                (top, right, size) = (100,1600,1000)
+                y_pred_zoom = crop_npy(y_pred.reshape(SHAPE), top, right, size)
+                for i in range(N_LABELS): y_pred_zoom[-1,i] =i # to avoid zero coloring errors
                 plt.figure(dpi=500)
-                plt.imshow(y_pred_veg_zoom, interpolation='nearest', cmap = colors.ListedColormap(color))
+                plt.imshow(y_pred_zoom, interpolation='nearest', cmap = colors.ListedColormap(color))
                 plt.axis('off')
                 plt.savefig(f"{images_dir}{model_name}_PREDICTIONS_veg_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+                
+                # zoom in water
+                (top, right, size) = (900,3600,300)
+                y_pred_zoom = crop_npy(y_pred.reshape(SHAPE), top, right, size)
+                for i in range(N_LABELS): y_pred_zoom[-4:,i] =i # to avoid zero coloring errors
+                plt.figure(dpi=500)
+                plt.imshow(y_pred_zoom, interpolation='nearest', cmap = colors.ListedColormap(color))
+                plt.axis('off')
+                plt.savefig(f"{images_dir}{model_name}_PREDICTIONS_water_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
-
-
+                # zoom in stadium
+                (top, right, size) = (0,1000,800)
+                y_pred_zoom = crop_npy(y_pred.reshape(SHAPE), top, right, size)
+                for i in range(N_LABELS): y_pred_zoom[-1,i] =i # to avoid zero coloring errors
+                plt.figure(dpi=500)
+                plt.imshow(y_pred_zoom, interpolation='nearest', cmap = colors.ListedColormap(color))
+                plt.axis('off')
+                plt.savefig(f"{images_dir}{model_name}_PREDICTIONS_stadium_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+    
+                # zoom in roads
+                (top, right, size) = (50,3300,800)
+                y_pred_zoom = crop_npy(y_pred.reshape(SHAPE), top, right, size)
+                for i in range(N_LABELS): y_pred_zoom[-1,i] =i # to avoid zero coloring errors
+                plt.figure(dpi=500)
+                plt.imshow(y_pred_zoom, interpolation='nearest', cmap = colors.ListedColormap(color))
+                plt.axis('off')
+                plt.savefig(f"{images_dir}{model_name}_PREDICTIONS_roads_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
 # uncomment later
 
             # Metrics 
@@ -133,10 +189,10 @@ for project_name in os.listdir('outputs/'):
             print("F1-score weighted:", '{0:.2f}'.format(f1))
             print("Kappa score:", '{0:.2f}'.format(kappa))
 
-            # print()
-            # m_confusion_matrix = confusion_matrix(y_labelled, y_pred, normalize='true')
-            # m_confusion_matrix = np.around(m_confusion_matrix.astype('float') / m_confusion_matrix.sum(axis=1)[:, np.newaxis], decimals=2)
-            # print(generate_latex_confusion_matrix(m_confusion_matrix, caption = model_name))
+            print()
+            m_confusion_matrix = confusion_matrix(y_labelled, y_pred, normalize='true')
+            m_confusion_matrix = np.around(m_confusion_matrix.astype('float') / m_confusion_matrix.sum(axis=1)[:, np.newaxis], decimals=2)
+            print(generate_latex_confusion_matrix(m_confusion_matrix, caption = model_name))
             
             print("------------------------------")
             plt.close('all')
@@ -163,14 +219,44 @@ for project_name in os.listdir('outputs/'):
         model_name = file[:-4]
         plt.figure(dpi=500)
         plt.imshow(uncertainty.reshape(SHAPE), cmap='turbo', 
-        # vmin=0, vmax=2.25
-        # vmin=0, vmax=6.25
+        vmin=0, vmax=1
         )
         plt.axis('off')
-        # cbar = plt.colorbar(location='top')
-        # cbar.ax.tick_params(labelsize =8 )
         plt.savefig(f"{images_dir}{model_name}.png",bbox_inches='tight', pad_inches=0 ,dpi=500)
 
+        if dataset == "houston":
+            # zoom in vegetation
+            (top, right, size) = (100,1600,1000)
+            uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
+            plt.figure(dpi=500)
+            plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
+            plt.axis('off')
+            plt.savefig(f"{images_dir}{model_name}_veg_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+
+            # zoom in water
+            (top, right, size) = (900,3600,300)
+            uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
+            plt.figure(dpi=500)
+            plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
+            plt.axis('off')
+            plt.savefig(f"{images_dir}{model_name}_water_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+
+            # zoom in stadium
+            (top, right, size) = (0,1000,800)
+            uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
+            plt.figure(dpi=500)
+            plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
+            plt.axis('off')
+            plt.savefig(f"{images_dir}{model_name}_stadium_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+
+
+            # zoom in roads
+            (top, right, size) = (50,3300,800)
+            uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
+            plt.figure(dpi=500)
+            plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
+            plt.axis('off')
+            plt.savefig(f"{images_dir}{model_name}_roads_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
 a = np.array([[0,1]])
 pl.figure(figsize=(9, 1.5))

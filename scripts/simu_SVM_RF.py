@@ -17,7 +17,8 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colors
-from sklearn.metrics import confusion_matrix, f1_score, cohen_kappa_score
+from sklearn.metrics import confusion_matrix, f1_score, cohen_kappa_score,classification_report, accuracy_score
+import time
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -31,22 +32,40 @@ dataset = args.dataset
 if dataset == "trento":
     from trento_config import *
     from mcvae.dataset import trento_dataset
-    C = 100
-    gamma = 0.1
 
-    n_estimators = 100
-    criterion = 'entropy'
-    min_samples_leaf = 4
-    max_depth = None
-    bootstrap = False 
-    max_features = 'sqrt'
-    verbose = True
+    C = 100
+    kernel = 'rbf'
+    gamma = 'scale'
+
+    n_estimators=300
+    criterion = 'gini'
+    min_samples_leaf=2
+    max_depth=80
+    min_samples_split=5
+    bootstrap=True
+    max_features="sqrt"
+    n_jobs = 5
 
     DATASET = trento_dataset(data_dir=data_dir)
 elif dataset == "houston":
     from houston_config import *
     from mcvae.dataset import houston_dataset
     DATASET = houston_dataset(data_dir=data_dir, samples_per_class=SAMPLES_PER_CLASS)
+
+    C = 100
+    kernel = 'rbf'
+    gamma = 'scale'
+
+    n_estimators=300
+    criterion = 'gini'
+    min_samples_leaf=2
+    max_depth=80
+    min_samples_split=5
+    bootstrap=True
+    max_features="sqrt"
+    n_jobs = 5
+
+
 else:
     print("Dataset name is not valid. Please try one of the following: trento, houston, trento-patch, houston-patch")
     exit()
@@ -61,35 +80,52 @@ print("Fitting SVM...")
 clf_svm = SVC(
     C=C,
     kernel="rbf", 
-    gamma = gamma
-    verbose = verbose
+    gamma = gamma,
     probability=True
     )
+start_time = time.time()
 clf_svm.fit(X_train.numpy(), y_train.numpy())
+end_time = time.time()
+elapsed_time = end_time - start_time
+print("Training Elapsed time: ", elapsed_time) 
 
+start_time = time.time()
 y_pred_prob = clf_svm.predict_proba(X.numpy())
+end_time = time.time()
+elapsed_time = end_time - start_time
+print("Testing Elapsed time: ", elapsed_time) 
+
 np.save(f"{outputs_dir}{PROJECT_NAME}_SVM.npy", y_pred_prob)
+
+y_pred = clf_svm.predict(X_test.numpy())
+print("Accuracy:", classification_report(y_pred,y_test))
+
+
 
 # ----- RF -----
 print("Fitting RF...")
 # Fit RF classifier
 clf_rf = RandomForestClassifier(
-    # n_estimators=300,
-    # min_samples_leaf=2,
-    # max_depth=80,
-    # min_samples_split=5,
-    # bootstrap=True,
-    # max_features="sqrt",
     n_estimators=n_estimators,
     criterion=criterion,
     min_samples_leaf=min_samples_leaf,
     max_depth=max_depth,
     bootstrap=bootstrap,
     max_features=max_features,
-    verbose=verbose,
-    n_jobs = 5,
+    n_jobs=n_jobs
     )
+start_time = time.time()
 clf_rf.fit(X_train.numpy(), y_train.numpy())
-
+end_time = time.time()
+elapsed_time = end_time - start_time
+print("Elapsed time: ", elapsed_time) 
+start_time = time.time()
 y_pred_prob = clf_rf.predict_proba(X.numpy())
+end_time = time.time()
+elapsed_time = end_time - start_time
+print("Testing Elapsed time: ", elapsed_time) 
+
 np.save(f"{outputs_dir}{PROJECT_NAME}_RF.npy", y_pred_prob)
+
+y_pred = clf_svm.predict(X_test.numpy())
+print("Accuracy:", classification_report(y_pred,y_test))

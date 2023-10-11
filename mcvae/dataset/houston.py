@@ -53,10 +53,6 @@ class houston_dataset(Dataset):
             label_ind = np.where(y_all == label)[0]
             if label == 0:
                 labelled_exs = np.random.choice(label_ind, size=5000, replace=False)
-            # Resample
-            # elif (len(label_ind)< samples_per_class):
-            #     labelled_exs = np.random.choice(label_ind, size=samples_per_class, replace=True)
-
             elif (len(label_ind)< samples_per_class):
                 if len(label_ind)< samples_per_class/2:
                     labelled_exs = np.random.choice(label_ind, size=int(samples_per_class/4), replace=False)

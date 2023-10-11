@@ -17,7 +17,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import argparse
-
+import time
 from mcvae.architectures import VAE_M1M2
 from mcvae.inference import VAE_M1M2_Trainer
 from mcvae.architectures.regular_modules import (
@@ -171,6 +171,8 @@ for scenario in SCENARIOS:
         mdl_name = str(mdl_name)
         mdl_name = os.path.join(MDL_DIR, "{}.pt".format(mdl_name))
         logger.info(mdl_name)
+
+        start_time = time.time()
         while True:
             try:
                 mdl = VAE_M1M2(
@@ -230,7 +232,9 @@ for scenario in SCENARIOS:
                 continue
             break
         torch.save(mdl.state_dict(), mdl_name)
-
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print("Training Elapsed time: ", elapsed_time) 
         # with torch.no_grad():
         #     train_res = trainer.inference(
         #         trainer.full_loader,
@@ -367,6 +371,7 @@ for scenario in SCENARIOS:
                     break
                 torch.save(mdl.state_dict(), mdl_name[:-3]+".pt")
 
+            start_time = time.time()
             with torch.no_grad():
                 train_res = trainer.inference(
                     trainer.full_loader,
@@ -382,6 +387,10 @@ for scenario in SCENARIOS:
                 )
             y_pred = train_res["preds_plugin"].numpy()
             y_pred = y_pred / y_pred.sum(1, keepdims=True)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            print("Testing Elapsed time: ", elapsed_time) 
+
             np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}.npy", y_pred)
 
             logger.info(trainer.model.encoder_z2_z1.keys())

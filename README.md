@@ -92,7 +92,9 @@ python3 scripts/results_analysis.py
 ```
 Generate plots to compare data distributions for the trento and houston datasets
 ```
-python3 scripts/data_distributions_analysis.py
+python3 scripts/trento_distributions_analysis.py
+python3 scripts/houston_distributions_analysis.py
+
 ```
 The output files, including .npy, .png, logs, and uncertainty images, are saved in the following directory structure:
 ```

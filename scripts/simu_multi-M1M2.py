@@ -1,24 +1,32 @@
 """
-    Decision theory: Experiment for M1+M1 model on trento
+This script is specifically designed to handle the training and prediction tasks 
+associated with multi-M1+M2 architecture.
+Usage:
+  python3 scripts/simu_multi-M1M2.py -d <DATASET NAME> 
+
+Replace <DATASET NAME> with the specific dataset you intend to use. The script will 
+then initiate the training process for the M1+M2 model using the specified dataset. 
+Once the training is complete, the script allows you to make accurate predictions 
+on new data.
 """
 
 import os
 import logging
+from unittest.mock import patch
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
 import argparse
-
-
-from mcvae.architectures import VAE_M1M2
-from mcvae.inference import VAE_M1M2_Trainer
+import time
+from mcvae.architectures import MVAE_M1M2
+from mcvae.inference import MVAE_M1M2_Trainer
 from mcvae.architectures.regular_modules import (
-    EncoderA,
-    EncoderB,
-    ClassifierA,
-    EncoderAStudent,
-    EncoderBStudent,
+    encoder_A,
+    encoder_B,
+    classifier_A,
+    encoder_A_student,
+    encoder_B_student,
 )
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -34,105 +42,40 @@ args = parser.parse_args()
 dataset = args.dataset
 
 if dataset=="trento":
-    from trento_config import (
-        outputs_dir,
-        data_dir,
-        N_PARTICULES,
-        N_EPOCHS,
-        N_HIDDEN,
-        LR,
-        N_EXPERIMENTS,
-        BATCH_SIZE,
-        CLASSIFICATION_RATIO,
-        N_EVAL_SAMPLES,
-        N_INPUT,
-        N_LABELS,
-        PROJECT_NAME,
-        SCENARIOS,
-    )
-    from mcvae.dataset import trentoDataset
-    DATASET = trentoDataset(
-        data_dir = data_dir,
-
+    from trento_multimodal_config import *
+    from mcvae.dataset import trentoMultimodalDataset
+    DATASET = trentoMultimodalDataset(
+    data_dir = data_dir,
     )
 elif dataset=="trento-patch":
-    from trento_patch_config import (
-        outputs_dir,
-        data_dir,
-        N_PARTICULES,
-        N_EPOCHS,
-        N_HIDDEN,
-        LR,
-        N_EXPERIMENTS,
-        BATCH_SIZE,
-        CLASSIFICATION_RATIO,
-        N_EVAL_SAMPLES,
-        N_INPUT,
-        PATCH_SIZE,
-        N_LABELS,
-        PROJECT_NAME,
-        SCENARIOS,
-    )
-    from mcvae.dataset import trentoPatchDataset
-    print("Train on trento with 2d Patching")
-    DATASET = trentoPatchDataset(
-        data_dir = data_dir,
-        patch_size=PATCH_SIZE,
-
+    from trento_multimodal_patch_config import *
+    from mcvae.dataset import trento_multimodal_patch_dataset
+    DATASET = trento_multimodal_patch_dataset(
+    data_dir = data_dir,
+    patch_size = PATCH_SIZE,
     )
 elif dataset=="houston":
-    from houston_config import (
-        outputs_dir,
-        data_dir,
-        N_PARTICULES,
-        N_EPOCHS,
-        N_HIDDEN,
-        LR,
-        N_EXPERIMENTS,
-        BATCH_SIZE,
-        CLASSIFICATION_RATIO,
-        N_EVAL_SAMPLES,
-        N_INPUT,
-        N_LABELS,
-        PROJECT_NAME,
-        SCENARIOS,
-        SAMPLES_PER_CLASS,
-    )
-    from mcvae.dataset import houstonDataset
-    DATASET = houstonDataset(
-        data_dir = data_dir,
-        samples_per_class=SAMPLES_PER_CLASS,
+    from houston_multimodal_config import *
+    from mcvae.dataset import houston_multimodal_dataset
+    DATASET = houston_multimodal_dataset(
+    data_dir = data_dir,
+    samples_per_class=SAMPLES_PER_CLASS,
     )
 elif dataset=="houston-patch":
-    from houston_patch_config import (
-        outputs_dir,
-        data_dir,
-        N_PARTICULES,
-        N_EPOCHS,
-        N_HIDDEN,
-        LR,
-        N_EXPERIMENTS,
-        BATCH_SIZE,
-        CLASSIFICATION_RATIO,
-        N_EVAL_SAMPLES,
-        N_INPUT,
-        PATCH_SIZE,
-        N_LABELS,
-        PROJECT_NAME,
-        SCENARIOS,
-        SAMPLES_PER_CLASS,
-    )
-    from mcvae.dataset import houstonPatchDataset
-    DATASET = houstonPatchDataset(
+    from houston_patch_config import *
+    from mcvae.dataset import houston_patch_dataset
+    DATASET = houston_patch_dataset(
         data_dir = data_dir,
         samples_per_class=SAMPLES_PER_CLASS,
         patch_size = PATCH_SIZE,
     )
+else:
+    print("Dataset name is not valid. Please try one of the following: trento, houston, trento-patch, houston-patch")
+    exit()
 
 from mcvae.utils.utility_functions import (
     model_evaluation,
 )
-
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -145,8 +88,9 @@ DEFAULT_MAP = dict(
     default="gaussian",
 )
 
-Z1_MAP = dict(gaussian=EncoderB, student=EncoderBStudent,)
-Z2_MAP = dict(gaussian=EncoderA, student=EncoderAStudent,)
+Z1_MAP = dict(gaussian=encoder_B, student=encoder_B_student,)
+Z2_MAP = dict(gaussian=encoder_B, student=encoder_B_student,)
+U_MAP = dict(gaussian=encoder_A, student=encoder_A_student,)
 
 FILENAME = f"{outputs_dir}/{PROJECT_NAME}.pkl"
 MDL_DIR = f"{outputs_dir}/models"
@@ -160,22 +104,19 @@ if not os.path.exists(outputs_dir):
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-
 logger.info("train all examples {}".format(len(DATASET.train_dataset.tensors[0])))
 logger.info("train labelled examples {}".format(len(DATASET.train_dataset_labelled.tensors[0])))
 logger.info("test all examples {}".format(len(DATASET.test_dataset.tensors[0])))
 logger.info("test labelled examples {}".format(len(DATASET.test_dataset_labelled.tensors[0])))
 
 EVAL_ENCODERS = [
-    dict(encoder_type="train", eval_encoder_name="train"),  # MUST BE ON TOP!!!
+    dict(encoder_type="train", eval_encoder_name="train"), 
     # dict(encoder_type="ELBO", reparam=True, eval_encoder_name="VAE"),
 ]
 
-
-
 DF_LI = []
-logger.info("Number of experiments : {}".format(N_EXPERIMENTS))
-# Main script
+logging.info("Number of experiments : {}".format(N_EXPERIMENTS))
+
 for scenario in SCENARIOS:
     loss_gen = scenario.get("loss_gen", None)
     loss_wvar = scenario.get("loss_wvar", None)
@@ -189,16 +130,19 @@ for scenario in SCENARIOS:
     vdist_map_train = scenario.get("vdist_map", None)
     classify_mode = scenario.get("classify_mode", "vanilla")
     lr = scenario.get("lr", LR)
-    z2_with_elbo = scenario.get("z2_with_elbo", False)
+    u_with_elbo = scenario.get("u_with_elbo", False)
     counts = scenario.get("counts", None)
     model_name = scenario.get("model_name", None)
 
     batch_norm = scenario.get("batch_norm", False)
-    cubo_z2_with_elbo = scenario.get("cubo_z2_with_elbo", False)
+    cubo_u_with_elbo = scenario.get("cubo_u_with_elbo", False)
     batch_size = scenario.get("batch_size", BATCH_SIZE)
 
     encoder_z1=scenario.get("encoder_z1", None)
-    x_decoder=scenario.get("x_decoder", None)
+    encoder_z2=scenario.get("encoder_z2", None)
+
+    decoder_x1=scenario.get("decoder_x1", None)
+    decoder_x2=scenario.get("decoder_x2", None)
 
     do_defensive = type(loss_wvar) == list
     multi_encoder_keys = loss_wvar if do_defensive else ["default"]
@@ -220,7 +164,7 @@ for scenario in SCENARIOS:
             "VDIST_MAP_TRAIN": vdist_map_train,
             "LR": lr,
             "BATCH_NORM": batch_norm,
-            "Z2_WITH_ELBO": z2_with_elbo,
+            "U_WITH_ELBO": u_with_elbo,
             "MODEL_NAME": model_name,
         }
 
@@ -231,10 +175,12 @@ for scenario in SCENARIOS:
         mdl_name = str(mdl_name)
         mdl_name = os.path.join(MDL_DIR, "{}.pt".format(mdl_name))
         logger.info(mdl_name)
+        start_time = time.time()
         while True:
             try:
-                mdl = VAE_M1M2(
-                    n_input=N_INPUT,
+                mdl = MVAE_M1M2(
+                    n1_input=N1_INPUT,
+                    n2_input=N2_INPUT,
                     n_labels=N_LABELS,
                     n_latent=n_latent,
                     n_hidden=n_hidden,
@@ -243,13 +189,15 @@ for scenario in SCENARIOS:
                     multi_encoder_keys=multi_encoder_keys,
                     vdist_map=vdist_map_train,
                     encoder_z1=encoder_z1,
-                    x_decoder=x_decoder
+                    encoder_z2=encoder_z2,
+                    decoder_x1=decoder_x1,
+                    decoder_x2=decoder_x2
                 )
                 if os.path.exists(mdl_name):
                     logger.info("model exists; loading from .pt")
                     mdl.load_state_dict(torch.load(mdl_name))
                 mdl.to(device)
-                trainer = VAE_M1M2_Trainer(
+                trainer = MVAE_M1M2_Trainer(
                     dataset=DATASET,
                     model=mdl,
                     use_cuda=True,
@@ -281,7 +229,7 @@ for scenario in SCENARIOS:
                             n_samples_phi=n_samples_wphi,
                             reparam_wphi=reparam_latent,
                             classification_ratio=CLASSIFICATION_RATIO,
-                            z2_with_elbo=z2_with_elbo,
+                            u_with_elbo=u_with_elbo,
                             update_mode="all",
                         )
                     
@@ -290,15 +238,17 @@ for scenario in SCENARIOS:
                 continue
             break
         torch.save(mdl.state_dict(), mdl_name)
-
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print("Elapsed time: ", elapsed_time) 
         # with torch.no_grad():
         #     train_res = trainer.inference(
         #         trainer.full_loader,
         #         keys=[
-        #             "qc_z1_all_probas",
+        #             "qc_z1z2_all_probas",
         #             "y",
         #             "log_ratios",
-        #             "qc_z1",
+        #             "qc_z1z2",
         #             "preds_is",
         #             "preds_plugin",
         #         ],
@@ -308,9 +258,8 @@ for scenario in SCENARIOS:
         # y_pred = y_pred / y_pred.sum(1, keepdims=True)
         # np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}.npy", y_pred)
 
-
         mdl.eval()
-        # TODO: find something cleaner
+
         if do_defensive:
             factor = N_EVAL_SAMPLES / counts.sum()
             multi_counts = factor * counts
@@ -333,12 +282,12 @@ for scenario in SCENARIOS:
             }
             logger.info("ENCODER TYPE : {}".format(encoder_type))
             if encoder_type == "train":
-                logger.info("Using train variational distribution for evaluation ...")
+                logging.info("Using train variational distribution for evaluation ...")
                 eval_encoder = None
                 do_defensive_eval = do_defensive
                 multi_counts_eval = multi_counts
             else:
-                logger.info(
+                logging.info(
                     "Training eval variational distribution for evaluation with {} ...".format(
                         encoder_type
                     )
@@ -355,11 +304,11 @@ for scenario in SCENARIOS:
 
                 while True:
                     try:
-                        logger.info("Using map {} ...".format(vdist_map_eval))
+                        logging.info("Using map {} ...".format(vdist_map_eval))
                         new_classifier = nn.ModuleDict(
                             {
-                                key: ClassifierA(
-                                    n_latent,
+                                key: classifier_A(
+                                    n_input= 2*n_latent,
                                     n_output=N_LABELS,
                                     do_batch_norm=False,
                                     dropout_rate=0.1,
@@ -368,12 +317,13 @@ for scenario in SCENARIOS:
                             }
                         ).to(device)
                         new_encoder_z1 = encoder_z1.to(device)
+                        new_encoder_z2 = encoder_z2.to(device)
 
-                        new_encoder_z2_z1 = nn.ModuleDict(
+                        new_encoder_u= nn.ModuleDict(
                             {
-                                # key: EncoderA(
-                                key: Z2_MAP[vdist_map_eval[key]](
-                                    n_input=n_latent + N_LABELS,
+                                # key: encoder_A(
+                                key: U_MAP[vdist_map_eval[key]](
+                                    n_input=2*n_latent + N_LABELS,
                                     n_output=n_latent,
                                     n_hidden=n_hidden,
                                     dropout_rate=0.1,
@@ -385,7 +335,8 @@ for scenario in SCENARIOS:
                         encoders = dict(
                             classifier=new_classifier,
                             encoder_z1=new_encoder_z1,
-                            encoder_z2_z1=new_encoder_z2_z1,
+                            encoder_z2=new_encoder_z2,
+                            encoder_u=new_encoder_u,
                         )
                         all_dc = {**loop_setup_dict, **eval_encoder_loop}
                         eval_encoder_rootname = str(
@@ -402,14 +353,14 @@ for scenario in SCENARIOS:
                             os.path.exists(filen) for filen in mdl_names.values()
                         ]
                         if np.array(filen_exists_arr).all():
-                            logger.info("Loading eval mdls")
+                            logging.info("Loading eval mdls")
                             for key in mdl_names:
                                 encoders[key].load_state_dict(
                                     torch.load(mdl_names[key])
                                 )
                             mdl.update_q(**encoders)
                         else:
-                            logger.info("training {}".format(encoder_type))
+                            logging.info("training {}".format(encoder_type))
                             trainer.train_eval_encoder(
                                 encoders=encoders,
                                 n_epochs=n_epochs,
@@ -426,16 +377,17 @@ for scenario in SCENARIOS:
                         logger.info(e)
                         continue
                     break
-                torch.save(mdl.state_dict(), mdl_name[:-3]+".pt")
-
+                torch.save(mdl.state_dict(), mdl_name[:-3]+"train"+".pt")
+            
+            start_time = time.time()
             with torch.no_grad():
                 train_res = trainer.inference(
                     trainer.full_loader,
                     keys=[
-                        "qc_z1_all_probas",
+                        "qc_z1z2_all_probas",
                         "y",
                         "log_ratios",
-                        "qc_z1",
+                        "qc_z1z2",
                         "preds_is",
                         "preds_plugin",
                     ],
@@ -443,19 +395,22 @@ for scenario in SCENARIOS:
                 )
             y_pred = train_res["preds_plugin"].numpy()
             y_pred = y_pred / y_pred.sum(1, keepdims=True)
-            np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}_ELBO.npy", y_pred)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            print("Testing Elapsed time: ", elapsed_time) 
 
-            logger.info(trainer.model.encoder_z2_z1.keys())
+            np.save(f"{outputs_dir}{PROJECT_NAME}_{model_name}.npy", y_pred)
+
+            logger.info(trainer.model.encoder_u.keys())
             loop_results_dict = model_evaluation(
-
                 trainer=trainer,
                 counts_eval=multi_counts_eval,
                 encoder_eval_name="default",
                 n_eval_samples = N_EVAL_SAMPLES,
             )
-
             res = {**loop_setup_dict, **loop_results_dict, **eval_encoder_loop}
             logger.info(res)
             DF_LI.append(res)
             DF = pd.DataFrame(DF_LI)
             DF.to_pickle(FILENAME)
+

@@ -8,7 +8,6 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import logging
 import random
-import matplotlib.pyplot as plt
 
 from mcvae.utils import normalize, log_train_test_split
 
@@ -16,11 +15,20 @@ random.seed(42)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-class houstonDataset(Dataset):
+def select_random_elements(tensor, num_elements):
+    if num_elements > tensor.numel():
+        raise ValueError("Number of elements requested exceeds tensor size.")
+    
+    indices = random.sample(range(tensor.numel()), num_elements)
+    selected_elements = tensor.view(-1)[indices]
+    
+    return selected_elements
+
+class houston_dataset(Dataset):
     def __init__(
         self,
         data_dir,
-        samples_per_class=200,
+        samples_per_class=2000,
         train_size=0.5,
         do_preprocess=True,
     ) -> None:
@@ -40,30 +48,31 @@ class houstonDataset(Dataset):
         y_all = y
         y_all = y_all.reshape(-1) # [5731136] 0 to 20
 
-        # train_inds = []
-        # for label in y_all.unique():
-        #     label_ind = np.where(y_all == label)[0]
-        #     samples = samples_per_class
-        #     if label == 0:
-        #         labelled_exs = np.random.choice(label_ind, size=(len(y_all.unique())-1)*samples, replace=False)
-        #     elif (len(label_ind)< samples):
-        #         labelled_exs = np.random.choice(label_ind, size=samples, replace=True)
-        #     else:
-        #         labelled_exs = np.random.choice(label_ind, size=samples, replace=False)
+        train_inds = []
+        for label in y_all.unique():
+            label_ind = np.where(y_all == label)[0]
+            if label == 0:
+                labelled_exs = np.random.choice(label_ind, size=5000, replace=False)
+            elif (len(label_ind)< samples_per_class):
+                if len(label_ind)< samples_per_class/2:
+                    labelled_exs = np.random.choice(label_ind, size=int(samples_per_class/4), replace=False)
+                else: 
+                    labelled_exs = np.random.choice(label_ind, size=int(samples_per_class/2), replace=False)
+            else:
+                labelled_exs = np.random.choice(label_ind, size=samples_per_class, replace=False)
 
-        #     train_inds.append(labelled_exs)
-        # train_inds = np.concatenate(train_inds)
+            train_inds.append(labelled_exs)
+        train_inds = np.concatenate(train_inds)
 
-        # x_all_train = x_all[train_inds]
-        # y_all_train = y_all[train_inds]
+        x_train_all = x_all[train_inds]
+        y_train_all = y_all[train_inds]
         
-        x_train_all, _, y_train_all, _ = train_test_split(
-            x_all, y_all, train_size = 40000, random_state = 42, stratify = y_all
-        ) # 0 to 20
+        # x_train_all, _, y_train_all, _ = train_test_split(
+        #     x_all, y_all, train_size = 40000, random_state = 42, stratify = y_all
+        # ) # 0 to 20
         x_train, x_test, y_train, y_test = train_test_split(
             x_train_all, y_train_all, train_size = 0.5, random_state = 42, stratify = y_train_all
         ) # 0 to 20
-
 
         train_labelled_indeces = (y_train!=0)
         x_train_labelled = x_train[train_labelled_indeces] # [787260, 57]
@@ -83,31 +92,31 @@ class houstonDataset(Dataset):
 
 if __name__ == "__main__":
 
-    DATASET = houstonDataset(
-        data_dir = "/Users/plo026/data/houston/",
+    DATASET = houston_dataset(
+        data_dir = "/home/pigi/data/houston/",
     )
 
-    x,y = DATASET.full_dataset.tensors # [5731136] 0 to 20
+    x,y = DATASET.full_dataset.tensors 
     print(x.shape, y.shape, torch.unique(y))
     for l in torch.unique(y):
         print(f'Label {l}: {torch.sum(y==l)}')
 
-    x,y = DATASET.train_dataset.tensors # [1719340] -1 to 19
+    x,y = DATASET.train_dataset.tensors 
     print(x.shape, y.shape, torch.unique(y)) 
     for l in torch.unique(y):
         print(f'Label {l}: {torch.sum(y==l)}')
 
-    x,y = DATASET.train_dataset_labelled.tensors # [605673] 0 to 19
+    x,y = DATASET.train_dataset_labelled.tensors
     print(x.shape, y.shape, torch.unique(y))
     for l in torch.unique(y):
         print(f'Label {l}: {torch.sum(y==l)}')
 
-    x,y = DATASET.test_dataset.tensors # [4011796] -1 to 19
+    x,y = DATASET.test_dataset.tensors 
     print(x.shape, y.shape, torch.unique(y))
     for l in torch.unique(y):
         print(f'Label {l}: {torch.sum(y==l)}')
 
-    x,y = DATASET.test_dataset_labelled.tensors # [1413237] 0 to 19
+    x,y = DATASET.test_dataset_labelled.tensors 
     print(x.shape, y.shape, torch.unique(y))
     for l in torch.unique(y):
         print(f'Label {l}: {torch.sum(y==l)}')

@@ -1,59 +1,108 @@
+"""
+This Python script serves as a configuration file specifically designed for the Houston dataset, 
+which comprises two seperate patched modalities as input. The configuration file plays a crucial role in 
+defining and organizing the settings, parameters, and options required to effectively process 
+and analyze the Houston dataset.
+"""
+
 import numpy as np
 import logging
 import os
-from mcvae.dataset import trentoDataset
+from mcvae.dataset import houston_dataset
 import torch.nn as nn
 from mcvae.architectures.encoders import (
-    EncoderB5,
-    BernoulliDecoderA5,
-    EncoderB6,
-    BernoulliDecoderA6,
-    EncoderB8,
-    BernoulliDecoderA8
+    encoder_B5,
+    bernoulli_decoder_A5,
+    encoder_B6,
+    bernoulli_decoder_A6,
+    encoder_B8,
+    bernoulli_decoder_A8
 )
 
-data_dir = "/Users/plo026/data/houston/"
+data_dir = "/home/pigi/data/houston/"
 outputs_dir = "outputs/houston_patch/"
-labels = [
-    "Unknown", "Healthy Grass", "Stressed Grass", "Artificial Turf", "Evergreen Trees", 
-    "Deciduous Trees", "Bare Earth", "Water", "Residential buildings",
-    "Non-residential buildings", "Roads", "Sidewalks", "Crosswalks",
-    "Major thoroughfares", "Highways", "Railways", "Paved parking lots", "Unpaved parking lots",
-    "Cars", "Trains", "Stadium seats"
-    ]
-color = [
-    "black", "limegreen", "lime", "forestgreen", "green", 
-    "darkgreen", "saddlebrown", "aqua", "white", 
-    "plum",  "red", "darkgray", "dimgray",
-    "firebrick", "darkred", "peru", "yellow", "orange",
-    "magenta", "blue", "skyblue"
-    ]
 images_dir =  "outputs/houston_patch/images/"
-heterophil_matrix = np.array(
-    [
-        [1,2,3,5,5,4,6,6,6,5,5,5,5,5,6,5,5,6,6,6],
-        [2,1,3,5,5,4,6,6,6,5,5,5,5,5,6,5,5,6,6,6],
-        [3,3,1,5,5,4,6,6,6,5,5,5,5,5,6,5,5,6,6,6],
-        [5,5,5,1,2,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
-        [5,5,5,2,1,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
-        [4,4,4,6,6,1,6,6,6,5,5,5,5,5,6,5,2,6,6,6],
-        [6,6,6,6,6,6,1,6,6,6,6,6,6,6,6,6,6,6,6,6],
-        [6,6,6,6,6,6,6,1,2,5,5,5,5,5,6,5,6,6,6,6],
-        [6,6,6,6,6,6,6,2,1,5,5,5,5,5,6,5,6,6,6,6],
-        [5,5,5,6,6,5,6,5,5,1,2,2,2,2,6,2,6,6,6,6],
-        [5,5,5,6,6,5,6,5,5,2,1,3,2,2,6,2,6,6,6,6],
-        [5,5,5,6,6,5,6,5,5,3,3,1,3,3,6,4,6,6,6,6],
-        [5,5,5,6,6,5,6,5,5,2,2,3,1,2,6,2,6,6,6,6],
-        [5,5,5,6,6,5,6,5,5,2,2,3,2,1,6,2,6,6,6,6],
-        [6,6,6,6,6,6,6,6,6,6,6,6,6,6,1,6,6,3,3,6],
-        [5,5,5,6,6,5,6,5,5,2,2,4,2,2,6,1,3,6,6,6],
-        [5,5,5,6,6,2,6,6,6,6,6,6,6,6,6,3,1,6,6,6],
-        [6,6,6,6,6,6,6,6,6,6,6,6,6,6,3,6,6,1,3,6],
-        [6,6,6,6,6,6,6,6,6,6,6,6,6,6,3,6,6,3,1,6],
-        [6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,1],
-    ]
-)
 
+labels = [
+    "Unknown", 
+    "Healthy Grass", 
+    "Stressed Grass", 
+    "Artificial Turf", 
+    "Evergreen Trees", 
+    "Deciduous Trees", 
+    "Bare Earth", 
+    "Water", 
+    "Residential buildings",
+    "Non-residential buildings", 
+    "Roads", 
+    "Sidewalks", 
+    "Crosswalks",
+    "Major thoroughfares", 
+    "Highways", 
+    "Railways", 
+    "Paved parking lots", 
+    "Unpaved parking lots",
+    "Cars", 
+    "Trains", 
+    "Stadium seats"
+    ]
+# color = [
+#     "black", 
+
+#     "green", 
+#     "olive", 
+#     "lime", 
+
+#     "orange", 
+#     "maroon", 
+
+#     "brown", 
+#     "turquoise",
+
+#     "pink", 
+#     "magenta", 
+
+#     "gray", 
+#     "navy", 
+
+#     "white", 
+
+#     "red", 
+#     "coral", 
+
+#     "yellow", 
+
+#     "indigo", 
+#     "purple", 
+
+#     "blue", 
+#     "cyan", 
+#     "teal", 
+#     ]
+
+color = [
+    '#000000',
+    '#3cb44b', 
+    '#aaffc3', 
+    '#bfef45', 
+    '#f58231',
+    '#ffd8b1', 
+    '#9A6324', 
+    '#469990', 
+    '#911eb4', 
+    '#dcbeff', 
+    '#000075', 
+    '#a9a9a9', 
+    '#ffffff', 
+    '#4363d8', 
+    '#42d4f4', 
+    '#ffe119', 
+    '#800000', 
+    '#e6194B', 
+    '#fabed4', 
+    '#f032e6', 
+    '#fffac8', 
+    ]
 
 if not os.path.exists(outputs_dir):
     os.makedirs(outputs_dir)
@@ -73,59 +122,35 @@ CLASSIFICATION_RATIO = 50.0
 N_EVAL_SAMPLES = 25
 BATCH_SIZE = 128
 PROJECT_NAME = "houston_patch"
-SAMPLES_PER_CLASS = 200
+SAMPLES_PER_CLASS = 500
 
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
-SCENARIOS = [  # WAKE updates
-    # dict(
-    #     loss_gen="ELBO",
-    #     loss_wvar="ELBO",
-    #     reparam_latent=True,
-    #     counts=None,
-    #     n_latent = 5,
-    #     model_name="EncoderB0_L05_VAE",
-    #     encoder_z1=nn.ModuleDict(
-    #         {
-    #             "default": EncoderB5( 
-    #             n_input=N_INPUT,
-    #             n_output=5,
-    #             n_hidden=128,
-    #             dropout_rate=0,
-    #             do_batch_norm=False,
-    #         )}
-    #     ),
-    #     x_decoder=BernoulliDecoderA5( 
-    #             n_input=5,
-    #             n_output=N_INPUT,
-    #             dropout_rate=0,
-    #             do_batch_norm=False,
-    #     ),
-    # ),
-    #     dict(
-    #     loss_gen="ELBO",
-    #     loss_wvar="ELBO",
-    #     reparam_latent=True,
-    #     counts=None,
-    #     n_latent = 30,
-    #     model_name="EncoderB6_L30_VAE",
-    #     encoder_z1=nn.ModuleDict(
-    #         {
-    #             "default": EncoderB6( 
-    #             n_input=N_INPUT,
-    #             n_output=30,
-    #             n_hidden=128,
-    #             dropout_rate=0,
-    #             do_batch_norm=False,
-    #         )}
-    #     ),
-    #     x_decoder=BernoulliDecoderA6( 
-    #             n_input=30,
-    #             n_output=N_INPUT,
-    #             dropout_rate=0,
-    #             do_batch_norm=False,
-    #     ),
-    # ),
+SCENARIOS = [  
+    dict(
+        loss_gen="ELBO",
+        loss_wvar="ELBO",
+        reparam_latent=True,
+        counts=None,
+        n_latent = 5,
+        model_name="M1M2_encoder_B0_L05",
+        encoder_z1=nn.ModuleDict(
+            {
+                "default": encoder_B5( 
+                n_input=N_INPUT,
+                n_output=5,
+                n_hidden=128,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+        x_decoder=bernoulli_decoder_A5( 
+                n_input=5,
+                n_output=N_INPUT,
+                dropout_rate=0,
+                do_batch_norm=False,
+        ),
+    ),
 
     dict(
         loss_gen="ELBO",
@@ -133,10 +158,10 @@ SCENARIOS = [  # WAKE updates
         reparam_latent=True,
         counts=None,
         n_latent = 30,
-        model_name="EncoderB6_L3o_VAE",
+        model_name="M1M2_encoder_B6_L30",
         encoder_z1=nn.ModuleDict(
             {
-                "default": EncoderB8( 
+                "default": encoder_B6( 
                 n_input=N_INPUT,
                 n_output=30,
                 n_hidden=128,
@@ -144,7 +169,32 @@ SCENARIOS = [  # WAKE updates
                 do_batch_norm=False,
             )}
         ),
-        x_decoder=BernoulliDecoderA8( 
+        x_decoder=bernoulli_decoder_A6( 
+                n_input=30,
+                n_output=N_INPUT,
+                dropout_rate=0,
+                do_batch_norm=False,
+        ),
+    ),
+
+    dict(
+        loss_gen="ELBO",
+        loss_wvar="ELBO",
+        reparam_latent=True,
+        counts=None,
+        n_latent = 30,
+        model_name="M1M2_encoder_B6_L30",
+        encoder_z1=nn.ModuleDict(
+            {
+                "default": encoder_B8( 
+                n_input=N_INPUT,
+                n_output=30,
+                n_hidden=128,
+                dropout_rate=0,
+                do_batch_norm=False,
+            )}
+        ),
+        x_decoder=bernoulli_decoder_A8( 
                 n_input=30,
                 n_output=N_INPUT,
                 dropout_rate=0,

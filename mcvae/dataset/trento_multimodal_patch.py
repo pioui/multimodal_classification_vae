@@ -8,7 +8,6 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import logging
 import random
-import matplotlib.pyplot as plt
 
 from mcvae.utils import normalize, log_train_test_split
 
@@ -16,7 +15,7 @@ random.seed(42)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-class trentoMultimodalPatchDataset(Dataset):
+class trento_multimodal_patch_dataset(Dataset):
     def __init__(
         self,
         data_dir,
@@ -87,8 +86,8 @@ class trentoMultimodalPatchDataset(Dataset):
 
 if __name__ == "__main__":
 
-    DATASET = trentoMultimodalPatchDataset(
-        data_dir = "/Users/plo026/data/trento/",
+    DATASET = trento_multimodal_patch_dataset(
+        data_dir = "/home/pigi/data/trento/",
     )
     x1,x2,y = DATASET.train_dataset.tensors # 1819, -1 to 5
     print(x1.shape, x2.shape, y.shape, torch.unique(y))

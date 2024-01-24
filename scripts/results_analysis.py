@@ -28,7 +28,6 @@ from PIL import Image
 
 from mcvae.utils import generate_latex_matrix_from_dict, generate_latex_confusion_matrix, crop_npy
 
-print(os.listdir('outputs/'))
 
 for project_name in os.listdir('outputs/'):
     if project_name == 'trento':
@@ -54,7 +53,6 @@ for project_name in os.listdir('outputs/'):
         continue
 
     if dataset == "trento":
-        continue
         from mcvae.dataset import trento_dataset
         DATASET = trento_dataset(data_dir=data_dir)
         (r,g,b) = (31,17,8)
@@ -74,8 +72,6 @@ for project_name in os.listdir('outputs/'):
     metrics_dict = {}
 
     plt.figure(dpi=500)
-
-
 
     X_rgb = torch.stack( (X[:,r].reshape(SHAPE), X[:,g].reshape(SHAPE), X[:,b].reshape(SHAPE)), axis=-1) 
     X_rgb = X_rgb.numpy()
@@ -281,75 +277,76 @@ for project_name in os.listdir('outputs/'):
     print(models_names)
     print(metrics_values)
 
-    for file in sorted(os.listdir(os.path.join(outputs_dir, 'uncertainties'))):
-        print(file)
-        uncertainty = np.load(os.path.join(outputs_dir,'uncertainties',file))
+    if os.path.isdir(os.path.join(outputs_dir, 'uncertainties')):
+        for file in sorted(os.listdir(os.path.join(outputs_dir, 'uncertainties'))):
+            print(file)
+            uncertainty = np.load(os.path.join(outputs_dir,'uncertainties',file))
 
-        model_name = file[:-4]
-        
-        plt.figure(dpi=500)
-        plt.imshow(uncertainty.reshape(SHAPE), cmap='turbo', 
-        vmin=0, vmax=1
-        )
-        plt.axis('off')
-        plt.savefig(f"{images_dir}{model_name}.png",bbox_inches='tight', pad_inches=0 ,dpi=500)
-
-        if dataset == "houston":
-            # zoom in vegetation
-            (top, right, size) = (100,1600,1000)
-            uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
+            model_name = file[:-4]
+            
             plt.figure(dpi=500)
-            plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
+            plt.imshow(uncertainty.reshape(SHAPE), cmap='turbo', 
+            vmin=0, vmax=1
+            )
             plt.axis('off')
-            plt.savefig(f"{images_dir}{model_name}_veg_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+            plt.savefig(f"{images_dir}{model_name}.png",bbox_inches='tight', pad_inches=0 ,dpi=500)
 
-            # zoom in water
-            (top, right, size) = (0,2500,300)
-            uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
-            plt.figure(dpi=500)
-            plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
-            plt.axis('off')
-            plt.savefig(f"{images_dir}{model_name}_water_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+            if dataset == "houston":
+                # zoom in vegetation
+                (top, right, size) = (100,1600,1000)
+                uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
+                plt.figure(dpi=500)
+                plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
+                plt.axis('off')
+                plt.savefig(f"{images_dir}{model_name}_veg_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
-            # zoom in stadium
-            (top, right, size) = (0,1000,800)
-            uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
-            plt.figure(dpi=500)
-            plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
-            plt.axis('off')
-            plt.savefig(f"{images_dir}{model_name}_stadium_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+                # zoom in water
+                (top, right, size) = (0,2500,300)
+                uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
+                plt.figure(dpi=500)
+                plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
+                plt.axis('off')
+                plt.savefig(f"{images_dir}{model_name}_water_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
-            # zoom in roads
-            (top, right, size) = (50,3300,800)
-            uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
-            plt.figure(dpi=500)
-            plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
-            plt.axis('off')
-            plt.savefig(f"{images_dir}{model_name}_roads_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+                # zoom in stadium
+                (top, right, size) = (0,1000,800)
+                uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
+                plt.figure(dpi=500)
+                plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
+                plt.axis('off')
+                plt.savefig(f"{images_dir}{model_name}_stadium_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
-            # zoom in trains
-            (top, right, size) = (200,200,800)
-            uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
-            plt.figure(dpi=500)
-            plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
-            plt.axis('off')
-            plt.savefig(f"{images_dir}{model_name}_trains_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+                # zoom in roads
+                (top, right, size) = (50,3300,800)
+                uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
+                plt.figure(dpi=500)
+                plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
+                plt.axis('off')
+                plt.savefig(f"{images_dir}{model_name}_roads_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
-            # zoom in uplots
-            (top, right, size) = (400,500,500)
-            uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
-            plt.figure(dpi=500)
-            plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
-            plt.axis('off')
-            plt.savefig(f"{images_dir}{model_name}_uplots_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+                # zoom in trains
+                (top, right, size) = (200,200,800)
+                uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
+                plt.figure(dpi=500)
+                plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
+                plt.axis('off')
+                plt.savefig(f"{images_dir}{model_name}_trains_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
-            # zoom in cars
-            (top, right, size) = (700,1450,500)
-            uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
-            plt.figure(dpi=500)
-            plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
-            plt.axis('off')
-            plt.savefig(f"{images_dir}{model_name}_cars_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+                # zoom in uplots
+                (top, right, size) = (400,500,500)
+                uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
+                plt.figure(dpi=500)
+                plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
+                plt.axis('off')
+                plt.savefig(f"{images_dir}{model_name}_uplots_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
+
+                # zoom in cars
+                (top, right, size) = (700,1450,500)
+                uncertainty_zoom = crop_npy(uncertainty.reshape(SHAPE), top, right, size)
+                plt.figure(dpi=500)
+                plt.imshow(uncertainty_zoom, interpolation='nearest', cmap = 'turbo', vmin=0, vmax=1)
+                plt.axis('off')
+                plt.savefig(f"{images_dir}{model_name}_cars_zoom.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
 
 a = np.array([[0,1]])

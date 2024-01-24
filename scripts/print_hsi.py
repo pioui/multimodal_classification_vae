@@ -1,3 +1,11 @@
+"""
+This Python script creates the false color representation from the HSI information for Houston and Trento dataset
+
+Usage:
+  python3 scripts/print_hsi.py 
+
+"""
+
 from email.mime import image
 import pickle
 import matplotlib.pyplot as plt
@@ -34,7 +42,6 @@ for project_name in os.listdir('outputs/'):
     if dataset == "trento":
         from mcvae.dataset import trento_dataset
         DATASET = trento_dataset(data_dir=data_dir, 
-        # do_preprocess = False
         )
         (r,g,b) = (31,17,8)
         li = 2
@@ -42,28 +49,15 @@ for project_name in os.listdir('outputs/'):
     elif dataset == "houston":
         from mcvae.dataset import houston_dataset
         DATASET = houston_dataset(data_dir=data_dir, samples_per_class=SAMPLES_PER_CLASS, 
-        # do_preprocess = False
         )
         li = 7
-        hi=50
+        hi = 50
         (r,g,b) = (16,13,6) #real
-        # (r,g,b) = (40,25,5) # orange
-        # (r,g,b) = (20,30,10) # green
-        # (r,g,b) = (25,30,15) # good contrast
+
 
     X_train,y_train = DATASET.train_dataset_labelled.tensors 
     X_test,y_test = DATASET.test_dataset_labelled.tensors 
     X,y = DATASET.full_dataset.tensors 
-
-    # for i in range(0,hi,5):
-    #     plt.figure(dpi=500)
-    #     X_hsi = X[:,i].reshape(SHAPE)
-    #     print(i, X_hsi.max(), X_hsi.min())
-    #     plt.imshow(X_hsi, interpolation='nearest', 
-    #     vmin=0, vmax=1, 
-    #     cmap='gray')
-    #     plt.axis('off')
-    #     plt.savefig(f"{images_dir}{dataset}_HSI_{i}.png",bbox_inches='tight', pad_inches=0, dpi=500)
 
     X_r = X[:,r].reshape(SHAPE)
     X_g = X[:,g].reshape(SHAPE)

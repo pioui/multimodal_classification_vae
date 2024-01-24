@@ -1,7 +1,7 @@
 """
-Script to plot the distributions of different HSI and LiDAR channels in Houston and Trento data
+Script to plot the distributions of different HSI and LiDAR channels in Houston data
 Usage:
-  python3 scripts/data_distribution.py 
+  python3 scripts/houston_distribution.py 
 TODO: not very clean code
 """
 import matplotlib.pyplot as plt

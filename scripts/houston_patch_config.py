@@ -46,39 +46,6 @@ labels = [
     "Trains", 
     "Stadium seats"
     ]
-# color = [
-#     "black", 
-
-#     "green", 
-#     "olive", 
-#     "lime", 
-
-#     "orange", 
-#     "maroon", 
-
-#     "brown", 
-#     "turquoise",
-
-#     "pink", 
-#     "magenta", 
-
-#     "gray", 
-#     "navy", 
-
-#     "white", 
-
-#     "red", 
-#     "coral", 
-
-#     "yellow", 
-
-#     "indigo", 
-#     "purple", 
-
-#     "blue", 
-#     "cyan", 
-#     "teal", 
-#     ]
 
 color = [
     '#000000',

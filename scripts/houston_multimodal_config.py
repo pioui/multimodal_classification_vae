@@ -43,39 +43,6 @@ labels = [
     "Trains", 
     "Stadium seats"
     ]
-# color = [
-#     "black", 
-
-#     "green", 
-#     "olive", 
-#     "lime", 
-
-#     "orange", 
-#     "maroon", 
-
-#     "brown", 
-#     "turquoise",
-
-#     "pink", 
-#     "magenta", 
-
-#     "gray", 
-#     "navy", 
-
-#     "white", 
-
-#     "red", 
-#     "coral", 
-
-#     "yellow", 
-
-#     "indigo", 
-#     "purple", 
-
-#     "blue", 
-#     "cyan", 
-#     "teal", 
-#     ]
 
 color = [
     '#000000',
@@ -125,32 +92,6 @@ SAMPLES_PER_CLASS = 500
 logging.basicConfig(filename = f'{outputs_dir}{PROJECT_NAME}_logs.log')
 
 SCENARIOS = [ 
-    dict(
-        loss_gen="ELBO",
-        loss_wvar="ELBO",
-        reparam_latent=True,
-        counts=None,
-        n_latent=30,
-        model_name="multi-M1M2_encoder_B0_L30",
-        encoder_z1=nn.ModuleDict(
-            {"default": encoder_B0( 
-                n_input=N1_INPUT,
-                n_output=30,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-        encoder_z2=nn.ModuleDict(
-            {"default": encoder_B0( 
-                n_input=N2_INPUT,
-                n_output=30,
-                n_hidden=128,
-                dropout_rate=0,
-                do_batch_norm=False,
-            )}
-        ),
-    ),
 
     dict(
         loss_gen="ELBO",

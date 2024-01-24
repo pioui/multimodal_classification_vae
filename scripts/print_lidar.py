@@ -1,3 +1,10 @@
+"""
+This Python script creates the grayscale representation from the Lidar information for Houston and Trento dataset
+
+Usage:
+  python3 scripts/print_lidar.py 
+
+"""
 
 import numpy as np
 import tifffile
@@ -6,37 +13,10 @@ from mcvae.utils import normalize
 
 percentile = 97
 
-
 data_dir = "/home/pigi/data/houston/"
 images_dir =  "outputs/houston/images/"
 image_lidar = np.array(tifffile.imread(data_dir+"houston_lidar.tif")) # [7,  1202, 4768]
 dataset = "houston"
-
-# for i in range(3):
-#     plt.figure(dpi=500)
-#     X_lidar = image_lidar[i,:]
-#     print(i, X_lidar.max(), X_lidar.min())
-
-#     if X_lidar.min()<=0:
-#         X_lidar = X_lidar-X_lidar.min()+0.00000000000001
-#     print(i, X_lidar.max(), X_lidar.min())
-
-#     X_lidar = np.log(X_lidar)
-#     print(i, X_lidar.max(), X_lidar.min())
-
-#     x_min = X_lidar.min()
-#     x_max = X_lidar.max()
-#     X_lidar = (X_lidar- x_min)/(x_max-x_min)
-#     print(i, X_lidar.max(), X_lidar.min())
-
-#     plt.imshow(X_lidar, interpolation='nearest', 
-#     vmin=0, vmax=1, 
-#     cmap='gray')
-#     plt.axis('off')
-#     plt.savefig(f"{images_dir}{dataset}_Lidar_{i}.png",bbox_inches='tight', pad_inches=0, dpi=500)
-
-
-
 
 for i in range(7):
     X_lidar = image_lidar[i,:]
@@ -49,13 +29,6 @@ for i in range(7):
         if X_lidar[j] > value:
             X_lidar[j]= value
     print(i, X_lidar.max(), X_lidar.min())
-
-    # if X_lidar.min()<=0:
-    #     X_lidar = X_lidar-X_lidar.min()+1
-    # print(i, X_lidar.max(), X_lidar.min())
-
-    # X_lidar = np.log(X_lidar)
-    # print(i, X_lidar.max(), X_lidar.min())
 
     x_min = X_lidar.min()
     x_max = X_lidar.max()
@@ -78,7 +51,6 @@ for i in range(7):
 X_rgb = np.stack((X_r.reshape(1202, 4768), X_g.reshape(1202, 4768), X_b.reshape(1202, 4768)), axis = 2)
 plt.imshow(X_rgb, interpolation='nearest', 
 vmin=0, vmax=1, 
-# cmap='gray'
 )
 plt.axis('off')
 plt.savefig(f"{images_dir}{dataset}_RGB_LiDAR.png",bbox_inches='tight', pad_inches=0, dpi=500)
@@ -100,19 +72,10 @@ for i in range(2):
             X_lidar[j]= value
     print(i, X_lidar.max(), X_lidar.min())
 
-    # if X_lidar.min()<=0:
-    #     X_lidar = X_lidar-X_lidar.min()+1
-    # print(i, X_lidar.max(), X_lidar.min())
-
-    # X_lidar = np.log(X_lidar)
-    # print(i, X_lidar.max(), X_lidar.min())
-
     x_min = X_lidar.min()
     x_max = X_lidar.max()
     X_lidar = (X_lidar- x_min)/(x_max-x_min)
     print(i, X_lidar.max(), X_lidar.min())
-
-
 
     X_lidar = X_lidar.reshape(166,600)
     plt.imshow(X_lidar, interpolation='nearest', 
